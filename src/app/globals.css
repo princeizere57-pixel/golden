@@ -1,0 +1,90 @@
+@import "tailwindcss";
+
+/* OneKit-inspired tokens. Colourways are named background/ink pairs for cards and banners. */
+:root {
+  --bg: #fbf8f3;
+  --surface: #ffffff;
+  --ink: #1c1917;
+  --muted: #6b635b;
+  --line: #e7e1d8;
+  --accent: #d9480f;
+  --accent-ink: #ffffff;
+  --focus: #1d4ed8;
+
+  --cw-tomato: #c2410c;
+  --cw-basil: #3f6212;
+  --cw-saffron: #b45309;
+  --cw-aubergine: #5b21b6;
+  --cw-charcoal: #292524;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #12100e;
+    --surface: #1c1917;
+    --ink: #f5f0ea;
+    --muted: #a8a29e;
+    --line: #2e2a26;
+    --accent: #fb923c;
+    --accent-ink: #1c1917;
+    --focus: #93c5fd;
+  }
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-ink: var(--ink);
+  --color-muted: var(--muted);
+  --color-line: var(--line);
+  --color-accent: var(--accent);
+  --color-accent-ink: var(--accent-ink);
+  --color-tomato: var(--cw-tomato);
+  --color-basil: var(--cw-basil);
+  --color-saffron: var(--cw-saffron);
+  --color-aubergine: var(--cw-aubergine);
+  --color-charcoal: var(--cw-charcoal);
+  --font-sans: var(--font-geist-sans), system-ui, sans-serif;
+}
+
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-sans);
+}
+
+:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 2px;
+}
+
+/* Cook mode: high contrast regardless of system theme. */
+.cook-mode {
+  --bg: #000000;
+  --surface: #111111;
+  --ink: #ffffff;
+  --muted: #d4d4d4;
+  --line: #333333;
+  --accent: #facc15;
+  --accent-ink: #000000;
+  background: var(--bg);
+  color: var(--ink);
+}
+
+.rail {
+  scroll-snap-type: x mandatory;
+  scrollbar-width: thin;
+}
+.rail > * {
+  scroll-snap-align: start;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
