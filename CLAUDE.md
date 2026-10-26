@@ -57,6 +57,14 @@ REA (`rea-agents`) was used to study Mob's public website (mob.co.uk): its route
 ### Module D — Multi-dish timing orchestration (`src/lib/timing/`)
 - Schedules several dishes so they finish together, respecting the cook's attention (only one *active* task at a time; *passive* tasks like simmering run in parallel).
 
+### Module E — Personal recipe import (`src/lib/import/`, `/import`, `/my/[slug]`)
+- A user pastes a link to a recipe page on any site (Mob included). The server fetches **that one page**, reads its schema.org `Recipe` JSON-LD (`parse.ts`) and converts the steps into OneKit blocks (`to-blocks.ts`: heat, timings, hands-off steps, "until…" cues, glossary terms), so the skill engine, cook mode and Fix My Mistake all work on it.
+- Rules (do not relax):
+  - **User-initiated only.** No crawling, bulk import, scheduled fetching or pre-importing.
+  - **Private.** Imports are stored per user (on-device now; `imported_recipes` with owner-only RLS once accounts exist). Never add them to `RECIPES`, seed data, `segments`, the public feed, search or sharing.
+  - **Credit.** Always show the author and source with a link to the original; don't store or show the source's photos or videos.
+  - `fetch.ts` blocks private/local addresses on every redirect (SSRF), caps size and time.
+
 ## 5. Monetisation and payment architecture (`src/lib/billing/`)
 
 - **Pricing:** annual **$45.00/year** (anchored against **$7.99/month**). GBP prices are set separately (not converted on the fly).

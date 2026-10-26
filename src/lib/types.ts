@@ -15,6 +15,8 @@ export interface Ingredient {
   unit: "g" | "ml" | "tsp" | "tbsp" | "cup" | "pc" | "pinch";
   /** Prep note, e.g. "finely diced". */
   prep?: string;
+  /** Original line, kept for imported recipes whose quantities couldn't be parsed exactly. */
+  raw?: string;
 }
 
 /** Attention a block needs: active blocks need the cook's hands; passive ones run on their own. */
@@ -74,6 +76,8 @@ export interface Recipe {
   premium: boolean;
   ingredients: Ingredient[];
   blocks: StepBlock[];
+  /** Set on recipes a user imported for personal use: always credited and linked back. */
+  source?: { url: string; name: string };
 }
 
 /** A recipe step after the skill engine has adapted it. */

@@ -35,7 +35,7 @@ function useWakeLock() {
   return held;
 }
 
-export function CookView({ recipe, initialSkill }: { recipe: Recipe; initialSkill: SkillLevel }) {
+export function CookView({ recipe, initialSkill, exitHref = `/recipes/${recipe.slug}` }: { recipe: Recipe; initialSkill: SkillLevel; exitHref?: string }) {
   const [skill, setSkill] = useState(initialSkill);
   const [index, setIndex] = useState(0);
   const { timers, now, start } = useTimers();
@@ -66,7 +66,7 @@ export function CookView({ recipe, initialSkill }: { recipe: Recipe; initialSkil
     <div className="cook-mode min-h-[calc(100vh-57px)] px-4 py-6">
       <div className="mx-auto flex max-w-3xl flex-col gap-6">
         <div className="flex items-center justify-between gap-4 text-sm">
-          <Link href={`/recipes/${recipe.slug}`} className="inline-flex min-h-16 items-center underline">Exit cook mode</Link>
+          <Link href={exitHref} className="inline-flex min-h-16 items-center underline">Exit cook mode</Link>
           <span className="text-muted">{awake ? "Screen stays on" : "Screen may sleep"}</span>
         </div>
         <SkillSlider value={skill} onChange={setSkill} />
