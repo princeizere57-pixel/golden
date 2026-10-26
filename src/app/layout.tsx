@@ -24,7 +24,8 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
                 Be a <span className="text-accent">Chef</span>
               </Link>
               <div className="ml-auto flex items-center gap-1 text-sm">
-                <Link href="/import" className="rounded-full px-3 py-2.5 hover:bg-surface">Import</Link>
+                <Link href="/explore" className="rounded-full px-3 py-2.5 hover:bg-surface">Explore</Link>
+                <Link href="/import"className="rounded-full px-3 py-2.5 hover:bg-surface">Import</Link>
                 <Link href="/plan"className="rounded-full px-3 py-2.5 hover:bg-surface">Plan a meal</Link>
                 <Link href="/onboarding"className="rounded-full px-3 py-2.5 hover:bg-surface">Skill quiz</Link>
                 <Link href="/account" className="rounded-full px-3 py-2.5 hover:bg-surface">Account</Link>

@@ -61,19 +61,24 @@ export function parseIngredient(line: string, index: number): Ingredient {
   };
 }
 
-/** Explicit time in a step, in minutes (upper bound of ranges), or null. */
+/** Total explicit time in a step, in minutes (upper bound of each range), or null. */
 export function stepMinutes(text: string): number | null {
-  const m = text.match(/(\d+(?:\.\d+)?)(?:\s*(?:-|–|to)\s*(\d+(?:\.\d+)?))?\s*(hours?|hrs?|minutes?|mins?|seconds?|secs?)\b/i);
-  if (!m) return null;
-  const n = Number(m[2] ?? m[1]);
-  const unit = m[3].toLowerCase();
-  return unit.startsWith("h") ? n * 60 : unit.startsWith("s") ? Math.max(0.5, n / 60) : n;
+  const matches = [...text.matchAll(/(\d+(?:\.\d+)?)(?:\s*(?:-|–|to)\s*(\d+(?:\.\d+)?))?\s*(hours?|hrs?|minutes?|mins?|seconds?|secs?)\b/gi)];
+  if (!matches.length) return null;
+  const total = matches.reduce((sum, m) => {
+    const n = Number(m[2] ?? m[1]);
+    const unit = m[3].toLowerCase();
+    return sum + (unit.startsWith("h") ? n * 60 : unit.startsWith("s") ? n / 60 : n);
+  }, 0);
+  return Math.max(0.5, Math.round(total * 10) / 10);
 }
 
 const HEAT = /\b(medium-high|medium-low|high|medium|low)(?:\s+to\s+(?:medium|high|low))?\s+heat\b/i;
 const COOKING = /\b(fry|sauté|saute|sear|boil|simmer|bake|roast|grill|toast|brown|heat)\b/i;
 const OVEN = /\b(oven|bake|roast)\b/i;
-const HANDS_OFF = /\b(simmer|bake|roast|rest|marinate|chill|leave|set aside|cool|prove|rise|boil for|cook for|soak)\b/i;
+const BOIL = /\bboil/i;
+const VESSEL = /\b(frying pan|saucepan|skillet|wok|casserole|dutch oven|stockpot|pot|roasting tin|baking tray|tray)\b/i;
+const HANDS_OFF = /\b(simmer|bake|roast|rest|marinate|chill|leave|set aside|cool|prove|rise|boil|cook for|soak)/i;
 
 export function stepToBlock(text: string, index: number): StepBlock {
   const explicit = stepMinutes(text);
@@ -92,16 +97,21 @@ export function stepToBlock(text: string, index: number): StepBlock {
   if (passive) return { ...base, kind: "timing", timerLabel: `Step ${index + 1}` };
   const heat = text.match(HEAT)?.[1]?.toLowerCase() as HeatControlBlock["heat"] | undefined;
   if (heat || COOKING.test(text)) {
-    return { ...base, kind: "heat", heat: heat ?? (OVEN.test(text) ? "high" : "medium"), vessel: OVEN.test(text) ? "oven" : "pan" };
+    const vessel = OVEN.test(text) ? "oven" : (text.match(VESSEL)?.[1]?.toLowerCase() ?? "pan");
+    return { ...base, kind: "heat", heat: heat ?? (OVEN.test(text) || BOIL.test(text) ? "high" : "medium"), vessel };
   }
   return { ...base, kind: "prep", ingredientIds: [] };
 }
 
 const COLOURWAYS: Colourway[] = ["tomato", "basil", "saffron", "aubergine", "charcoal"];
 
+/** Stable colourway for a title. */
+export function colourwayFor(title: string): Colourway {
+  return COLOURWAYS[[...title].reduce((h, c) => (h * 31 + c.charCodeAt(0)) >>> 0, 7) % COLOURWAYS.length];
+}
+
 /** Builds a private Recipe from an import. It's never added to the public catalogue. */
 export function toRecipe(imported: ImportedRecipe, id: string): Recipe {
-  const hash = [...imported.title].reduce((h, c) => (h * 31 + c.charCodeAt(0)) >>> 0, 7);
   return {
     slug: `my-${id}`,
     title: imported.title,
@@ -110,7 +120,7 @@ export function toRecipe(imported: ImportedRecipe, id: string): Recipe {
     category: "My imports",
     dietary: [],
     serves: imported.serves,
-    colourway: COLOURWAYS[hash % COLOURWAYS.length],
+    colourway: colourwayFor(imported.title),
     premium: false,
     ingredients: imported.ingredients.map(parseIngredient),
     blocks: imported.steps.map(stepToBlock),

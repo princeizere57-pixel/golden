@@ -66,6 +66,11 @@ REA (`rea-agents`) was used to study Mob's public website (mob.co.uk): its route
   - **Photos.** The private import view may show the source's own finished-dish photo, loaded from the source's URL with a "Photo: <source>" credit (`SourcePhoto`, plain `<img>`). Never download, cache, proxy (`next/image`) or re-host it, and never use source photos on our own recipes, the feed or marketing.
   - `fetch.ts` blocks private/local addresses on every redirect (SSRF), caps size and time.
 
+### Module F — TheMealDB library (`src/lib/mealdb/`, `/explore`, `/meals/[id]`)
+- Public recipe API (search, categories, lookup) converted to our `Recipe` shape by `convert.ts`, reusing the import pipeline (`parseIngredient`, `stepToBlock`), so every meal gets the skill slider, cook mode, timers and Fix My Mistake. Slugs are `mealdb-<id>`; `findRecipe()` resolves them for server actions.
+- Responses cached for a day (`next.revalidate`). Photos load from TheMealDB's CDN (`/preview` thumbnails in lists).
+- **Licence:** `MEALDB_API_KEY` empty = shared test key `1`, development only. A public or app-store release requires a TheMealDB supporter key. Always credit TheMealDB and link to the meal.
+
 ## 5. Monetisation and payment architecture (`src/lib/billing/`)
 
 - **Pricing:** annual **$45.00/year** (anchored against **$7.99/month**). GBP prices are set separately (not converted on the fly).

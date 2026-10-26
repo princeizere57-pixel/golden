@@ -75,6 +75,7 @@ describe("stepToBlock", () => {
     expect(stepMinutes("roast for 1 hour")).toBe(60);
     expect(stepMinutes("blitz for 30 seconds")).toBe(0.5);
     expect(stepMinutes("chop the onion")).toBeNull();
+    expect(stepMinutes("cook until fragrant, 1 to 2 minutes, then boil for 5 minutes")).toBe(7);
   });
 
   it("classifies hands-off, heat and prep steps with cues and jargon", () => {
@@ -87,6 +88,9 @@ describe("stepToBlock", () => {
 
     expect(stepToBlock("Roast in the oven for 3 minutes.", 0)).toMatchObject({ kind: "heat", vessel: "oven" });
     expect(stepToBlock("Zest the lemons over the bowl.", 0)).toMatchObject({ kind: "prep", attention: "active" });
+    expect(stepToBlock("Heat the oil in a wok and stir-fry.", 0)).toMatchObject({ kind: "heat", vessel: "wok", heat: "medium" });
+    expect(stepToBlock("Bring a pot of water to the boil.", 0)).toMatchObject({ kind: "heat", vessel: "pot", heat: "high" });
+    expect(stepToBlock("Bring water to a boil and cook the pasta, about 9 minutes.", 0)).toMatchObject({ kind: "timing", attention: "passive", minutes: 9 });
   });
 });
 
