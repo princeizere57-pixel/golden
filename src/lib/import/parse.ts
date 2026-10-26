@@ -67,6 +67,13 @@ function firstString(value: unknown): string | undefined {
   return undefined;
 }
 
+/** A person's or organisation's name; never a URL (some sites give the author as a link). */
+function authorName(value: unknown): string | undefined {
+  const node = Array.isArray(value) ? value[0] : value;
+  const name = cleanText(node && typeof node === "object" ? (node as Node).name : node);
+  return name && !/^https?:\/\//i.test(name) ? name : undefined;
+}
+
 function serves(value: unknown): number {
   const n = Number(String(firstString(value) ?? [value].flat()[0] ?? "").match(/\d+/)?.[0]);
   return Number.isFinite(n) && n > 0 && n < 100 ? n : 2;
@@ -94,7 +101,7 @@ export function extractRecipe(html: string, url: string): ImportedRecipe | null 
   return {
     title,
     summary: cleanText(recipe.description).slice(0, 280),
-    author: cleanText(firstString(recipe.author)) || undefined,
+    author: authorName(recipe.author),
     image: firstString(recipe.image),
     sourceUrl: url,
     sourceName: cleanText(siteName) || new URL(url).hostname.replace(/^www\./, ""),

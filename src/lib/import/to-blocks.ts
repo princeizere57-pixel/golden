@@ -114,6 +114,8 @@ export function toRecipe(imported: ImportedRecipe, id: string): Recipe {
     premium: false,
     ingredients: imported.ingredients.map(parseIngredient),
     blocks: imported.steps.map(stepToBlock),
+    // The source's own photo URL, displayed from their server. Never downloaded or re-hosted.
+    image: imported.image?.startsWith("https://") ? imported.image : undefined,
     source: { url: imported.sourceUrl, name: imported.sourceName },
   };
 }

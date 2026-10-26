@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState, useTransition } from "react";
 import { importRecipeAction } from "@/app/actions/import";
+import { SourcePhoto } from "@/components/source-photo";
 import { listImports, removeImport, saveImport } from "@/lib/import/store";
 import type { Recipe } from "@/lib/types";
 
@@ -54,6 +55,7 @@ export function ImportPanel() {
         <ul className="mt-3 divide-y divide-line rounded-3xl border border-line bg-surface">
           {imports.map((r) => (
             <li key={r.slug} className="flex items-center gap-4 p-4">
+              <SourcePhoto recipe={r} credit={false} className="h-16 w-16 shrink-0" />
               <Link href={`/my/${r.slug}`} className="min-h-11 flex-1">
                 <span className="block font-semibold">{r.title}</span>
                 <span className="text-sm text-muted">from {r.source?.name}</span>

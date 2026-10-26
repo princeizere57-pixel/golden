@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { CookView } from "@/components/cook-view";
 import { SkillSteps } from "@/components/skill-steps";
+import { SourcePhoto } from "@/components/source-photo";
 import { getImport } from "@/lib/import/store";
 import type { Recipe, SkillLevel } from "@/lib/types";
 
@@ -27,7 +28,7 @@ function Credit({ recipe }: { recipe: Recipe }) {
   if (!recipe.source) return null;
   return (
     <p className="mt-3 text-sm">
-      Original recipe by <strong>{recipe.chef}</strong> on{" "}
+      Original recipe{recipe.chef !== recipe.source.name && <> by <strong>{recipe.chef}</strong></>} on{" "}
       <a href={recipe.source.url} target="_blank" rel="noopener noreferrer" className="underline">{recipe.source.name} ↗</a>
     </p>
   );
@@ -40,6 +41,7 @@ export function MyRecipe({ slug, skill }: { slug: string; skill: SkillLevel }) {
   return (
     <main className="mx-auto grid max-w-6xl gap-10 px-4 py-10 pb-24 lg:grid-cols-[1fr_2fr]">
       <aside>
+        <SourcePhoto recipe={recipe} className="mb-6 aspect-[4/3]" />
         <p className="text-sm text-muted">My imports · private</p>
         <h1 className="mt-1 text-3xl font-bold tracking-tight">{recipe.title}</h1>
         <Credit recipe={recipe} />

@@ -10,7 +10,7 @@ const page = `<html><head>
 <script type="application/ld+json">{"@context":"https://schema.org","@graph":[
   {"@type":"WebSite","name":"Test Kitchen"},
   {"@type":["Recipe"],"name":"Lemon &amp; Herb Couscous","description":"<p>A quick side.</p>",
-   "author":{"@type":"Person","name":"Sam Cook"},"recipeYield":["4","4 servings"],
+   "author":{"@type":"Person","name":"Sam Cook"},"recipeYield":["4","4 servings"],"image":[{"@type":"ImageObject","url":"https://img.example.com/couscous.jpg"}],
    "recipeIngredient":["200g couscous","1½ tbsp olive oil","2 lemons, zested","300ml hot stock","1 small bunch parsley"],
    "recipeInstructions":[
      {"@type":"HowToSection","name":"Couscous","itemListElement":[
@@ -39,6 +39,13 @@ describe("extractRecipe", () => {
     expect(extractRecipe("<html></html>", "https://x.com")).toBeNull();
     expect(extractRecipe('<script type="application/ld+json">{bad json</script>', "https://x.com")).toBeNull();
     expect(extractRecipe('<script type="application/ld+json">{"@type":"Recipe","name":"No steps"}</script>', "https://x.com")).toBeNull();
+  });
+
+  it("ignores authors given only as a link", () => {
+    const linked = page.replace('{"@type":"Person","name":"Sam Cook"}', '{"@id":"https://www.example.com/#org","url":"https://www.example.com"}');
+    expect(extractRecipe(linked, "https://www.example.com/r")!.author).toBeUndefined();
+    const named = page.replace('{"@type":"Person","name":"Sam Cook"}', '[{"name":"Alex Chef"}]');
+    expect(extractRecipe(named, "https://www.example.com/r")!.author).toBe("Alex Chef");
   });
 
   it("falls back to the hostname for the source", () => {
@@ -89,10 +96,13 @@ describe("toRecipe", () => {
     expect(recipe.slug).toBe("my-abc123");
     expect(recipe.category).toBe("My imports");
     expect(recipe.source).toEqual({ url: "https://www.example.com/recipes/couscous", name: "Test Kitchen" });
-    expect(recipe.image).toBeUndefined();
+    expect(recipe.image).toBe("https://img.example.com/couscous.jpg");
+    const insecure = toRecipe({ ...extractRecipe(page, "https://www.example.com/r")!, image: "http://img.example.com/x.jpg" }, "x");
+    expect(insecure.image).toBeUndefined();
     const beginner = adaptRecipe(recipe, "beginner");
     expect(beginner.steps).toHaveLength(3);
-    expect(beginner.steps[2].instructions[0]).toBe("Set the pan over medium-high heat.");
+    // The step already names its heat, so beginners aren't told twice.
+    expect(beginner.steps[2].instructions[0]).toMatch(/^Fry the parsley in the oil over medium-high heat/);
   });
 });
 

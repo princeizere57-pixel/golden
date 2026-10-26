@@ -16,7 +16,7 @@ const formatMinutes = (m: number) => (m < 1 ? `${Math.round(m * 60)} s` : `~${Ma
 
 function beginner(block: StepBlock): AdaptedStep {
   const steps = microSteps(block.text);
-  if (block.kind === "heat") steps.unshift(`Set the ${block.vessel} over ${block.heat} heat.`);
+  if (block.kind === "heat" && !/\bheat\b/i.test(block.text)) steps.unshift(`Set the ${block.vessel} over ${block.heat} heat.`);
   if (block.cue) steps.push(`It's ready when ${block.cue} (${formatMinutes(block.minutes)}).`);
   return {
     blockId: block.id,

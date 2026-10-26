@@ -62,7 +62,8 @@ REA (`rea-agents`) was used to study Mob's public website (mob.co.uk): its route
 - Rules (do not relax):
   - **User-initiated only.** No crawling, bulk import, scheduled fetching or pre-importing.
   - **Private.** Imports are stored per user (on-device now; `imported_recipes` with owner-only RLS once accounts exist). Never add them to `RECIPES`, seed data, `segments`, the public feed, search or sharing.
-  - **Credit.** Always show the author and source with a link to the original; don't store or show the source's photos or videos.
+  - **Credit.** Always show the author and source with a link to the original.
+  - **Photos.** The private import view may show the source's own finished-dish photo, loaded from the source's URL with a "Photo: <source>" credit (`SourcePhoto`, plain `<img>`). Never download, cache, proxy (`next/image`) or re-host it, and never use source photos on our own recipes, the feed or marketing.
   - `fetch.ts` blocks private/local addresses on every redirect (SSRF), caps size and time.
 
 ## 5. Monetisation and payment architecture (`src/lib/billing/`)
