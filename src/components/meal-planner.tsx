@@ -23,7 +23,7 @@ export function MealPlanner({ recipes }: { recipes: Pick<Recipe, "slug" | "title
       <fieldset className="flex flex-wrap gap-2">
         <legend className="mb-2 font-semibold">Dishes</legend>
         {recipes.map((r) => (
-          <label key={r.slug} className={`inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-full border px-4 text-sm ${chosen.includes(r.slug) ? "border-ink bg-ink text-bg" : "border-line bg-surface"}`}>
+          <label key={r.slug} className={`inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-full border px-4 text-sm ${chosen.includes(r.slug) ? "border-button bg-button text-button-ink" : "border-line bg-surface"}`}>
             <input type="checkbox" className="sr-only" checked={chosen.includes(r.slug)} onChange={() => toggle(r.slug)} />
             {r.title}
           </label>

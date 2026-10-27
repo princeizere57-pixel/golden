@@ -43,7 +43,7 @@ export default async function MealPage({ params }: Props) {
           <SaveButton recipe={recipe} />
           <AddToListButton recipe={recipe} />
         </div>
-        <Link href={`/meals/${id}/cook`} className="mt-4 flex min-h-14 items-center justify-center rounded-full bg-ink font-semibold text-bg">Start cook mode</Link>
+        <Link href={`/meals/${id}/cook`} className="mt-4 flex min-h-14 items-center justify-center rounded-full bg-button font-semibold text-button-ink">Start cook mode</Link>
       </aside>
       <section aria-label="Method">
         <SkillSteps recipe={recipe} initialSkill={viewer.skill} />

@@ -19,7 +19,7 @@ function Missing() {
     <main className="mx-auto max-w-2xl px-4 py-16 text-center">
       <h1 className="text-2xl font-bold">Recipe not found on this device</h1>
       <p className="mt-2 text-muted">Imports are saved privately in this browser.</p>
-      <Link href="/import" className="mt-6 inline-flex min-h-12 items-center rounded-full bg-ink px-6 font-semibold text-bg">Import a recipe</Link>
+      <Link href="/import" className="mt-6 inline-flex min-h-12 items-center rounded-full bg-button px-6 font-semibold text-button-ink">Import a recipe</Link>
     </main>
   );
 }
@@ -50,7 +50,7 @@ export function MyRecipe({ slug, skill }: { slug: string; skill: SkillLevel }) {
         <ul className="mt-2 divide-y divide-line">
           {recipe.ingredients.map((i) => <li key={i.id} className="py-2 text-sm">{i.raw ?? i.name}</li>)}
         </ul>
-        <Link href={`/my/${recipe.slug}/cook`} className="mt-6 flex min-h-14 items-center justify-center rounded-full bg-ink font-semibold text-bg">Start cook mode</Link>
+        <Link href={`/my/${recipe.slug}/cook`} className="mt-6 flex min-h-14 items-center justify-center rounded-full bg-button font-semibold text-button-ink">Start cook mode</Link>
       </aside>
       <section aria-label="Method">
         <SkillSteps recipe={recipe} initialSkill={skill} />

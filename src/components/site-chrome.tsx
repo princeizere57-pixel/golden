@@ -44,7 +44,7 @@ export function SiteHeader() {
           <Link href="/plan" className="rounded-full px-3 py-2.5 hover:bg-surface">Plan a meal</Link>
           <Link href="/account" className="rounded-full px-3 py-2.5 hover:bg-surface">Account</Link>
         </div>
-        <Link href="/premium" className="ml-auto rounded-full bg-ink px-4 py-2.5 text-sm font-semibold text-bg lg:ml-2">Try free</Link>
+        <Link href="/premium" className="ml-auto rounded-full bg-button px-4 py-2.5 text-sm font-semibold text-button-ink lg:ml-2">Try free</Link>
       </nav>
     </header>
   );

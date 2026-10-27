@@ -11,6 +11,9 @@
   --accent: #f28c38;
   --accent-soft: #fdeee1;
   --accent-ink: #ffffff;
+  /* Primary buttons, icon buttons, selected chips and frames. Dark text on top for contrast. */
+  --button: #facc15;
+  --button-ink: #1f1d1b;
   --focus: #1d4ed8;
 
   --cw-tomato: #c2410c;
@@ -29,6 +32,8 @@
   --color-accent: var(--accent);
   --color-accent-soft: var(--accent-soft);
   --color-accent-ink: var(--accent-ink);
+  --color-button: var(--button);
+  --color-button-ink: var(--button-ink);
   --color-tomato: var(--cw-tomato);
   --color-basil: var(--cw-basil);
   --color-saffron: var(--cw-saffron);

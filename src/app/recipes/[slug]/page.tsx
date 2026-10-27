@@ -52,9 +52,9 @@ export default async function RecipePage({ params }: Props) {
           <AddToListButton recipe={recipe} />
         </div>
         {locked ? (
-          <Link href="/premium" className="mt-6 flex min-h-14 items-center justify-center rounded-full bg-ink font-semibold text-bg">Unlock with a free trial</Link>
+          <Link href="/premium" className="mt-6 flex min-h-14 items-center justify-center rounded-full bg-button font-semibold text-button-ink">Unlock with a free trial</Link>
         ) : (
-          <Link href={`/recipes/${recipe.slug}/cook`} className="mt-6 flex min-h-14 items-center justify-center rounded-full bg-ink font-semibold text-bg">Start cook mode</Link>
+          <Link href={`/recipes/${recipe.slug}/cook`} className="mt-6 flex min-h-14 items-center justify-center rounded-full bg-button font-semibold text-button-ink">Start cook mode</Link>
         )}
       </aside>
       <section aria-label="Method">

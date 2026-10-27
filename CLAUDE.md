@@ -93,7 +93,7 @@ REA (`rea-agents`) was used to study Mob's public website (mob.co.uk): its route
 ## 7. Look and flow (Mob-inspired, skill-anchored)
 
 The interface follows the editorial pattern seen in Mob's app, re-done with our own copy, questions and logic. Never copy Mob's wording, fonts, logo or images.
-- **Theme** (`globals.css`): white page, near-black ink, orange `--accent` for the highlighted word in headlines, black pill buttons (`bg-ink text-bg`), rounded option cards. Headlines use `.font-display` (Archivo, black weight, wide). Cook mode keeps its own high-contrast theme.
+- **Theme** (`globals.css`): white page, near-black ink, orange `--accent` for the highlighted word in headlines, yellow pill buttons (`bg-button text-button-ink`: `--button` #facc15 with dark text), rounded option cards. Headlines use `.font-display` (Archivo, black weight, wide). Cook mode keeps its own high-contrast theme.
 - **First run:** `/welcome` → `/onboarding` (`onboarding-flow.tsx`): one question per screen with progress bar, back and close. Questions and scoring live in `src/lib/skill/quiz.ts`: confidence + techniques decide the level; household and time become prefs (`bac-prefs` cookie). Then a "building your skill path" step, the level result, and the 7-day trial offer. `/` redirects to `/welcome` until a level is set.
 - **Tabs** (`site-chrome.tsx`): floating pill tab bar on phones (Discover, For you, Shopping list with a to-buy badge, Saved); header links on wide screens.
 - **Discover** (`/`): big title, sticky search, quick photo tiles, collections pitched per level, NEW rail, "Right at your level", dish of the day with Share, time-limited rail from prefs, review prompt after 3 visits. Built from `src/lib/library.ts` (seed + local TheMealDB cache).

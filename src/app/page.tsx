@@ -60,10 +60,10 @@ export default async function Discover({ searchParams }: { searchParams: Promise
       <div className="flex items-center justify-between px-4 pt-6">
         <h1 className="font-display text-[2.3rem]">Discover</h1>
         <div className="flex gap-2">
-          <Link href="/onboarding" aria-label="Retake the skill quiz" className="flex h-12 w-12 items-center justify-center rounded-full bg-ink text-bg">
+          <Link href="/onboarding" aria-label="Retake the skill quiz" className="flex h-12 w-12 items-center justify-center rounded-full bg-button text-button-ink">
             <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden><path d="M4 18 10 6l4 8 2-4 4 8z" /></svg>
           </Link>
-          <Link href="/account" aria-label="Account and settings" className="flex h-12 w-12 items-center justify-center rounded-full bg-ink text-bg">
+          <Link href="/account" aria-label="Account and settings" className="flex h-12 w-12 items-center justify-center rounded-full bg-button text-button-ink">
             <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden><circle cx="12" cy="12" r="3" /><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z" /></svg>
           </Link>
         </div>
@@ -115,7 +115,7 @@ export default async function Discover({ searchParams }: { searchParams: Promise
         <section className="mx-4 mt-12 rounded-3xl bg-accent-soft p-7">
           <h2 className="font-display text-2xl">Cook anything, at your level</h2>
           <p className="mt-2 max-w-xl text-muted">Every recipe rewritten for you, hands-free cook mode and Fix My Mistake. 7 days free, then $45 a year.</p>
-          <Link href="/premium" className="mt-4 inline-flex min-h-12 items-center rounded-full bg-ink px-6 font-semibold text-bg">Start free trial</Link>
+          <Link href="/premium" className="mt-4 inline-flex min-h-12 items-center rounded-full bg-button px-6 font-semibold text-button-ink">Start free trial</Link>
         </section>
       )}
 

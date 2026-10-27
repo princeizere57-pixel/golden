@@ -90,7 +90,7 @@ export function OnboardingFlow({ images, stripeReady, priceLine }: { images: str
               <li key={l} className="flex gap-2"><Check />{l}</li>
             ))}
           </ul>
-          <button onClick={() => setStage({ kind: "trial" })} className="mt-auto min-h-14 w-full rounded-full bg-ink pt-0 text-lg font-semibold text-bg">I&apos;m ready</button>
+          <button onClick={() => setStage({ kind: "trial" })} className="mt-auto min-h-14 w-full rounded-full bg-button pt-0 text-lg font-semibold text-button-ink">I&apos;m ready</button>
         </section>
       )}
 
@@ -114,10 +114,10 @@ export function OnboardingFlow({ images, stripeReady, priceLine }: { images: str
             <Link href="/premium" className="text-sm underline">See all plans</Link>
             <p className="mt-4 text-sm text-muted">No payment now. Cancel any time.</p>
             {stripeReady ? (
-              <Link href="/premium" className="mt-3 flex min-h-14 w-full items-center justify-center rounded-full bg-ink text-lg font-semibold text-bg">Start your FREE trial</Link>
+              <Link href="/premium" className="mt-3 flex min-h-14 w-full items-center justify-center rounded-full bg-button text-lg font-semibold text-button-ink">Start your FREE trial</Link>
             ) : (
               <form action={setDemoPlan.bind(null, "premium")}>
-                <button className="mt-3 min-h-14 w-full rounded-full bg-ink text-lg font-semibold text-bg">Start your FREE trial</button>
+                <button className="mt-3 min-h-14 w-full rounded-full bg-button text-lg font-semibold text-button-ink">Start your FREE trial</button>
               </form>
             )}
             <p className="mt-2 text-sm text-muted">{priceLine}</p>
@@ -164,7 +164,7 @@ function QuestionStep({ index, answers, onChange, onNext }: { index: number; ans
       <button
         onClick={onNext}
         disabled={!canContinue}
-        className="mt-auto min-h-14 w-full rounded-full bg-ink text-lg font-semibold text-bg transition-colors disabled:bg-line disabled:text-muted"
+        className="mt-auto min-h-14 w-full rounded-full bg-button text-lg font-semibold text-button-ink transition-colors disabled:bg-line disabled:text-muted"
       >
         Continue
       </button>
@@ -183,8 +183,8 @@ function Check() {
 /** A phone outline previewing the personalised feed. */
 export function PhoneMock({ images, level }: { images: string[]; level: string }) {
   return (
-    <div aria-hidden className="mx-auto mt-6 w-60 rounded-[2.2rem] border-[6px] border-ink bg-bg p-3 shadow-xl">
-      <div className="mx-auto mb-3 h-4 w-20 rounded-full bg-ink" />
+    <div aria-hidden className="mx-auto mt-6 w-60 rounded-[2.2rem] border-[6px] border-button bg-bg p-3 shadow-xl">
+      <div className="mx-auto mb-3 h-4 w-20 rounded-full bg-button" />
       <div className="rounded-full border border-line px-3 py-1.5 text-[10px] text-muted">Search recipes, techniques…</div>
       <p className="mt-3 text-[11px] font-semibold">Picked for {level} cooks</p>
       <div className="mt-2 flex gap-2 overflow-hidden">

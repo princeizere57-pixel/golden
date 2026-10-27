@@ -35,7 +35,7 @@ export function ShoppingList() {
       ))}
       <div className="mt-6 flex gap-3">
         <button onClick={clearDone} disabled={!done} className="min-h-12 flex-1 rounded-full border border-line font-semibold disabled:opacity-40">Clear ticked</button>
-        <button onClick={clearShopping} className="min-h-12 flex-1 rounded-full bg-ink font-semibold text-bg">Clear all</button>
+        <button onClick={clearShopping} className="min-h-12 flex-1 rounded-full bg-button font-semibold text-button-ink">Clear all</button>
       </div>
     </div>
   );

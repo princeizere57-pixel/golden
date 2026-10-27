@@ -53,7 +53,7 @@ export function FixMyMistake({ slug, defaultVolumeMl }: { slug: string; defaultV
             How bad? {["", "a little", "noticeably", "a lot"][severity]}
             <input type="range" min={1} max={3} step={1} value={severity} onChange={(e) => setSeverity(Number(e.target.value) as 1 | 2 | 3)} className="mt-1 h-11 w-full" />
           </label>
-          <button onClick={solve} className="mt-3 min-h-16 w-full rounded-full bg-ink font-bold text-bg">Show me the fix</button>
+          <button onClick={solve} className="mt-3 min-h-16 w-full rounded-full bg-button font-bold text-button-ink">Show me the fix</button>
           {fix && (
             <div className="mt-4" aria-live="polite">
               <h3 className="text-lg font-bold">{fix.headline}</h3>

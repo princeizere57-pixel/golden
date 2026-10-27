@@ -25,7 +25,7 @@ export default function WelcomePage() {
           // eslint-disable-next-line @next/next/no-img-element -- decorative TheMealDB photo
           <img src={side.src} alt="" className="absolute -left-10 top-24 h-56 w-48 -rotate-6 rounded-3xl object-cover shadow-xl" />
         )}
-        <div className="absolute -right-6 top-0 w-72 rotate-6 rounded-[2.4rem] border-[7px] border-ink bg-bg p-4 shadow-2xl">
+        <div className="absolute -right-6 top-0 w-72 rotate-6 rounded-[2.4rem] border-[7px] border-button bg-bg p-4 shadow-2xl">
           <p className="font-display text-xl">Discover</p>
           <div className="mt-3 grid grid-cols-2 gap-2">
             {tiles.slice(0, 4).map((t) => (
@@ -46,7 +46,7 @@ export default function WelcomePage() {
       </div>
 
       <div className="relative z-10 rounded-t-3xl bg-bg px-6 pb-8 pt-6">
-        <Link href="/onboarding" className="flex min-h-14 w-full items-center justify-center rounded-full bg-ink text-lg font-semibold text-bg">Get started</Link>
+        <Link href="/onboarding" className="flex min-h-14 w-full items-center justify-center rounded-full bg-button text-lg font-semibold text-button-ink">Get started</Link>
         <Link href="/explore" className="mt-3 flex min-h-12 w-full items-center justify-center text-base font-medium">Browse recipes first</Link>
       </div>
     </main>

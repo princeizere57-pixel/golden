@@ -42,7 +42,7 @@ export function SaveButton({ recipe }: { recipe: Recipe }) {
     <button
       onClick={() => toggleSaved({ slug: recipe.slug, href: recipeHref(recipe), title: recipe.title, image: recipe.image, minutes: totalMinutes(recipe) })}
       aria-pressed={saved}
-      className={`flex min-h-12 flex-1 items-center justify-center gap-2 rounded-full border font-semibold ${saved ? "border-ink bg-ink text-bg" : "border-line"}`}
+      className={`flex min-h-12 flex-1 items-center justify-center gap-2 rounded-full border font-semibold ${saved ? "border-button bg-button text-button-ink" : "border-line"}`}
     >
       <svg viewBox="0 0 24 24" width="18" height="18" fill={saved ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2" aria-hidden><path d="M6 4h12v17l-6-4-6 4z" /></svg>
       {saved ? "Saved" : "Save"}
@@ -80,7 +80,7 @@ export function ShareButton({ title, path, className = "" }: { title: string; pa
     }
   }
   return (
-    <button onClick={share} className={`min-h-10 rounded-full bg-black/60 px-4 text-sm font-medium text-white backdrop-blur ${className}`}>
+    <button onClick={share} className={`min-h-10 rounded-full bg-button px-4 text-sm font-semibold text-button-ink shadow ${className}`}>
       {copied ? "Link copied" : "Share"}
     </button>
   );
@@ -147,7 +147,7 @@ export function ReviewPrompt() {
           <>
             <h2 id="review-title" className="text-2xl font-semibold">Thank you!</h2>
             <p className="mt-2 text-muted">Your rating helps us decide what to build next.</p>
-            <button onClick={() => close(true)} className="mt-6 min-h-14 w-full rounded-full bg-ink text-lg font-semibold text-bg">Back to cooking</button>
+            <button onClick={() => close(true)} className="mt-6 min-h-14 w-full rounded-full bg-button text-lg font-semibold text-button-ink">Back to cooking</button>
           </>
         ) : (
           <>
@@ -160,7 +160,7 @@ export function ReviewPrompt() {
                 </button>
               ))}
             </div>
-            <button disabled={!stars} onClick={() => setThanks(true)} className="mt-5 min-h-14 w-full rounded-full bg-ink text-lg font-semibold text-bg disabled:bg-line disabled:text-muted">Send rating</button>
+            <button disabled={!stars} onClick={() => setThanks(true)} className="mt-5 min-h-14 w-full rounded-full bg-button text-lg font-semibold text-button-ink disabled:bg-line disabled:text-muted">Send rating</button>
             <button onClick={() => close(false)} className="mt-2 min-h-12 w-full font-medium">Skip for now</button>
           </>
         )}
