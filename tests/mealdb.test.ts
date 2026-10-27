@@ -60,8 +60,7 @@ describe("TheMealDB conversion", () => {
     expect(mealToRecipe({ idMeal: "1", strMeal: "Empty", strInstructions: "Cook it." })).toBeNull();
   });
 
-  it("uses the thumbnail variant once", () => {
-    expect(thumb("https://x/a.jpg")).toBe("https://x/a.jpg/preview");
-    expect(thumb("https://x/a.jpg/preview")).toBe("https://x/a.jpg/preview");
+  it("uses the 350 px variant once", () => {
+    expect(thumb("https://x/a.jpg/medium")).toBe("https://x/a.jpg/medium");
   });
 });

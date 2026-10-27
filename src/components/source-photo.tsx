@@ -9,7 +9,8 @@ import type { Recipe } from "@/lib/types";
  */
 export function SourcePhoto({ recipe, className = "", credit = true }: { recipe: Recipe; className?: string; credit?: boolean }) {
   const [failed, setFailed] = useState(false);
-  if (!recipe.image || !recipe.source || failed) return null;
+  const owner = recipe.imageCredit ?? recipe.source;
+  if (!recipe.image || !owner || failed) return null;
   return (
     <figure className={className}>
       {/* eslint-disable-next-line @next/next/no-img-element -- must load from the source, not our image proxy */}
@@ -23,7 +24,8 @@ export function SourcePhoto({ recipe, className = "", credit = true }: { recipe:
       />
       {credit && (
         <figcaption className="mt-1.5 text-xs text-muted">
-          Photo: <a href={recipe.source.url} target="_blank" rel="noopener noreferrer" className="underline">{recipe.source.name} ↗</a>
+          Photo: <a href={owner.url} target="_blank" rel="noopener noreferrer" className="underline">{owner.name} ↗</a>
+          {recipe.imageCredit && " (similar dish)"}
         </figcaption>
       )}
     </figure>

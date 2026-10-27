@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { SkillSteps } from "@/components/skill-steps";
+import { SourcePhoto } from "@/components/source-photo";
 import { RECIPES, getRecipe } from "@/lib/data/recipes";
 import { activeMinutes } from "@/lib/skill/adapt";
 import { getViewer } from "@/lib/viewer";
@@ -27,6 +28,7 @@ export default async function RecipePage({ params }: Props) {
   return (
     <main className="mx-auto grid max-w-6xl gap-10 px-4 py-10 pb-24 lg:grid-cols-[1fr_2fr]">
       <aside>
+        <SourcePhoto recipe={recipe} className="mb-6 aspect-square" />
         <p className="text-sm text-muted">{recipe.category} · {recipe.chef}</p>
         <h1 className="mt-1 text-3xl font-bold tracking-tight">{recipe.title}</h1>
         <p className="mt-3 text-muted">{recipe.summary}</p>

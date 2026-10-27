@@ -10,6 +10,11 @@ export async function setSkill(skill: string) {
   (await cookies()).set(SKILL_COOKIE, parseSkill(skill), { maxAge: YEAR, sameSite: "lax", path: "/" });
 }
 
+/** Level switch used by forms (e.g. on Explore); the page re-renders with the new level. */
+export async function chooseSkill(form: FormData) {
+  await setSkill(String(form.get("skill")));
+}
+
 /** Onboarding quiz: each answer scores 0–2; the total picks a level. */
 export async function finishOnboarding(form: FormData) {
   const score = ["q1", "q2", "q3"].reduce((sum, q) => sum + Number(form.get(q) ?? 0), 0);

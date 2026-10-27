@@ -6,6 +6,9 @@ import type { Recipe, Segment } from "@/lib/types";
 export const RECIPES: Recipe[] = [
   {
     slug: "garlic-butter-pasta",
+    // Photo of a similar dish from TheMealDB (350 px variant), credited on the card and page.
+    image: "https://www.themealdb.com/images/media/meals/uquqtu1511178042.jpg/medium",
+    imageCredit: { name: "TheMealDB", url: "https://www.themealdb.com/meal/52835" },
     title: "Garlic Butter Pasta",
     summary: "Glossy, emulsified butter sauce built from pasta water. The first sauce every cook should own.",
     chef: "Be a Chef Kitchen",
@@ -81,6 +84,9 @@ export const RECIPES: Recipe[] = [
   },
   {
     slug: "crispy-chickpea-traybake",
+    // Photo of a similar dish from TheMealDB (350 px variant), credited on the card and page.
+    image: "https://www.themealdb.com/images/media/meals/tvtxpq1511464705.jpg/medium",
+    imageCredit: { name: "TheMealDB", url: "https://www.themealdb.com/meal/52870" },
     title: "Crispy Chickpea Traybake",
     summary: "One tray, mostly hands-off. Spiced chickpeas and peppers roasted until blistered.",
     chef: "Be a Chef Kitchen",
@@ -131,6 +137,9 @@ export const RECIPES: Recipe[] = [
   },
   {
     slug: "pan-seared-salmon",
+    // Photo of a similar dish from TheMealDB (350 px variant), credited on the card and page.
+    image: "https://www.themealdb.com/images/media/meals/xxyupu1468262513.jpg/medium",
+    imageCredit: { name: "TheMealDB", url: "https://www.themealdb.com/meal/52773" },
     title: "Pan-Seared Salmon, Crisp Skin",
     summary: "Restaurant-crisp skin in a home pan, with a two-minute brown butter.",
     chef: "Be a Chef Kitchen",
@@ -192,6 +201,9 @@ export const RECIPES: Recipe[] = [
   },
   {
     slug: "fluffy-rice",
+    // Photo of a similar dish from TheMealDB (350 px variant), credited on the card and page.
+    image: "https://www.themealdb.com/images/media/meals/kw92t41604181871.jpg/medium",
+    imageCredit: { name: "TheMealDB", url: "https://www.themealdb.com/meal/53033" },
     title: "Foolproof Fluffy Rice",
     summary: "The absorption method, with the exact ratio and the resting step most people skip.",
     chef: "Be a Chef Kitchen",

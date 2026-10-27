@@ -45,8 +45,8 @@ export function mealIngredients(meal: Meal): string[] {
   return lines;
 }
 
-/** Small thumbnail variant TheMealDB serves for list views. */
-export const thumb = (url: string) => `${url.replace(/\/preview$/, "")}/preview`;
+/** TheMealDB's 350 px variant: the smallest size that's at least 300 px (others: 150, 500, 700). */
+export const thumb = (url: string) => `${url.replace(/\/(preview|small|medium|large)$/, "")}/medium`;
 
 export function mealToRecipe(meal: Meal): Recipe | null {
   const steps = mealSteps(meal.strInstructions);

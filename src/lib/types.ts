@@ -73,6 +73,8 @@ export interface Recipe {
   video?: string;
   /** Poster/still image. */
   image?: string;
+  /** Who the image belongs to, when it isn't ours (shown as "Photo: name"). */
+  imageCredit?: { name: string; url: string };
   premium: boolean;
   ingredients: Ingredient[];
   blocks: StepBlock[];

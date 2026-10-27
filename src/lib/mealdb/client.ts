@@ -40,6 +40,34 @@ export async function mealRecipe(id: string): Promise<Recipe | null> {
   return meal ? mealToRecipe(meal) : null;
 }
 
+/** Runs `fn` over items with at most `limit` in flight. */
+async function mapLimit<T, R>(items: T[], limit: number, fn: (item: T) => Promise<R>): Promise<R[]> {
+  const out = new Array<R>(items.length);
+  let next = 0;
+  await Promise.all(
+    Array.from({ length: Math.min(limit, items.length) }, async () => {
+      while (next < items.length) {
+        const i = next++;
+        out[i] = await fn(items[i]);
+      }
+    }),
+  );
+  return out;
+}
+
+/** Full recipes for a category (each lookup is cached for a day). Meals that fail to load are skipped. */
+export async function categoryRecipes(category: string): Promise<Recipe[]> {
+  const summaries = await mealsByCategory(category);
+  const recipes = await mapLimit(summaries, 8, (s) => mealRecipe(s.idMeal));
+  return recipes.filter((r): r is Recipe => r !== null);
+}
+
+/** Full recipes matching a search (search.php already returns full meals). */
+export async function searchRecipes(query: string): Promise<Recipe[]> {
+  const data = await get<{ meals?: Meal[] | null }>(`search.php?s=${encodeURIComponent(query)}`);
+  return (data?.meals ?? []).map(mealToRecipe).filter((r): r is Recipe => r !== null);
+}
+
 /** Seed recipe or TheMealDB recipe, by slug. */
 export async function findRecipe(slug: string, seed: (slug: string) => Recipe | undefined): Promise<Recipe | undefined> {
   return seed(slug) ?? (slug.startsWith(MEALDB_PREFIX) ? (await mealRecipe(slug.slice(MEALDB_PREFIX.length))) ?? undefined : undefined);

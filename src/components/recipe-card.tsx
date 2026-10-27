@@ -33,6 +33,9 @@ export function RecipeCard({ recipe, activeMinutes, locked }: { recipe: Recipe; 
     >
       {recipe.video ? (
         <video ref={video} src={recipe.video} poster={recipe.image} muted loop playsInline preload="none" aria-hidden className="absolute inset-0 h-full w-full object-cover" />
+      ) : recipe.image ? (
+        // eslint-disable-next-line @next/next/no-img-element -- remote CDN photo, loaded at its 350 px size
+        <img src={recipe.image} alt="" width={350} height={350} loading="lazy" className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" />
       ) : (
         <span aria-hidden className="absolute -right-6 -top-6 text-[9rem] leading-none opacity-20 transition-transform group-hover:rotate-6">
           {recipe.title.charAt(0)}
@@ -46,6 +49,7 @@ export function RecipeCard({ recipe, activeMinutes, locked }: { recipe: Recipe; 
         </div>
         <h3 className="text-xl font-bold leading-tight">{recipe.title}</h3>
         <p className="mt-1 line-clamp-2 text-sm text-white/80">{recipe.summary}</p>
+        {recipe.imageCredit && <p className="mt-2 text-[11px] text-white/60">Photo: {recipe.imageCredit.name}</p>}
       </div>
     </Link>
   );
