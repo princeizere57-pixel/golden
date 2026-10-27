@@ -68,7 +68,8 @@ REA (`rea-agents`) was used to study Mob's public website (mob.co.uk): its route
 
 ### Module F — TheMealDB library (`src/lib/mealdb/`, `/explore`, `/meals/[id]`)
 - Public recipe API (search, categories, lookup) converted to our `Recipe` shape by `convert.ts`, reusing the import pipeline (`parseIngredient`, `stepToBlock`), so every meal gets the skill slider, cook mode, timers and Fix My Mistake. Slugs are `mealdb-<id>`; `findRecipe()` resolves them for server actions.
-- Responses cached for a day (`next.revalidate`). Photos load from TheMealDB's CDN (`/preview` thumbnails in lists).
+- Responses cached for a day (`next.revalidate`). Photos load from TheMealDB's CDN (`/medium` 350 px variant in lists).
+- **Local bulk cache:** `npm run data:mealdb` (`scripts/seed-mealdb.mts`) fetches full recipes letter by letter (`search.php?f=a`…, a–f in parallel, more letters until ≥100), de-duplicates and writes `src/data/mealdb-recipes.json`. `cache.ts` serves meal lookups from it before calling the API. The file is gitignored: regenerate it, don't commit it.
 - **Licence:** `MEALDB_API_KEY` empty = shared test key `1`, development only. A public or app-store release requires a TheMealDB supporter key. Always credit TheMealDB and link to the meal.
 
 ## 5. Monetisation and payment architecture (`src/lib/billing/`)

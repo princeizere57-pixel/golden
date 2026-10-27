@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { mealIngredients, mealSteps, mealToRecipe, thumb, type Meal } from "@/lib/mealdb/convert";
+import { fromCached, mealIngredients, mealSteps, mealToRecipe, thumb, type CachedMeal, type Meal } from "@/lib/mealdb/convert";
 import { adaptRecipe } from "@/lib/skill/adapt";
 
 // Original fixture in TheMealDB's response shape.
@@ -58,6 +58,26 @@ describe("TheMealDB conversion", () => {
   it("rejects meals without steps or ingredients", () => {
     expect(mealToRecipe({ ...meal, strInstructions: "" })).toBeNull();
     expect(mealToRecipe({ idMeal: "1", strMeal: "Empty", strInstructions: "Cook it." })).toBeNull();
+  });
+
+  it("round-trips the cached shape back into a meal", () => {
+    const cached: CachedMeal = {
+      idMeal: meal.idMeal,
+      strMeal: meal.strMeal,
+      strCategory: "Vegetarian",
+      strArea: "British",
+      strInstructions: meal.strInstructions!,
+      strMealThumb: meal.strMealThumb!,
+      strYoutube: null,
+      strSource: null,
+      ingredients: [
+        { name: "Onion", measure: "1 large" },
+        { name: "Butter", measure: "25g" },
+        { name: "Chopped Tomatoes", measure: "800g" },
+        { name: "Vegetable Stock", measure: "500ml" },
+      ],
+    };
+    expect(mealToRecipe(fromCached(cached))).toEqual(mealToRecipe(meal));
   });
 
   it("uses the 350 px variant once", () => {

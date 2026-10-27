@@ -2,6 +2,7 @@
 // The shared test key "1" is for development; public releases need a supporter key.
 
 import "server-only";
+import { cachedMeal } from "@/lib/mealdb/cache";
 import { MEALDB_PREFIX, mealToRecipe, type Meal, type MealSummary } from "@/lib/mealdb/convert";
 import type { Recipe } from "@/lib/types";
 
@@ -35,6 +36,8 @@ export async function searchMeals(query: string): Promise<MealSummary[]> {
 
 export async function mealRecipe(id: string): Promise<Recipe | null> {
   if (!/^\d+$/.test(id)) return null;
+  const cached = cachedMeal(id);
+  if (cached) return mealToRecipe(cached);
   const data = await get<{ meals?: Meal[] | null }>(`lookup.php?i=${id}`);
   const meal = data?.meals?.[0];
   return meal ? mealToRecipe(meal) : null;

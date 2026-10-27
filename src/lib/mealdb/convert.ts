@@ -26,6 +26,28 @@ export interface MealSummary {
 
 export const MEALDB_PREFIX = "mealdb-";
 
+/** Shape saved by scripts/seed-mealdb.ts: the API fields with ingredients as a clean list. */
+export interface CachedMeal {
+  idMeal: string;
+  strMeal: string;
+  strCategory: string | null;
+  strArea: string | null;
+  strInstructions: string;
+  strMealThumb: string | null;
+  strYoutube: string | null;
+  strSource: string | null;
+  ingredients: Array<{ name: string; measure: string }>;
+}
+
+export function fromCached({ ingredients, ...rest }: CachedMeal): Meal {
+  const meal: Meal = { ...rest };
+  ingredients.slice(0, 20).forEach((ing, i) => {
+    meal[`strIngredient${i + 1}`] = ing.name;
+    meal[`strMeasure${i + 1}`] = ing.measure;
+  });
+  return meal;
+}
+
 /** Splits instructions into steps: by line, dropping "STEP 3" / "3." labels and blank lines. */
 export function mealSteps(instructions: string | null | undefined): string[] {
   return (instructions ?? "")

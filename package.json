@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "eslint",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run"
+    "test": "vitest run",
+    "data:mealdb": "node scripts/seed-mealdb.mts"
   },
   "dependencies": {
     "next": "15.5.28",

@@ -40,3 +40,6 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# local TheMealDB cache (npm run data:mealdb); regenerate rather than commit
+/src/data/mealdb-recipes.json
