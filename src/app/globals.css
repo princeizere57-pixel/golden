@@ -1,13 +1,15 @@
 @import "tailwindcss";
 
-/* OneKit-inspired tokens. Colourways are named background/ink pairs for cards and banners. */
+/* Light, editorial look: white page, near-black ink, warm orange highlight, black pill buttons.
+   Colourways are named background/ink pairs for cards and banners. */
 :root {
-  --bg: #fbf8f3;
-  --surface: #ffffff;
-  --ink: #1c1917;
-  --muted: #6b635b;
-  --line: #e7e1d8;
-  --accent: #d9480f;
+  --bg: #ffffff;
+  --surface: #f6f4f1;
+  --ink: #1f1d1b;
+  --muted: #6d6761;
+  --line: #e7e3de;
+  --accent: #f28c38;
+  --accent-soft: #fdeee1;
   --accent-ink: #ffffff;
   --focus: #1d4ed8;
 
@@ -18,19 +20,6 @@
   --cw-charcoal: #292524;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --bg: #12100e;
-    --surface: #1c1917;
-    --ink: #f5f0ea;
-    --muted: #a8a29e;
-    --line: #2e2a26;
-    --accent: #fb923c;
-    --accent-ink: #1c1917;
-    --focus: #93c5fd;
-  }
-}
-
 @theme inline {
   --color-bg: var(--bg);
   --color-surface: var(--surface);
@@ -38,13 +27,15 @@
   --color-muted: var(--muted);
   --color-line: var(--line);
   --color-accent: var(--accent);
+  --color-accent-soft: var(--accent-soft);
   --color-accent-ink: var(--accent-ink);
   --color-tomato: var(--cw-tomato);
   --color-basil: var(--cw-basil);
   --color-saffron: var(--cw-saffron);
   --color-aubergine: var(--cw-aubergine);
   --color-charcoal: var(--cw-charcoal);
-  --font-sans: var(--font-geist-sans), system-ui, sans-serif;
+  --font-sans: var(--font-body), system-ui, sans-serif;
+  --font-display: var(--font-display), var(--font-body), system-ui, sans-serif;
 }
 
 body {
@@ -53,12 +44,21 @@ body {
   font-family: var(--font-sans);
 }
 
+/* Heavy, wide headline face. */
+.font-display {
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-stretch: 118%;
+  letter-spacing: -0.02em;
+  line-height: 1.02;
+}
+
 :focus-visible {
   outline: 3px solid var(--focus);
   outline-offset: 2px;
 }
 
-/* Cook mode: high contrast regardless of system theme. */
+/* Cook mode: high contrast regardless of the page theme. */
 .cook-mode {
   --bg: #000000;
   --surface: #111111;
@@ -73,10 +73,38 @@ body {
 
 .rail {
   scroll-snap-type: x mandatory;
-  scrollbar-width: thin;
+  /* Snap to the padded edge, not the scrollport edge, so the first card keeps its gutter. */
+  scroll-padding-inline: 1rem;
+  scrollbar-width: none;
+}
+.rail::-webkit-scrollbar {
+  display: none;
 }
 .rail > * {
   scroll-snap-align: start;
+}
+
+@keyframes step-in {
+  from {
+    opacity: 0;
+    transform: translateX(24px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.step-in {
+  animation: step-in 0.32s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+@keyframes fill {
+  from {
+    width: 0%;
+  }
+  to {
+    width: 100%;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

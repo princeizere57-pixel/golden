@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { AddToListButton, SaveButton } from "@/components/recipe-actions";
 import { SkillSteps } from "@/components/skill-steps";
 import { SourcePhoto } from "@/components/source-photo";
 import { mealRecipe } from "@/lib/mealdb/client";
@@ -38,7 +39,11 @@ export default async function MealPage({ params }: Props) {
         <ul className="mt-2 divide-y divide-line">
           {recipe.ingredients.map((i) => <li key={i.id} className="py-2 text-sm">{i.raw ?? i.name}</li>)}
         </ul>
-        <Link href={`/meals/${id}/cook`} className="mt-6 flex min-h-14 items-center justify-center rounded-full bg-accent font-semibold text-accent-ink">Start cook mode</Link>
+        <div className="mt-6 flex gap-3">
+          <SaveButton recipe={recipe} />
+          <AddToListButton recipe={recipe} />
+        </div>
+        <Link href={`/meals/${id}/cook`} className="mt-4 flex min-h-14 items-center justify-center rounded-full bg-ink font-semibold text-bg">Start cook mode</Link>
       </aside>
       <section aria-label="Method">
         <SkillSteps recipe={recipe} initialSkill={viewer.skill} />

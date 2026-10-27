@@ -42,7 +42,7 @@ export function ImportPanel() {
           onChange={(e) => setLink(e.target.value)}
           className="min-h-14 flex-1 rounded-2xl border border-line bg-surface px-4 text-base"
         />
-        <button disabled={pending} className="min-h-14 rounded-2xl bg-accent px-6 font-bold text-accent-ink disabled:opacity-60">
+        <button disabled={pending} className="min-h-14 rounded-2xl bg-ink px-6 font-bold text-bg disabled:opacity-60">
           {pending ? "Importing…" : "Import"}
         </button>
       </form>

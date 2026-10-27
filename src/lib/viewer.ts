@@ -11,10 +11,27 @@ export const PLAN_COOKIE = "bac-plan";
 export const parseSkill = (value: unknown): SkillLevel =>
   SKILL_LEVELS.includes(value as SkillLevel) ? (value as SkillLevel) : "beginner";
 
-export async function getViewer(): Promise<Viewer> {
+export const PREFS_COOKIE = "bac-prefs";
+
+/** Answers from onboarding that shape the feed. */
+export interface Prefs {
+  serves: number;
+  weeknightMinutes: number;
+  goals: string[];
+}
+
+const DEFAULT_PREFS: Prefs = { serves: 2, weeknightMinutes: 30, goals: [] };
+
+export async function getViewer(): Promise<Viewer & { onboarded: boolean; prefs: Prefs }> {
   const jar = await cookies();
+  let prefs = DEFAULT_PREFS;
+  try {
+    prefs = { ...DEFAULT_PREFS, ...JSON.parse(jar.get(PREFS_COOKIE)?.value ?? "{}") };
+  } catch {}
   return {
     skill: parseSkill(jar.get(SKILL_COOKIE)?.value),
     plan: jar.get(PLAN_COOKIE)?.value === "premium" ? "premium" : "free",
+    onboarded: jar.has(SKILL_COOKIE),
+    prefs,
   };
 }

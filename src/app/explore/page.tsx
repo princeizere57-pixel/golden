@@ -43,7 +43,7 @@ export default async function ExplorePage({ searchParams }: { searchParams: Prom
             name="skill"
             value={s}
             aria-pressed={viewer.skill === s}
-            className={`min-h-11 rounded-full border px-4 text-sm font-semibold ${viewer.skill === s ? "border-accent bg-accent text-accent-ink" : "border-line bg-surface"}`}
+            className={`min-h-11 rounded-full border px-4 text-sm font-semibold ${viewer.skill === s ? "border-accent bg-ink text-bg" : "border-line bg-surface"}`}
           >
             {SKILL_LABEL[s]}
           </button>
@@ -53,7 +53,7 @@ export default async function ExplorePage({ searchParams }: { searchParams: Prom
       <form action="/explore" className="mt-5 flex gap-3" role="search">
         <label htmlFor="q" className="sr-only">Search recipes</label>
         <input id="q" name="q" defaultValue={query} placeholder="Search: curry, lasagne, pancakes…" className="min-h-12 flex-1 rounded-2xl border border-line bg-surface px-4" />
-        <button className="min-h-12 rounded-2xl bg-accent px-5 font-semibold text-accent-ink">Search</button>
+        <button className="min-h-12 rounded-2xl bg-ink px-5 font-semibold text-bg">Search</button>
       </form>
 
       {categories.length > 0 && (

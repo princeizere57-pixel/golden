@@ -24,3 +24,4 @@ function load(): Map<string, Meal> {
 
 export const cachedMeal = (id: string): Meal | undefined => load().get(id);
 export const cachedMealCount = () => load().size;
+export const allCachedMeals = (): Meal[] => [...load().values()];

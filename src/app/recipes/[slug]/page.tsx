@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { AddToListButton, SaveButton } from "@/components/recipe-actions";
 import { SkillSteps } from "@/components/skill-steps";
 import { SourcePhoto } from "@/components/source-photo";
 import { RECIPES, getRecipe } from "@/lib/data/recipes";
@@ -46,10 +47,14 @@ export default async function RecipePage({ params }: Props) {
             </li>
           ))}
         </ul>
+        <div className="mt-6 flex gap-3">
+          <SaveButton recipe={recipe} />
+          <AddToListButton recipe={recipe} />
+        </div>
         {locked ? (
-          <Link href="/premium" className="mt-6 flex min-h-14 items-center justify-center rounded-full bg-accent font-semibold text-accent-ink">Unlock with a free trial</Link>
+          <Link href="/premium" className="mt-6 flex min-h-14 items-center justify-center rounded-full bg-ink font-semibold text-bg">Unlock with a free trial</Link>
         ) : (
-          <Link href={`/recipes/${recipe.slug}/cook`} className="mt-6 flex min-h-14 items-center justify-center rounded-full bg-accent font-semibold text-accent-ink">Start cook mode</Link>
+          <Link href={`/recipes/${recipe.slug}/cook`} className="mt-6 flex min-h-14 items-center justify-center rounded-full bg-ink font-semibold text-bg">Start cook mode</Link>
         )}
       </aside>
       <section aria-label="Method">
