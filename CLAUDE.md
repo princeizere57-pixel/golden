@@ -99,3 +99,11 @@ The interface follows the editorial pattern seen in Mob's app, re-done with our 
 - **Discover** (`/`): big title, sticky search, quick photo tiles, collections pitched per level, NEW rail, "Right at your level", dish of the day with Share, time-limited rail from prefs, review prompt after 3 visits. Built from `src/lib/library.ts` (seed + local TheMealDB cache).
 - **For you** (`/for-you`): a technique path per level with practice recipes, then a "next level" rail.
 - **Saved / Shopping list:** on-device (`src/lib/device-store.ts`) until accounts exist; Save and Add-to-list buttons on recipe and meal pages.
+
+## 8. Our own identity: 3D icons, Mini You and the game layer
+
+These set The Chef's AI apart; keep them original (no third-party mascots, icon sets or artwork).
+- **3D icons** (`src/components/icons-3d.tsx`): hand-built SVG with gradients, highlight and contact shadow. Tabs: Discover = lens, For you = steaming dish, Shopping list = yellow notepad with black pen, Saved = blue sack with a plastic clip. Log icons: hat, lifebuoy, trophy, flame.
+- **Mini You** (`mini-you.tsx`): a cartoon chef (white hat and double-breasted jacket) built from the user's avatar. Uploading a photo (`profile-studio.tsx`) samples skin and hair colour on-device; hair style, beard and glasses are adjustable. Moods: neutral, focused (cook mode), happy (dish finished, mistake fixed), proud (rank-up), sad (Fix My Mistake opened). Moods fade after 6 h.
+- **Game layer** (`src/lib/gamify.ts`, pure and tested; state in `progress-store.ts`, on-device): XP (cooked +50, fixed +15), chef ranks Kitchen Porter → Head Chef, day streaks. Cook mode's "I made it!" shows a celebration with XP, streak and rank progress.
+- **Kitchen log** (`kitchen-log.tsx`): activity cards (3D icon, **Title** · detail, photo, green tick) with Mini You commenting on top. Shown on For you and `/you`.

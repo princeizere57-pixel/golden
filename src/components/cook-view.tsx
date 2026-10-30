@@ -6,6 +6,10 @@
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { FixMyMistake } from "@/components/fix-my-mistake";
+import { FlameIcon, TrophyIcon } from "@/components/icons-3d";
+import { MiniYou } from "@/components/mini-you";
+import { rankFor } from "@/lib/gamify";
+import { readProgress, recordCooked, setMood } from "@/lib/progress-store";
 import { SkillSlider } from "@/components/skill-steps";
 import { formatClock, useTimers } from "@/components/timers";
 import { adaptRecipe } from "@/lib/skill/adapt";
@@ -46,6 +50,14 @@ export function CookView({ recipe, initialSkill, exitHref = `/recipes/${recipe.s
   const timerId = `${recipe.slug}:${step.blockId}`;
   const running = timers.find((t) => t.id === timerId);
   const last = index === steps.length - 1;
+  const [done, setDone] = useState<ReturnType<typeof recordCooked> | null>(null);
+
+  // Mini You concentrates while you cook.
+  useEffect(() => setMood("focused"), []);
+
+  function finish() {
+    setDone(recordCooked(recipe.title, recipe.image));
+  }
 
   const go = useCallback((delta: number) => setIndex((i) => Math.min(steps.length - 1, Math.max(0, i + delta))), [steps.length]);
 
@@ -97,13 +109,39 @@ export function CookView({ recipe, initialSkill, exitHref = `/recipes/${recipe.s
         <div className="grid grid-cols-2 gap-4">
           <button onClick={() => go(-1)} disabled={index === 0} className="min-h-16 rounded-2xl border border-line text-xl font-bold disabled:opacity-40">Back</button>
           {last ? (
-            <Link href="/" className="flex min-h-16 items-center justify-center rounded-2xl bg-accent text-xl font-bold text-accent-ink">Done. Enjoy!</Link>
+            <button onClick={finish} className="min-h-16 rounded-2xl bg-accent text-xl font-bold text-accent-ink">I made it!</button>
           ) : (
             <button onClick={() => go(1)} className="min-h-16 rounded-2xl bg-accent text-xl font-bold text-accent-ink">Next</button>
           )}
         </div>
       </div>
-      <FixMyMistake slug={recipe.slug} defaultVolumeMl={Math.max(250, Math.round(volume / 50) * 50)} />
+      <FixMyMistake slug={recipe.slug} dish={recipe.title} defaultVolumeMl={Math.max(250, Math.round(volume / 50) * 50)} />
+      {done && <Celebration recipe={recipe} result={done} />}
+    </div>
+  );
+}
+
+/** Finished-dish screen: Mini You celebrates, with XP, streak and rank progress. */
+function Celebration({ recipe, result }: { recipe: Recipe; result: { xp: number; streak: number; rankedUp: boolean } }) {
+  const progress = readProgress();
+  const rank = rankFor(progress.xp);
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 p-4" role="dialog" aria-modal="true" aria-labelledby="done-title">
+      <div className="step-in w-full max-w-sm rounded-3xl bg-white p-6 text-center text-[#1f1d1b]">
+        <MiniYou size={150} mood={result.rankedUp ? "proud" : "happy"} className="mx-auto" />
+        <h2 id="done-title" className="mt-2 font-display text-3xl">{result.rankedUp ? `You're a ${rank.title}!` : "You made it!"}</h2>
+        <p className="mt-1 text-[#6d6761]">{recipe.title}</p>
+        <div className="mt-5 flex justify-center gap-6">
+          <span className="flex items-center gap-1.5 text-lg font-bold"><TrophyIcon size={28} /> +{result.xp} XP</span>
+          <span className="flex items-center gap-1.5 text-lg font-bold"><FlameIcon size={28} /> {result.streak} day{result.streak === 1 ? "" : "s"}</span>
+        </div>
+        <div className="mt-5 h-3 overflow-hidden rounded-full bg-[#f6f4f1]">
+          <div className="h-full rounded-full bg-[#facc15]" style={{ width: `${rank.progress * 100}%` }} />
+        </div>
+        <p className="mt-1 text-sm text-[#6d6761]">{rank.next ? `${rank.toNext} XP to ${rank.next}` : "Top rank. Respect, chef."}</p>
+        <Link href="/" className="mt-6 flex min-h-14 items-center justify-center rounded-full bg-[#facc15] text-lg font-semibold">Back to Discover</Link>
+        <Link href="/you" className="mt-2 flex min-h-12 items-center justify-center font-medium">See Mini You</Link>
+      </div>
     </div>
   );
 }

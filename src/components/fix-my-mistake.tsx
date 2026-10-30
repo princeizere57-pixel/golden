@@ -2,20 +2,31 @@
 
 import { useState, useTransition } from "react";
 import { fixMistakeAction } from "@/app/actions/adapt";
+import { MiniYou } from "@/components/mini-you";
+import { XP } from "@/lib/gamify";
+import { recordFixed, recordMistake } from "@/lib/progress-store";
 import { MISTAKES, fixMistake, type Fix, type MistakeId } from "@/lib/recovery/fixes";
 
-/** Floating recovery assistant for cook mode. */
-export function FixMyMistake({ slug, defaultVolumeMl }: { slug: string; defaultVolumeMl: number }) {
+/** Floating recovery assistant for cook mode. Mini You is sad with you, then cheers the rescue. */
+export function FixMyMistake({ slug, dish, defaultVolumeMl }: { slug: string; dish: string; defaultVolumeMl: number }) {
   const [open, setOpen] = useState(false);
   const [mistake, setMistake] = useState<MistakeId>("too-salty");
   const [volume, setVolume] = useState(defaultVolumeMl);
   const [severity, setSeverity] = useState<1 | 2 | 3>(2);
   const [fix, setFix] = useState<(Fix & { tip?: string }) | null>(null);
+  const [rescued, setRescued] = useState(false);
   const [pending, startTransition] = useTransition();
 
   function solve() {
+    setRescued(false);
     setFix(fixMistake(mistake, { volumeMl: volume, severity }));
+    recordMistake(MISTAKES.find((m) => m.id === mistake)!.label, dish);
     startTransition(async () => setFix(await fixMistakeAction(slug, mistake, volume, severity)));
+  }
+
+  function worked() {
+    if (fix) recordFixed(fix.headline);
+    setRescued(true);
   }
 
   return (
@@ -56,6 +67,10 @@ export function FixMyMistake({ slug, defaultVolumeMl }: { slug: string; defaultV
           <button onClick={solve} className="mt-3 min-h-16 w-full rounded-full bg-button font-bold text-button-ink">Show me the fix</button>
           {fix && (
             <div className="mt-4" aria-live="polite">
+              <div className="mb-3 flex items-center gap-3 rounded-2xl bg-bg p-3">
+                <MiniYou headOnly size={52} mood={rescued ? "happy" : "sad"} />
+                <p className="text-sm">{rescued ? `Saved it! +${XP.fixed} XP. That's real chef thinking.` : "Oops. Happens to every chef. Here's how we fix it:"}</p>
+              </div>
               <h3 className="text-lg font-bold">{fix.headline}</h3>
               <ul className="mt-2 flex flex-wrap gap-2">
                 {fix.amounts.map((a) => (
@@ -65,6 +80,7 @@ export function FixMyMistake({ slug, defaultVolumeMl }: { slug: string; defaultV
               <ol className="mt-3 list-decimal space-y-1.5 pl-5">{fix.steps.map((s) => <li key={s}>{s}</li>)}</ol>
               {fix.tip && <p className="mt-3 rounded-2xl bg-bg p-3 text-sm"><strong>For this dish:</strong> {fix.tip}</p>}
               {pending && <p className="mt-2 text-xs text-muted">Checking for a dish-specific tip…</p>}
+              {!rescued && <button onClick={worked} className="mt-4 min-h-16 w-full rounded-full border-2 border-button font-bold">It worked!</button>}
             </div>
           )}
         </section>

@@ -5,7 +5,10 @@
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { STORE_EVENT, addToShopping, isSaved, listSaved, listShopping, toggleSaved } from "@/lib/device-store";
 import { formatDuration, recipeHref, totalMinutes } from "@/lib/links";
+import { recordActivity } from "@/lib/progress-store";
 import type { Recipe } from "@/lib/types";
+
+const thumbOf = (image?: string) => (image?.includes("themealdb.com") && !/\/(medium|preview|small|large)$/.test(image) ? `${image}/medium` : image);
 
 /** Re-renders when the device store changes (this tab or another). */
 export function useStore<T>(read: () => T, fallback: T): T {
@@ -40,7 +43,9 @@ export function SaveButton({ recipe }: { recipe: Recipe }) {
   const saved = useStore(() => isSaved(recipe.slug), false);
   return (
     <button
-      onClick={() => toggleSaved({ slug: recipe.slug, href: recipeHref(recipe), title: recipe.title, image: recipe.image, minutes: totalMinutes(recipe) })}
+      onClick={() => {
+        if (toggleSaved({ slug: recipe.slug, href: recipeHref(recipe), title: recipe.title, image: recipe.image, minutes: totalMinutes(recipe) })) recordActivity("saved", "Saved", recipe.title, thumbOf(recipe.image));
+      }}
       aria-pressed={saved}
       className={`flex min-h-12 flex-1 items-center justify-center gap-2 rounded-full border font-semibold ${saved ? "border-button bg-button text-button-ink" : "border-line"}`}
     >
@@ -52,9 +57,13 @@ export function SaveButton({ recipe }: { recipe: Recipe }) {
 
 export function AddToListButton({ recipe }: { recipe: Recipe }) {
   const [added, setAdded] = useState<number | null>(null);
+  function logListed(r: Recipe, count: number) {
+    setAdded(count);
+    if (count) recordActivity("listed", "Shopping list", `added ${count} item${count === 1 ? "" : "s"} for ${r.title}`, thumbOf(r.image));
+  }
   return (
     <button
-      onClick={() => setAdded(addToShopping(recipe.slug, recipe.title, recipeHref(recipe), recipe.ingredients.map((i) => i.raw ?? `${i.quantity ? `${i.quantity} ${i.unit === "pc" ? "" : i.unit} ` : ""}${i.name}`.replace(/\s+/g, " ").trim())))}
+      onClick={() => logListed(recipe, addToShopping(recipe.slug, recipe.title, recipeHref(recipe), recipe.ingredients.map((i) => i.raw ?? `${i.quantity ? `${i.quantity} ${i.unit === "pc" ? "" : i.unit} ` : ""}${i.name}`.replace(/\s+/g, " ").trim())))}
       className="flex min-h-12 flex-1 items-center justify-center gap-2 rounded-full border border-line font-semibold"
       aria-live="polite"
     >

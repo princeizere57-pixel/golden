@@ -5,16 +5,18 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { LensIcon, NotepadIcon, SackIcon, SteamingDishIcon } from "@/components/icons-3d";
+import { MiniYou } from "@/components/mini-you";
 import { useShopping } from "@/components/recipe-actions";
 
 const FULL_SCREEN = /^\/(welcome|onboarding)(\/|$)/;
 const COOK = /\/cook$/;
 
 const TABS = [
-  { href: "/", label: "Discover", icon: "M11 4a7 7 0 1 1 0 14 7 7 0 0 1 0-14zm9 16-4.2-4.2" },
-  { href: "/for-you", label: "For you", icon: "M12 3a9 9 0 1 1 0 18 9 9 0 0 1 0-18zm-2 5.5v7l6-3.5z" },
-  { href: "/shopping", label: "Shopping list", icon: "M7 3h10l2 2v16H5V5zM9 9h6M9 13h6M9 17h4" },
-  { href: "/saved", label: "Saved", icon: "M6 4h12v17l-6-4-6 4z" },
+  { href: "/", label: "Discover", Icon: LensIcon },
+  { href: "/for-you", label: "For you", Icon: SteamingDishIcon },
+  { href: "/shopping", label: "Shopping list", Icon: NotepadIcon },
+  { href: "/saved", label: "Saved", Icon: SackIcon },
 ];
 
 export function Brand({ className = "" }: { className?: string }) {
@@ -45,6 +47,7 @@ export function SiteHeader() {
           <Link href="/account" className="rounded-full px-3 py-2.5 hover:bg-surface">Account</Link>
         </div>
         <Link href="/premium" className="ml-auto rounded-full bg-button px-4 py-2.5 text-sm font-semibold text-button-ink lg:ml-2">Try free</Link>
+        <Link href="/you" aria-label="Mini You and your progress" className="overflow-hidden rounded-full bg-accent-soft"><MiniYou headOnly size={42} /></Link>
       </nav>
     </header>
   );
@@ -63,11 +66,9 @@ export function TabBar() {
           const badge = tab.href === "/shopping" && toBuy > 0 ? toBuy : 0;
           return (
             <li key={tab.href}>
-              <Link href={tab.href} aria-current={active ? "page" : undefined} className={`flex min-h-16 flex-col items-center justify-center gap-1 text-[11px] font-medium ${active ? "text-ink" : "text-muted"}`}>
-                <span className="relative">
-                  <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" strokeWidth={active ? 2.2 : 1.7} strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-                    <path d={tab.icon} />
-                  </svg>
+              <Link href={tab.href} aria-current={active ? "page" : undefined} className={`flex min-h-16 flex-col items-center justify-center gap-0.5 text-[11px] ${active ? "font-semibold text-ink" : "font-medium text-muted"}`}>
+                <span className={`relative transition-transform duration-200 ${active ? "-translate-y-0.5 scale-110" : "opacity-75 saturate-[.6]"}`}>
+                  <tab.Icon size={34} />
                   {badge > 0 && (
                     <span className="absolute -right-2.5 -top-1.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-basil px-1 text-[10px] font-bold text-white" aria-label={`${badge} to buy`}>{badge > 99 ? "99+" : badge}</span>
                   )}

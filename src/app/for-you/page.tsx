@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { PhotoCard, Rail } from "@/components/discover";
+import { KitchenLog } from "@/components/kitchen-log";
 import { forLevel, libraryRecipes } from "@/lib/library";
 import { difficulty } from "@/lib/skill/difficulty";
 import { getViewer } from "@/lib/viewer";
@@ -43,6 +44,11 @@ export default async function ForYouPage() {
           Your skill path at <strong className="text-ink">{LEVEL[viewer.skill]}</strong> level.{" "}
           <Link href="/onboarding" className="underline">Retake the quiz</Link>
         </p>
+      </div>
+
+      <div className="mt-6 px-4">
+        <KitchenLog limit={4} />
+        <Link href="/you" className="mt-3 inline-block text-sm font-medium underline">Full kitchen log and Mini You</Link>
       </div>
 
       {PATH[viewer.skill].map((step, i) => {
