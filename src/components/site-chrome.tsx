@@ -9,7 +9,7 @@ import { LensIcon, NotepadIcon, SackIcon, SteamingDishIcon } from "@/components/
 import { MiniYou } from "@/components/mini-you";
 import { useShopping } from "@/components/recipe-actions";
 
-const FULL_SCREEN = /^\/(welcome|onboarding)(\/|$)/;
+const FULL_SCREEN = /^\/(welcome|onboarding|signin|auth|checkout)(\/|$)/;
 const COOK = /\/cook$/;
 
 const TABS = [
@@ -53,13 +53,13 @@ export function SiteHeader() {
   );
 }
 
-/** Floating pill tab bar (phones and tablets). */
+/** Floating pill tab bar, on every screen size. */
 export function TabBar() {
   const path = usePathname();
   const toBuy = useShopping().filter((i) => !i.done).length;
   if (FULL_SCREEN.test(path) || COOK.test(path)) return null;
   return (
-    <nav aria-label="Tabs" className="fixed inset-x-3 bottom-3 z-30 mx-auto max-w-lg rounded-[1.75rem] border border-line bg-bg/90 shadow-[0_8px_30px_rgba(0,0,0,0.12)] backdrop-blur-md mb-[env(safe-area-inset-bottom)] lg:hidden">
+    <nav aria-label="Tabs" className="fixed inset-x-3 bottom-3 z-30 mx-auto max-w-lg rounded-[1.75rem] border border-line bg-bg/90 shadow-[0_8px_30px_rgba(0,0,0,0.12)] backdrop-blur-md mb-[env(safe-area-inset-bottom)]">
       <ul className="grid grid-cols-4">
         {TABS.map((tab) => {
           const active = tab.href === "/" ? path === "/" || path.startsWith("/explore") : path.startsWith(tab.href);

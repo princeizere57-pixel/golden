@@ -20,7 +20,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
       <body className={`${body.variable} ${display.variable} antialiased`}>
         <TimerProvider>
           <SiteHeader />
-          <div className="pb-24 lg:pb-0">{children}</div>
+          <div className="pb-24">{children}</div>
           <TabBar />
           <TimerTray />
         </TimerProvider>

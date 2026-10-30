@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { signOut } from "@/app/actions/auth";
 import { setDemoPlan } from "@/app/actions/viewer";
+import { getUser } from "@/lib/auth";
 import { getViewer } from "@/lib/viewer";
 
 export const metadata: Metadata = { title: "Account" };
@@ -9,7 +11,7 @@ const SKILL_LABEL = { beginner: "Beginner", intermediate: "Intermediate", chef: 
 
 export default async function AccountPage({ searchParams }: { searchParams: Promise<{ trial?: string }> }) {
   const { trial } = await searchParams;
-  const viewer = await getViewer();
+  const [viewer, user] = await Promise.all([getViewer(), getUser()]);
   const stripeReady = Boolean(process.env.STRIPE_US_SECRET_KEY || process.env.STRIPE_UK_SECRET_KEY);
 
   return (
@@ -17,6 +19,7 @@ export default async function AccountPage({ searchParams }: { searchParams: Prom
       <h1 className="text-3xl font-bold tracking-tight">Account</h1>
       {trial === "started" && <p role="status" className="mt-4 rounded-2xl bg-basil p-4 text-white">Your 7-day free trial has started. Happy cooking!</p>}
       <dl className="mt-8 divide-y divide-line rounded-3xl border border-line bg-surface">
+        {user && <Row label={user.provider === "google" ? "Signed in with Google" : "Signed in (demo)"} value={`${user.name} · ${user.email}`} action={null} />}
         <Row label="Skill level" value={SKILL_LABEL[viewer.skill]} action={<Link className="underline" href="/onboarding">Retake quiz</Link>} />
         <Row label="Plan" value={viewer.plan === "premium" ? "Premium" : "Free"} action={viewer.plan === "free" ? <Link className="underline" href="/premium">Upgrade</Link> : null} />
       </dl>
@@ -30,6 +33,12 @@ export default async function AccountPage({ searchParams }: { searchParams: Prom
             </form>
           )}
         </section>
+      )}
+      {user && (
+        <form action={signOut} className="mt-10">
+          <button className="min-h-12 rounded-full border border-line px-6 font-semibold">Sign out</button>
+          <p className="mt-2 text-xs text-muted">Signing out also clears your level and answers on this device, so the questions start fresh next time.</p>
+        </form>
       )}
     </main>
   );

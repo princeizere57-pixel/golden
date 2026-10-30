@@ -46,7 +46,7 @@ export default function WelcomePage() {
       </div>
 
       <div className="relative z-10 rounded-t-3xl bg-bg px-6 pb-8 pt-6">
-        <Link href="/onboarding" className="flex min-h-14 w-full items-center justify-center rounded-full bg-button text-lg font-semibold text-button-ink">Get started</Link>
+        <Link href="/signin" className="flex min-h-14 w-full items-center justify-center rounded-full bg-button text-lg font-semibold text-button-ink">Get started</Link>
         <Link href="/explore" className="mt-3 flex min-h-12 w-full items-center justify-center text-base font-medium">Browse recipes first</Link>
       </div>
     </main>

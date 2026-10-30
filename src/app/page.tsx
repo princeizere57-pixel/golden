@@ -10,6 +10,7 @@ import { totalMinutes } from "@/lib/links";
 import { thumb } from "@/lib/mealdb/convert";
 import { difficulty } from "@/lib/skill/difficulty";
 import type { Recipe } from "@/lib/types";
+import { getUser } from "@/lib/auth";
 import { getViewer } from "@/lib/viewer";
 
 const LEVEL = { beginner: "Beginner", intermediate: "Intermediate", chef: "Chef" };
@@ -43,8 +44,9 @@ const TILES = [
 ];
 
 export default async function Discover({ searchParams }: { searchParams: Promise<{ trial?: string }> }) {
-  const viewer = await getViewer();
-  if (!viewer.onboarded) redirect("/welcome");
+  const [viewer, user] = await Promise.all([getViewer(), getUser()]);
+  if (!user) redirect("/welcome");
+  if (!viewer.onboarded) redirect("/onboarding");
   const { trial } = await searchParams;
 
   const library = libraryRecipes();

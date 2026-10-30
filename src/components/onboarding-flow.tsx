@@ -1,27 +1,28 @@
 "use client";
 
 // Full-screen onboarding: one question per screen with a progress bar, then a short
-// "building your skill path" step, the level result and the trial offer.
+// "building your skill path" step and the level result. Checkout comes next (/checkout).
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { saveOnboarding, setDemoPlan } from "@/app/actions/viewer";
+import { saveOnboarding } from "@/app/actions/viewer";
+import { MiniYou } from "@/components/mini-you";
 import { LEVEL_PITCH, QUESTIONS, prefsFromAnswers, skillFromAnswers, type Answers } from "@/lib/skill/quiz";
 
 const BUILD_LINES = ["Reading your answers…", "Matching techniques to your level…", "Picking your first recipes…", "Setting up cook mode…"];
 
-type Stage = { kind: "question"; index: number } | { kind: "building" } | { kind: "result" } | { kind: "trial" };
+type Stage = { kind: "question"; index: number } | { kind: "building" } | { kind: "result" };
 
-export function OnboardingFlow({ images, stripeReady, priceLine }: { images: string[]; stripeReady: boolean; priceLine: string }) {
+export function OnboardingFlow({ images, userName }: { images: string[]; userName: string }) {
   const router = useRouter();
   const [stage, setStage] = useState<Stage>({ kind: "question", index: 0 });
   const [answers, setAnswers] = useState<Answers>({});
   const [line, setLine] = useState(0);
   const { skill } = skillFromAnswers(answers);
 
-  const steps = QUESTIONS.length + 3;
-  const position = stage.kind === "question" ? stage.index : stage.kind === "building" ? QUESTIONS.length : stage.kind === "result" ? QUESTIONS.length + 1 : QUESTIONS.length + 2;
+  const steps = QUESTIONS.length + 2;
+  const position = stage.kind === "question" ? stage.index : stage.kind === "building" ? QUESTIONS.length : QUESTIONS.length + 1;
   const progress = ((position + 1) / steps) * 100;
 
   useEffect(() => {
@@ -38,7 +39,6 @@ export function OnboardingFlow({ images, stripeReady, priceLine }: { images: str
   function back() {
     if (stage.kind === "question" && stage.index > 0) setStage({ kind: "question", index: stage.index - 1 });
     else if (stage.kind === "question") router.push("/welcome");
-    else if (stage.kind === "trial") setStage({ kind: "result" });
     else setStage({ kind: "question", index: QUESTIONS.length - 1 });
   }
 
@@ -51,7 +51,7 @@ export function OnboardingFlow({ images, stripeReady, priceLine }: { images: str
         <div className="h-2 flex-1 overflow-hidden rounded-full bg-accent-soft" role="progressbar" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(progress)} aria-label="Progress">
           <div className="h-full rounded-full bg-accent transition-[width] duration-500" style={{ width: `${progress}%` }} />
         </div>
-        <Link href={stage.kind === "trial" || stage.kind === "result" ? "/" : "/welcome"} aria-label="Close" className="flex h-11 w-11 items-center justify-center rounded-full hover:bg-surface">
+        <Link href={stage.kind === "result" ? "/" : "/welcome"} aria-label="Close" className="flex h-11 w-11 items-center justify-center rounded-full hover:bg-surface">
           <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden><path d="M6 6l12 12M18 6 6 18" /></svg>
         </Link>
       </div>
@@ -59,6 +59,7 @@ export function OnboardingFlow({ images, stripeReady, priceLine }: { images: str
       {stage.kind === "question" && (
         <QuestionStep
           key={stage.index}
+          intro={stage.index === 0 ? `Hi ${userName}! I'm your Chef's AI. A few quick questions so I can coach you at exactly the right level.` : undefined}
           index={stage.index}
           answers={answers}
           onChange={setAnswers}
@@ -90,46 +91,15 @@ export function OnboardingFlow({ images, stripeReady, priceLine }: { images: str
               <li key={l} className="flex gap-2"><Check />{l}</li>
             ))}
           </ul>
-          <button onClick={() => setStage({ kind: "trial" })} className="mt-auto min-h-14 w-full rounded-full bg-button pt-0 text-lg font-semibold text-button-ink">I&apos;m ready</button>
+          <button onClick={() => router.push("/checkout")} className="mt-auto min-h-14 w-full rounded-full bg-button text-lg font-semibold text-button-ink">I&apos;m ready</button>
         </section>
       )}
 
-      {stage.kind === "trial" && (
-        <section className="step-in flex flex-1 flex-col">
-          <h1 className="mt-8 font-display text-[2.1rem]">Unlock your full skill path</h1>
-          <p className="mt-2 text-muted">No charge today. Cancel before the trial ends and you pay nothing.</p>
-          <p className="mt-6 text-sm font-semibold text-muted">What&apos;s included:</p>
-          <ul className="mt-3 space-y-3">
-            {[
-              "7-day free trial, cancel any time",
-              "Every recipe rewritten for your level",
-              "Hands-free cook mode with timers",
-              "Fix My Mistake when things go wrong",
-              "Plan several dishes to finish together",
-            ].map((l) => (
-              <li key={l} className="flex gap-3"><Check />{l}</li>
-            ))}
-          </ul>
-          <div className="mt-auto pt-8 text-center">
-            <Link href="/premium" className="text-sm underline">See all plans</Link>
-            <p className="mt-4 text-sm text-muted">No payment now. Cancel any time.</p>
-            {stripeReady ? (
-              <Link href="/premium" className="mt-3 flex min-h-14 w-full items-center justify-center rounded-full bg-button text-lg font-semibold text-button-ink">Start your FREE trial</Link>
-            ) : (
-              <form action={setDemoPlan.bind(null, "premium")}>
-                <button className="mt-3 min-h-14 w-full rounded-full bg-button text-lg font-semibold text-button-ink">Start your FREE trial</button>
-              </form>
-            )}
-            <p className="mt-2 text-sm text-muted">{priceLine}</p>
-            <Link href="/" className="mt-3 inline-flex min-h-11 items-center text-sm font-medium">Maybe later</Link>
-          </div>
-        </section>
-      )}
     </main>
   );
 }
 
-function QuestionStep({ index, answers, onChange, onNext }: { index: number; answers: Answers; onChange: (a: Answers) => void; onNext: () => void }) {
+function QuestionStep({ index, intro, answers, onChange, onNext }: { index: number; intro?: string; answers: Answers; onChange: (a: Answers) => void; onNext: () => void }) {
   const q = QUESTIONS[index];
   const chosen = answers[q.id] ?? [];
   const canContinue = q.multi || chosen.length > 0;
@@ -141,7 +111,13 @@ function QuestionStep({ index, answers, onChange, onNext }: { index: number; ans
 
   return (
     <section className="step-in flex flex-1 flex-col">
-      <h1 className="mt-8 font-display text-[2.1rem]">
+      {intro && (
+        <div className="mt-6 flex items-start gap-3">
+          <span className="shrink-0 overflow-hidden rounded-full bg-accent-soft"><MiniYou headOnly size={52} mood="happy" /></span>
+          <p className="rounded-2xl rounded-tl-sm bg-surface px-4 py-3 text-[15px]">{intro}</p>
+        </div>
+      )}
+      <h1 className={`${intro ? "mt-6" : "mt-8"} font-display text-[2.1rem]`}>
         {q.title[0]}<span className="text-accent">{q.title[1]}</span>{q.title[2]}
       </h1>
       {q.hint && <p className="mt-3 text-muted">{q.hint}</p>}

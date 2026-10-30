@@ -1,15 +1,17 @@
 import type { Metadata } from "next";
+import { redirect } from "next/navigation";
 import { OnboardingFlow } from "@/components/onboarding-flow";
-import { PRICES, TRIAL_DAYS, formatMoney } from "@/lib/billing/routing";
+import { getUser } from "@/lib/auth";
+import { RECIPES } from "@/lib/data/recipes";
 import { libraryRecipes } from "@/lib/library";
 import { thumb } from "@/lib/mealdb/convert";
-import { RECIPES } from "@/lib/data/recipes";
 
 export const metadata: Metadata = { title: "Find your level" };
 
-export default function OnboardingPage() {
-  const year = PRICES.usd.year;
-  const priceLine = `${TRIAL_DAYS} days free, then ${formatMoney(year)}/year (${formatMoney({ amount: Math.round(year.amount / 12), currency: "usd" })}/mo, billed annually)`;
+/** Step 2 of first run: after sign-in, the Chef's AI asks its questions; checkout follows. */
+export default async function OnboardingPage() {
+  const user = await getUser();
+  if (!user) redirect("/signin");
   const images = [...RECIPES, ...libraryRecipes().slice(0, 6)].flatMap((r) => (r.image ? [thumb(r.image)] : [])).slice(0, 5);
-  return <OnboardingFlow images={images} stripeReady={Boolean(process.env.STRIPE_US_SECRET_KEY || process.env.STRIPE_UK_SECRET_KEY)} priceLine={priceLine} />;
+  return <OnboardingFlow images={images} userName={user.name.split(" ")[0]} />;
 }
