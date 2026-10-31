@@ -1,5 +1,5 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { JOURNEY_COOKIE, isJourneyPath } from "@/lib/journey";
+import { isJourneyPath, journeyComplete } from "@/lib/journey";
 
 const REF_COOKIE = "bac-ref";
 
@@ -10,7 +10,7 @@ const REF_COOKIE = "bac-ref";
  */
 export function middleware(req: NextRequest) {
   const { pathname, searchParams } = req.nextUrl;
-  const done = req.cookies.get(JOURNEY_COOKIE)?.value === "done";
+  const done = journeyComplete(req.cookies);
 
   let res: NextResponse;
   if (done || isJourneyPath(pathname)) res = NextResponse.next();

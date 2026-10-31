@@ -4,7 +4,7 @@ import localFont from "next/font/local";
 import { PageViews } from "@/components/page-views";
 import { SiteHeader, TabBar } from "@/components/site-chrome";
 import { TimerProvider, TimerTray } from "@/components/timers";
-import { JOURNEY_COOKIE } from "@/lib/journey";
+import { journeyComplete } from "@/lib/journey";
 import "./globals.css";
 
 // Fonts ship with the app (src/app/fonts, from Google Fonts, SIL Open Font License) so they never
@@ -21,7 +21,7 @@ export const viewport: Viewport = { themeColor: "#ffffff" };
 
 export default async function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   // Before the first-run sequence is done, "/" shows the welcome page, which has no chrome.
-  const welcomeAtRoot = (await cookies()).get(JOURNEY_COOKIE)?.value !== "done";
+  const welcomeAtRoot = !journeyComplete(await cookies());
   return (
     <html lang="en">
       <body className={`${body.variable} ${display.variable} antialiased`}>

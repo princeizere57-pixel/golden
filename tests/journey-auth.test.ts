@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it } from "vitest";
 import { sendMagicLink } from "@/lib/auth";
-import { isJourneyPath } from "@/lib/journey";
+import { isJourneyPath, journeyComplete } from "@/lib/journey";
 
 describe("first-run gate", () => {
   it("always allows the sequence, API and assets", () => {
@@ -13,6 +13,21 @@ describe("first-run gate", () => {
     for (const p of ["/", "/explore", "/for-you", "/plan", "/recipes/fluffy-rice", "/you", "/welcomeback"]) {
       expect(isJourneyPath(p), p).toBe(false);
     }
+  });
+});
+
+describe("journey complete", () => {
+  const jar = (names: Record<string, string>) => ({ has: (n: string) => n in names, get: (n: string) => (n in names ? { value: names[n] } : undefined) });
+
+  it("opens the app after sign-in and the questions, even without checkout", () => {
+    expect(journeyComplete(jar({ "bac-user": "{}", "bac-skill": "beginner" }))).toBe(true);
+    expect(journeyComplete(jar({ "bac-journey": "done" }))).toBe(true);
+  });
+
+  it("keeps first-time visitors on the welcome sequence", () => {
+    expect(journeyComplete(jar({}))).toBe(false);
+    expect(journeyComplete(jar({ "bac-user": "{}" }))).toBe(false);
+    expect(journeyComplete(jar({ "bac-skill": "beginner" }))).toBe(false);
   });
 });
 
