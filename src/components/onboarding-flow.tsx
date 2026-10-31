@@ -8,7 +8,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { saveOnboarding } from "@/app/actions/viewer";
 import { MiniYou } from "@/components/mini-you";
-import { PhotoCapture } from "@/components/photo-capture";
+import { FigurePicker } from "@/components/figure-picker";
 import { track } from "@/lib/analytics";
 import { LEVEL_PITCH, QUESTIONS, prefsFromAnswers, skillFromAnswers, type Answers } from "@/lib/skill/quiz";
 
@@ -66,9 +66,9 @@ export function OnboardingFlow({ images, userName }: { images: string[]; userNam
             First, let&apos;s make <span className="text-accent">your Mini You</span>
           </h1>
           <p className="mt-2 text-muted">Your cooking buddy celebrates your wins and keeps you going when things go wrong.</p>
-          <div className="mt-5 flex flex-1 flex-col">
-            <PhotoCapture onDone={() => setStage({ kind: "question", index: 0 })} onSkip={() => setStage({ kind: "question", index: 0 })} />
-          </div>
+          <p className="mt-5 font-semibold">Who&apos;s cooking with you?</p>
+          <div className="mt-3"><FigurePicker onPicked={(figure) => track("mini_you_created", { figure })} /></div>
+          <button onClick={() => setStage({ kind: "question", index: 0 })} className="mt-auto min-h-14 w-full rounded-full bg-button text-lg font-semibold text-button-ink">Continue</button>
         </section>
       )}
 

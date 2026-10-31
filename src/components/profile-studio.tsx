@@ -1,12 +1,11 @@
 "use client";
 
-// Mini You studio: upload a photo (we read skin and hair colour from it), fine-tune the look,
-// and see XP, rank and streak.
+// Mini You studio: pick a girl or boy Mini You, fine-tune the look, and see XP, rank and streak.
 
 import { useState } from "react";
 import { FlameIcon, SteamingDishIcon, TrophyIcon } from "@/components/icons-3d";
+import { FigurePicker } from "@/components/figure-picker";
 import { MiniYou } from "@/components/mini-you";
-import { PhotoCapture } from "@/components/photo-capture";
 import { useStore } from "@/components/recipe-actions";
 import { dayKey, liveStreak, rankFor, type Mood } from "@/lib/gamify";
 import { readProgress, updateAvatar, type Avatar } from "@/lib/progress-store";
@@ -19,7 +18,6 @@ const MOODS: Mood[] = ["neutral", "happy", "proud", "focused", "sad"];
 export function ProfileStudio() {
   const p = useStore(readProgress, null);
   const [preview, setPreview] = useState<Mood | undefined>();
-  const [capturing, setCapturing] = useState(false);
   if (!p) return null;
   const rank = rankFor(p.xp);
   const streak = liveStreak(p.lastCookDay, p.streak, dayKey(new Date()));
@@ -44,45 +42,12 @@ export function ProfileStudio() {
 
       <section>
         <h2 className="text-xl font-semibold">Make Mini You look like you</h2>
-        <div className="mt-4 rounded-3xl border border-line p-4">
-          {capturing ? (
-            <PhotoCapture compact onDone={() => { setCapturing(false); setPreview("happy"); }} onSkip={() => setCapturing(false)} />
-          ) : (
-            <div className="flex items-center gap-4">
-              {p.avatar.photo ? (
-                // eslint-disable-next-line @next/next/no-img-element -- the user's own photo (data URL)
-                <img src={p.avatar.photo} alt="Your profile photo" className="h-16 w-16 rounded-full object-cover" />
-              ) : (
-                <span className="h-16 w-16 rounded-full bg-surface" />
-              )}
-              <div className="flex-1">
-                <button onClick={() => setCapturing(true)} className="min-h-12 rounded-full bg-button px-5 font-semibold text-button-ink">
-                  {p.avatar.photo ? "New photo" : "Take or upload a photo"}
-                </button>
-                <p className="mt-1 text-xs text-muted">Camera or upload. We ask for camera access only when you choose it.</p>
-              </div>
-            </div>
-          )}
-        </div>
-
-        {p.avatar.photo && (
-          <fieldset className="mt-5">
-            <legend className="text-sm font-semibold">Show Mini You as</legend>
-            <div className="mt-2 flex flex-wrap gap-2">
-              {[
-                { label: "3D cartoon", on: Boolean(p.avatar.cartoon) && p.avatar.useCartoon !== false, set: { useCartoon: true, photoFace: true }, show: Boolean(p.avatar.cartoon) },
-                { label: "My photo", on: !(p.avatar.cartoon && p.avatar.useCartoon !== false) && p.avatar.photoFace !== false, set: { useCartoon: false, photoFace: true }, show: true },
-                { label: "Drawn chef", on: p.avatar.photoFace === false && !(p.avatar.cartoon && p.avatar.useCartoon !== false), set: { useCartoon: false, photoFace: false }, show: true },
-              ].filter((o) => o.show).map((o) => (
-                <button key={o.label} onClick={() => updateAvatar(o.set)} aria-pressed={o.on} className={`min-h-11 rounded-full border px-4 text-sm ${o.on ? "border-button bg-button text-button-ink" : "border-line"}`}>{o.label}</button>
-              ))}
-            </div>
-          </fieldset>
-        )}
+        <div className="mt-4"><FigurePicker compact onPicked={() => setPreview("happy")} /></div>
 
         <Swatches label="Skin" colours={SKINS} value={p.avatar.skin} onPick={(skin) => updateAvatar({ skin })} />
         <Swatches label="Hair colour" colours={HAIRS} value={p.avatar.hair} onPick={(hair) => updateAvatar({ hair })} />
 
+        {p.avatar.figure !== "girl" && (
         <fieldset className="mt-5">
           <legend className="text-sm font-semibold">Hair</legend>
           <div className="mt-2 flex flex-wrap gap-2">
@@ -93,9 +58,10 @@ export function ProfileStudio() {
             ))}
           </div>
         </fieldset>
+        )}
 
         <div className="mt-5 flex gap-2">
-          <Toggle label="Beard" on={p.avatar.beard} onClick={() => updateAvatar({ beard: !p.avatar.beard })} />
+          {p.avatar.figure !== "girl" && <Toggle label="Beard" on={p.avatar.beard} onClick={() => updateAvatar({ beard: !p.avatar.beard })} />}
           <Toggle label="Glasses" on={p.avatar.glasses} onClick={() => updateAvatar({ glasses: !p.avatar.glasses })} />
         </div>
 
@@ -132,7 +98,7 @@ function Swatches({ label, colours, value, onPick }: { label: string; colours: s
         ))}
         {!colours.includes(value.toLowerCase()) && (
           <span className="flex h-11 items-center gap-2 rounded-full border-2 border-ink px-3 text-xs ring-2 ring-button">
-            <span className="h-6 w-6 rounded-full" style={{ background: value }} /> From photo
+            <span className="h-6 w-6 rounded-full" style={{ background: value }} /> Custom
           </span>
         )}
       </div>

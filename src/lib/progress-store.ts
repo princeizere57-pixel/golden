@@ -4,19 +4,15 @@ import { STORE_EVENT } from "@/lib/device-store";
 import { XP, dayKey, nextStreak, rankFor, type Mood } from "@/lib/gamify";
 
 export interface Avatar {
+  /** Boy or girl Mini You. The girl always has her voluminous curls. */
+  figure: "boy" | "girl";
   skin: string;
   hair: string;
+  /** Boy only. */
   hairStyle: "short" | "curly" | "long" | "none";
+  /** Boy only. */
   beard: boolean;
   glasses: boolean;
-  /** Small JPEG data URL of the profile photo (camera or upload). */
-  photo?: string;
-  /** Show the photo itself as Mini You's face (default when a photo exists). */
-  photoFace?: boolean;
-  /** Optional 3D cartoon chef generated from the photo (JPEG data URL). */
-  cartoon?: string;
-  /** Prefer the cartoon over the drawn figure when one exists. */
-  useCartoon?: boolean;
 }
 
 export type LogKind = "cooked" | "mistake" | "fixed" | "rank" | "saved" | "listed" | "quiz";
@@ -40,7 +36,12 @@ export interface Progress {
   avatar: Avatar;
 }
 
-export const DEFAULT_AVATAR: Avatar = { skin: "#e0ac83", hair: "#3b2a20", hairStyle: "short", beard: false, glasses: false };
+export const DEFAULT_AVATAR: Avatar = { figure: "boy", skin: "#e0ac83", hair: "#3b2a20", hairStyle: "short", beard: false, glasses: false };
+
+/** Picks boy or girl; the girl starts with dark brown curls and no beard. */
+export function chooseFigure(figure: Avatar["figure"]) {
+  updateAvatar(figure === "girl" ? { figure, hair: "#4a2c1d", beard: false } : { figure });
+}
 
 const KEY = "bac-progress";
 const EMPTY: Progress = { xp: 0, streak: 0, lastCookDay: null, dishes: 0, log: [], avatar: DEFAULT_AVATAR };
@@ -48,7 +49,11 @@ const EMPTY: Progress = { xp: 0, streak: 0, lastCookDay: null, dishes: 0, log: [
 export function readProgress(): Progress {
   try {
     const value = JSON.parse(localStorage.getItem(KEY) ?? "null");
-    return value ? { ...EMPTY, ...value, avatar: { ...DEFAULT_AVATAR, ...value.avatar } } : EMPTY;
+    if (!value) return EMPTY;
+    // Photos and cartoons are no longer used: drop them so the next save removes them from the device.
+    const { photo: _p, photoFace: _pf, cartoon: _c, useCartoon: _uc, ...avatar } = value.avatar ?? {};
+    void [_p, _pf, _c, _uc];
+    return { ...EMPTY, ...value, avatar: { ...DEFAULT_AVATAR, ...avatar } };
   } catch {
     return EMPTY;
   }

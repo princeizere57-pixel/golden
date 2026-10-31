@@ -29,10 +29,9 @@ Everything below goes into a file named `.env.local` in the project folder (copy
 8. In Supabase **Authentication → Sign In / Providers → Google**: switch it **on**, paste the Client ID and Client secret, save.
 9. When you're ready for the public, press **Publish app** on Google's consent screen so anyone with a Google account can sign in.
 
-## 2. Gemini: AI rewrites and the 3D cartoon Mini You
+## 2. Gemini: AI rewrites (optional)
 1. Create a key at https://aistudio.google.com/apikey → `GEMINI_API_KEY`.
-2. The 3D cartoon uses `GEMINI_IMAGE_MODEL` (default `gemini-2.5-flash-image`). Image generation may need billing enabled on the Google project.
-3. The selfie is sent to Gemini **only** when the user taps "Make my 3D cartoon"; the app says so on that screen.
+2. Without a key, Golden uses its built-in skill engine; Mini You never needs Gemini.
 
 ## 3. Whop: payments (embedded checkout)
 

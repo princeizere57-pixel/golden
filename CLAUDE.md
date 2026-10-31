@@ -104,7 +104,7 @@ The interface follows the editorial pattern seen in Mob's app, re-done with our 
 
 These set The Chef's AI apart; keep them original (no third-party mascots, icon sets or artwork).
 - **3D icons** (`src/components/icons-3d.tsx`): hand-built SVG with gradients, highlight and contact shadow. Tabs: Discover = lens, For you = steaming dish, Shopping list = yellow notepad with black pen, Saved = blue sack with a plastic clip. Log icons: hat, lifebuoy, trophy, flame.
-- **Mini You** (`mini-you.tsx`): a cartoon chef (white hat and double-breasted jacket) built from the user's avatar. Uploading a photo (`profile-studio.tsx`) samples skin and hair colour on-device; hair style, beard and glasses are adjustable. Moods: neutral, focused (cook mode), happy (dish finished, mistake fixed), proud (rank-up), sad (Fix My Mistake opened). Moods fade after 6 h.
+- **Mini You** (`mini-you.tsx`): a drawn cartoon chef, girl or boy, white hat and jacket. Moods: neutral, focused (cook mode), happy (dish finished, mistake fixed), proud (rank-up), sad (Fix My Mistake opened). Moods fade after 6 h.
 - **Game layer** (`src/lib/gamify.ts`, pure and tested; state in `progress-store.ts`, on-device): XP (cooked +50, fixed +15), chef ranks Kitchen Porter → Head Chef, day streaks. Cook mode's "I made it!" shows a celebration with XP, streak and rank progress.
 - **Kitchen log** (`kitchen-log.tsx`): activity cards (3D icon, **Title** · detail, photo, green tick) with Mini You commenting on top. Shown on For you and `/you`.
 
@@ -118,7 +118,7 @@ These set The Chef's AI apart; keep them original (no third-party mascots, icon 
 
 - **Name:** Golden (large wordmark via `<Brand className="text-…">`); "Gold" uses `.text-gold` (metallic gradient), "en" stays ink.
 - **Gate:** `src/middleware.ts` + `src/lib/journey.ts`. Until the journey is done, `/` itself serves the welcome page (rewrite, address stays the bare site URL) and every page except `/welcome`, `/signin`, `/auth/*`, `/onboarding`, `/checkout`, `/api/*` redirects to `/welcome` until the `bac-journey` cookie is set, which `markJourneyDone()` only does for a signed-in user with a level (checkout: trial started or "Not now"). Sign out clears it.
-- **Mini You photo:** onboarding starts with `PhotoCapture` (recommendations first; camera permission requested only on tap; upload fallback). Modes: drawn chef, photo face (`PhotoFace` with mood badge) or 3D cartoon (`src/lib/ai/cartoon.ts`, Gemini image model, explicit opt-in because it sends the photo to Google).
+- **Mini You:** drawn SVG chef, girl or boy (`FigurePicker` in onboarding and `/you`). The girl has voluminous curls, lashes, a rosy grin and gold earrings. No photos, camera or AI image generation.
 - **Email sign-in:** Supabase magic link (`sendMagicLink`) returning to `/auth/callback`.
 - **Analytics:** `src/lib/analytics.ts` (PostHog capture API, no-op without `NEXT_PUBLIC_POSTHOG_KEY`, honours Do Not Track) + `PageViews`.
 - **Tabs:** Discover, For you, Plan a meal (pan on fire), Shopping list, Saved.
