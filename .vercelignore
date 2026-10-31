@@ -1,0 +1,6 @@
+# Never upload local secrets or build output; Vercel gets settings as environment variables.
+.env*
+!.env.example
+node_modules
+.next
+src/data/mealdb-recipes.json
