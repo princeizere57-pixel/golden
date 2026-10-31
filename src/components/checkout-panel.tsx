@@ -91,7 +91,7 @@ export function CheckoutPanel({ user, level, premium, offers, payLaterReady, dra
           {firstName}, your <span className="text-accent">{level}</span> path is ready
         </h1>
       </div>
-      <p className="mt-3 text-muted">Save two or three dinners from the bin and Golden has paid for its year. Here&apos;s what you unlock:</p>
+      <p className="mt-3 text-muted">Every dinner you rescue from the bin is money back in your pocket. Here&apos;s what you unlock:</p>
       <ul className="mt-3 space-y-2">
         {benefits.map((b) => (
           <li key={b} className="flex gap-2"><span aria-hidden className="text-basil">✓</span>{b}</li>
@@ -129,8 +129,12 @@ export function CheckoutPanel({ user, level, premium, offers, payLaterReady, dra
       <fieldset className="mt-7 space-y-3" disabled={Boolean(session)}>
         <legend className="mb-1 text-lg font-semibold">Choose your plan</legend>
         {offers.filter((o) => o.kind === "core").map((o) => <OfferCard key={o.id} offer={o} checked={chosen === o.id} onChange={() => setChosen(o.id)} />)}
-        <p className="pt-3 text-lg font-semibold">Or go further</p>
-        {offers.filter((o) => o.kind === "upsell").map((o) => <OfferCard key={o.id} offer={o} checked={chosen === o.id} onChange={() => setChosen(o.id)} />)}
+        {offers.some((o) => o.kind === "upsell") && (
+          <>
+            <p className="pt-3 text-lg font-semibold">Or go further</p>
+            {offers.filter((o) => o.kind === "upsell").map((o) => <OfferCard key={o.id} offer={o} checked={chosen === o.id} onChange={() => setChosen(o.id)} />)}
+          </>
+        )}
       </fieldset>
 
       {payLaterReady && !session && (

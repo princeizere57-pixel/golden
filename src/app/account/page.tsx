@@ -17,11 +17,11 @@ export default async function AccountPage({ searchParams }: { searchParams: Prom
   return (
     <main className="mx-auto max-w-2xl px-4 py-12 pb-24">
       <h1 className="text-3xl font-bold tracking-tight">Account</h1>
-      {trial === "started" && <p role="status" className="mt-4 rounded-2xl bg-basil p-4 text-white">Your 7-day free trial has started. Happy cooking!</p>}
+      {trial === "started" && <p role="status" className="mt-4 rounded-2xl bg-basil p-4 text-white">Your free trial has started. Happy cooking!</p>}
       <dl className="mt-8 divide-y divide-line rounded-3xl border border-line bg-surface">
         {user && <Row label={user.provider === "google" ? "Signed in with Google" : "Signed in (demo)"} value={`${user.name} · ${user.email}`} action={null} />}
         <Row label="Skill level" value={SKILL_LABEL[viewer.skill]} action={<Link className="underline" href="/onboarding">Retake quiz</Link>} />
-        <Row label="Plan" value={viewer.plan === "premium" ? "Premium" : "Free"} action={viewer.plan === "free" ? <Link className="underline" href="/premium">Upgrade</Link> : null} />
+        <Row label="Plan" value={viewer.plan === "premium" ? "Premium" : "Free"} action={viewer.plan === "free" ? <Link className="underline" href="/checkout">Upgrade</Link> : null} />
       </dl>
       {viewer.plan === "premium" && (
         <section className="mt-8">

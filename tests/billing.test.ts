@@ -44,7 +44,7 @@ describe("Stripe", () => {
     expect(verifyStripeSignature(payload, "garbage", secret)).toBe(false);
   });
 
-  it("creates a checkout session with a 7-day trial on the routed entity's key", async () => {
+  it("creates a checkout session with the free trial on the routed entity's key", async () => {
     process.env.STRIPE_UK_SECRET_KEY = "sk_test_uk";
     let seen: { url: string; init: RequestInit } | undefined;
     const fakeFetch = (async (url: string, init: RequestInit) => {
@@ -57,7 +57,7 @@ describe("Stripe", () => {
     );
     expect(url).toBe("https://checkout.stripe.test/s");
     const body = new URLSearchParams(String(seen!.init.body));
-    expect(body.get("subscription_data[trial_period_days]")).toBe("7");
+    expect(body.get("subscription_data[trial_period_days]")).toBe("3");
     expect(body.get("mode")).toBe("subscription");
     expect((seen!.init.headers as Record<string, string>).Authorization).toBe("Bearer sk_test_uk");
     delete process.env.STRIPE_UK_SECRET_KEY;

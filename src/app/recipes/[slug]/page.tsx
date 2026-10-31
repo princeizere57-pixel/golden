@@ -52,7 +52,7 @@ export default async function RecipePage({ params }: Props) {
           <AddToListButton recipe={recipe} />
         </div>
         {locked ? (
-          <Link href="/premium" className="mt-6 flex min-h-14 items-center justify-center rounded-full bg-button font-semibold text-button-ink">Unlock with a free trial</Link>
+          <Link href="/checkout" className="mt-6 flex min-h-14 items-center justify-center rounded-full bg-button font-semibold text-button-ink">Unlock with a free trial</Link>
         ) : (
           <Link href={`/recipes/${recipe.slug}/cook`} className="mt-6 flex min-h-14 items-center justify-center rounded-full bg-button font-semibold text-button-ink">Start cook mode</Link>
         )}
@@ -61,7 +61,7 @@ export default async function RecipePage({ params }: Props) {
         {locked ? (
           <div className="rounded-3xl border border-line bg-surface p-8">
             <h2 className="text-xl font-bold">This one&apos;s a Premium recipe</h2>
-            <p className="mt-2 text-muted">Start a 7-day free trial to see the method at your level and cook it hands-free.</p>
+            <p className="mt-2 text-muted">Start a free trial to see the method at your level and cook it hands-free.</p>
           </div>
         ) : (
           <SkillSteps recipe={recipe} initialSkill={viewer.skill} />

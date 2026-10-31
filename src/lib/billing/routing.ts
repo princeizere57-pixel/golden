@@ -26,7 +26,7 @@ export const PRICES: Record<Currency, Record<Interval, Price>> = {
   },
 };
 
-export const TRIAL_DAYS = 7;
+export const TRIAL_DAYS = 3;
 
 export interface EntityConfig {
   entity: BillingEntity;

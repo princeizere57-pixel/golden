@@ -1,8 +1,8 @@
 // Golden's offers: one source of truth for the checkout page, Whop metadata and the webhook.
-// Core prices come from our plan ($45/year with a 7-day trial, $7.99/month). Upsell prices are
-// starting points: change them here and in the matching Whop plan together.
+// Prices and trials match the plans configured in Whop (WHOP_PLAN_YEAR, WHOP_PLAN_MONTH):
+// keep the two in sync when either changes.
 
-export type OfferId = "year" | "month" | "lifetime" | "gift";
+export type OfferId = "year" | "month";
 
 export interface Offer {
   id: OfferId;
@@ -32,12 +32,12 @@ const CORE_FEATURES = [
 export const OFFERS: Offer[] = [
   {
     id: "year",
-    name: "Golden Yearly",
-    tagline: "Pays for itself in 2–3 rescued dinners",
+    name: "Golden Year",
+    tagline: "Just $3.76 a month, billed once a year",
     planType: "renewal",
-    price: 45,
+    price: 45.09,
     billingPeriodDays: 365,
-    trialDays: 7,
+    trialDays: 3,
     planEnv: "WHOP_PLAN_YEAR",
     kind: "core",
     badge: "Best value",
@@ -50,37 +50,18 @@ export const OFFERS: Offer[] = [
     planType: "renewal",
     price: 7.99,
     billingPeriodDays: 30,
-    trialDays: 7,
+    trialDays: 3,
     planEnv: "WHOP_PLAN_MONTH",
     kind: "core",
     includes: CORE_FEATURES,
   },
-  {
-    id: "lifetime",
-    name: "Golden for Life",
-    tagline: "One payment, every future update, never renew",
-    planType: "one_time",
-    price: 99,
-    trialDays: 0,
-    planEnv: "WHOP_PLAN_LIFETIME",
-    kind: "upsell",
-    badge: "Upgrade",
-    includes: ["Everything in Yearly, forever", "Priority access to new Chef-level masterclasses", "Founding Member badge in the community"],
-  },
-  {
-    id: "gift",
-    name: "Gift a Year",
-    tagline: "Bring a friend along: they get a full year of Golden",
-    planType: "one_time",
-    price: 45,
-    trialDays: 0,
-    planEnv: "WHOP_PLAN_GIFT",
-    kind: "upsell",
-    includes: ["A year of Golden for someone you cook with", "Cook together: share progress in the community"],
-  },
 ];
 
 export const offerById = (id: string): Offer | undefined => OFFERS.find((o) => o.id === id);
+
+/** Shortest free trial across offers, for headlines like "3 days free". */
+export const TRIAL_HEADLINE_DAYS = Math.min(...OFFERS.map((o) => o.trialDays));
+export const LOWEST_PRICE = Math.min(...OFFERS.map((o) => o.price));
 
 export function priceLine(o: Offer): string {
   const money = `$${o.price % 1 ? o.price.toFixed(2) : o.price}`;

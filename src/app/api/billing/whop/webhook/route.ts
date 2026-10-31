@@ -48,7 +48,7 @@ async function fulfillPayment(payment: WhopPayment) {
   console.log(`[PAYMENT SUCCEEDED] ${payment.id} for order ${orderId} (${offer?.id ?? "unknown offer"})`);
   await markOrderPaid(orderId, payment.id);
   // One-time offers have no membership renewals to follow, so grant access from the payment.
-  if (offer?.planType === "one_time" && offer.id === "lifetime" && userId) {
+  if (offer?.planType === "one_time" && userId) {
     await saveSubscription({ provider: "whop", externalId: payment.id, status: "active", userId, whopUserId: payment.user_id ?? undefined });
   }
 }

@@ -6,6 +6,7 @@ import { PantryRail } from "@/components/pantry";
 import { recipeHref } from "@/lib/links";
 import { ReviewPrompt } from "@/components/recipe-actions";
 import { XpChip } from "@/components/xp-chip";
+import { LOWEST_PRICE, TRIAL_HEADLINE_DAYS } from "@/lib/billing/offers";
 import { RECIPES } from "@/lib/data/recipes";
 import { byCategory, dishOfTheDay, forLevel, libraryRecipes } from "@/lib/library";
 import { totalMinutes } from "@/lib/links";
@@ -80,7 +81,7 @@ export default async function Discover({ searchParams }: { searchParams: Promise
         <SearchBar />
       </div>
 
-      {trial === "started" && <p role="status" className="mx-4 mt-2 rounded-2xl bg-basil p-4 text-white">Your 7-day free trial has started. Happy cooking!</p>}
+      {trial === "started" && <p role="status" className="mx-4 mt-2 rounded-2xl bg-basil p-4 text-white">Your free trial has started. Happy cooking!</p>}
 
       <p className="mt-2 px-4 text-sm text-muted">
         Cooking at <strong className="text-ink">{LEVEL[viewer.skill]}</strong> level. Every recipe is rewritten for you.
@@ -123,8 +124,8 @@ export default async function Discover({ searchParams }: { searchParams: Promise
       {viewer.plan === "free" && (
         <section className="mx-4 mt-12 rounded-3xl bg-accent-soft p-7">
           <h2 className="font-display text-2xl">Cook anything, at your level</h2>
-          <p className="mt-2 max-w-xl text-muted">Every recipe rewritten for you, hands-free cook mode and Fix My Mistake. 7 days free, then $45 a year.</p>
-          <Link href="/premium" className="mt-4 inline-flex min-h-12 items-center rounded-full bg-button px-6 font-semibold text-button-ink">Start free trial</Link>
+          <p className="mt-2 max-w-xl text-muted">Every recipe rewritten for you, hands-free cook mode and Fix My Mistake. {TRIAL_HEADLINE_DAYS} days free, then $45.09 a year or ${LOWEST_PRICE} a month.</p>
+          <Link href="/checkout" className="mt-4 inline-flex min-h-12 items-center rounded-full bg-button px-6 font-semibold text-button-ink">Start free trial</Link>
         </section>
       )}
 

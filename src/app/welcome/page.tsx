@@ -3,6 +3,7 @@ import Link from "next/link";
 import { HatIcon, LifebuoyIcon, PanFireIcon, SteamingDishIcon, TrophyIcon } from "@/components/icons-3d";
 import { Brand } from "@/components/site-chrome";
 import { RECIPES } from "@/lib/data/recipes";
+import { TRIAL_HEADLINE_DAYS } from "@/lib/billing/offers";
 import { GIVEAWAY } from "@/lib/giveaway";
 import { libraryRecipes } from "@/lib/library";
 import { thumb } from "@/lib/mealdb/convert";
@@ -15,7 +16,7 @@ const VALUE = [
     Icon: LifebuoyIcon,
     problem: "Ruined food is wasted money",
     detail: "An overcooked steak, a split sauce or burnt garlic and dinner goes in the bin.",
-    solution: "Fix My Mistake rescues it in real time, with exact amounts for your pan. Save two or three dinners and Golden has paid for its year.",
+    solution: "Fix My Mistake rescues it in real time, with exact amounts for your pan. Every rescued dinner is money back in your pocket.",
   },
   {
     Icon: PanFireIcon,
@@ -120,7 +121,7 @@ export default function WelcomePage() {
 
       <section className="bg-bg px-6 pb-8" aria-labelledby="pillars">
         <h2 id="pillars" className="font-display text-[1.9rem]">
-          $45 a year that <span className="text-accent">gives back more</span>
+          What Golden <span className="text-accent">gives back</span>
         </h2>
         <p className="mt-2 text-muted">Our estimate: $100–$300 a year back in rescued ingredients, plus calmer cooking.</p>
         <div className="mt-4 grid gap-3">
@@ -141,7 +142,7 @@ export default function WelcomePage() {
       </section>
 
       <div className="fixed inset-x-0 bottom-0 z-20 mx-auto max-w-lg rounded-t-3xl bg-bg px-6 pb-6 pt-4 shadow-[0_-8px_30px_rgba(0,0,0,0.08)]">
-        <Link href="/signin" className="flex min-h-14 w-full items-center justify-center rounded-full bg-button text-lg font-semibold text-button-ink">Start leveling up: 7 days free</Link>
+        <Link href="/signin" className="flex min-h-14 w-full items-center justify-center rounded-full bg-button text-lg font-semibold text-button-ink">Start leveling up: {TRIAL_HEADLINE_DAYS} days free</Link>
         <Link href="/signin" className="mt-2 flex min-h-11 w-full items-center justify-center text-base font-medium">I already have an account</Link>
       </div>
     </main>
