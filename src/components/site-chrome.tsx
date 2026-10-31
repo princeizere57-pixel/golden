@@ -31,9 +31,9 @@ export function Brand({ className = "text-3xl" }: { className?: string }) {
 /** Tab pages carry their own big title on phones, so the header only shows there on wide screens. */
 const TAB_PAGES = /^\/(for-you|shopping|saved|plan)?$/;
 
-export function SiteHeader() {
+export function SiteHeader({ welcomeAtRoot = false }: { welcomeAtRoot?: boolean }) {
   const path = usePathname();
-  if (FULL_SCREEN.test(path)) return null;
+  if (FULL_SCREEN.test(path) || (welcomeAtRoot && path === "/")) return null;
   return (
     <header className={`sticky top-0 z-30 border-b border-line bg-bg/90 backdrop-blur ${TAB_PAGES.test(path) ? "hidden lg:block" : ""}`}>
       <nav className="mx-auto flex max-w-6xl items-center gap-4 px-4 py-3" aria-label="Main">
@@ -46,10 +46,10 @@ export function SiteHeader() {
 }
 
 /** Floating pill tab bar, on every screen size. */
-export function TabBar() {
+export function TabBar({ welcomeAtRoot = false }: { welcomeAtRoot?: boolean }) {
   const path = usePathname();
   const toBuy = useShopping().filter((i) => !i.done).length;
-  if (FULL_SCREEN.test(path) || COOK.test(path)) return null;
+  if (FULL_SCREEN.test(path) || COOK.test(path) || (welcomeAtRoot && path === "/")) return null;
   return (
     <nav aria-label="Tabs" className="fixed inset-x-3 bottom-3 z-30 mx-auto max-w-lg rounded-[1.75rem] border border-line bg-bg/90 shadow-[0_8px_30px_rgba(0,0,0,0.12)] backdrop-blur-md mb-[env(safe-area-inset-bottom)]">
       <ul className="grid grid-cols-5">

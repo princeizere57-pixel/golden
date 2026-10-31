@@ -40,7 +40,9 @@ export async function markJourneyDone(): Promise<boolean> {
 
 /** "Not now" on checkout: finish the sequence and open the app. */
 export async function finishJourney() {
-  redirect((await markJourneyDone()) ? "/" : "/welcome");
+  // If the earlier steps weren't really finished, "/" simply shows the welcome page again.
+  await markJourneyDone();
+  redirect("/");
 }
 
 /** Demo-only plan switch, used when Stripe isn't configured. Real plans come from webhooks. */

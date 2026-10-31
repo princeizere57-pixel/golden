@@ -40,5 +40,5 @@ export async function demoSignIn(form: FormData) {
 export async function signOut() {
   const jar = await cookies();
   for (const name of [USER_COOKIE, SKILL_COOKIE, PREFS_COOKIE, PLAN_COOKIE, JOURNEY_COOKIE]) jar.delete(name);
-  redirect("/welcome");
+  redirect("/");
 }

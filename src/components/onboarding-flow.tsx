@@ -55,7 +55,7 @@ export function OnboardingFlow({ images, userName }: { images: string[]; userNam
         <div className="h-2 flex-1 overflow-hidden rounded-full bg-accent-soft" role="progressbar" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(progress)} aria-label="Progress">
           <div className="h-full rounded-full bg-accent transition-[width] duration-500" style={{ width: `${progress}%` }} />
         </div>
-        <Link href={stage.kind === "result" ? "/" : "/welcome"} aria-label="Close" className="flex h-11 w-11 items-center justify-center rounded-full hover:bg-surface">
+        <Link href="/" aria-label="Close" className="flex h-11 w-11 items-center justify-center rounded-full hover:bg-surface">
           <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden><path d="M6 6l12 12M18 6 6 18" /></svg>
         </Link>
       </div>

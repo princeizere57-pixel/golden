@@ -1,8 +1,10 @@
 import type { Metadata, Viewport } from "next";
+import { cookies } from "next/headers";
 import { Archivo, Geist } from "next/font/google";
 import { PageViews } from "@/components/page-views";
 import { SiteHeader, TabBar } from "@/components/site-chrome";
 import { TimerProvider, TimerTray } from "@/components/timers";
+import { JOURNEY_COOKIE } from "@/lib/journey";
 import "./globals.css";
 
 const body = Geist({ variable: "--font-body", subsets: ["latin"] });
@@ -15,14 +17,16 @@ export const metadata: Metadata = {
 
 export const viewport: Viewport = { themeColor: "#ffffff" };
 
-export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+export default async function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+  // Before the first-run sequence is done, "/" shows the welcome page, which has no chrome.
+  const welcomeAtRoot = (await cookies()).get(JOURNEY_COOKIE)?.value !== "done";
   return (
     <html lang="en">
       <body className={`${body.variable} ${display.variable} antialiased`}>
         <TimerProvider>
-          <SiteHeader />
+          <SiteHeader welcomeAtRoot={welcomeAtRoot} />
           <div className="pb-24">{children}</div>
-          <TabBar />
+          <TabBar welcomeAtRoot={welcomeAtRoot} />
           <TimerTray />
           <PageViews />
         </TimerProvider>
