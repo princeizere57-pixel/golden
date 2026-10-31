@@ -20,10 +20,10 @@ const TABS = [
   { href: "/saved", label: "Saved", Icon: SackIcon },
 ];
 
-export function Brand({ className = "" }: { className?: string }) {
+export function Brand({ className = "text-3xl" }: { className?: string }) {
   return (
-    <span className={`font-display text-xl ${className}`}>
-      The Chef&apos;s <span className="text-gold">Gold</span>en
+    <span className={`font-display leading-none ${className}`}>
+      <span className="text-gold">Gold</span>en
     </span>
   );
 }

@@ -9,7 +9,7 @@ const body = Geist({ variable: "--font-body", subsets: ["latin"] });
 const display = Archivo({ variable: "--font-display", subsets: ["latin"], axes: ["wdth"] });
 
 export const metadata: Metadata = {
-  title: { default: "The Chef's Golden", template: "%s · The Chef's Golden" },
+  title: { default: "Golden", template: "%s · Golden" },
   description: "Recipes and techniques adapted to your skill level, a hands-free cook mode, and fixes for when things go wrong.",
 };
 

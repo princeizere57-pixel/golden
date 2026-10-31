@@ -160,7 +160,7 @@ export function ReviewPrompt() {
           </>
         ) : (
           <>
-            <h2 id="review-title" className="text-2xl font-semibold">Enjoying The Chef&apos;s Golden?</h2>
+            <h2 id="review-title" className="text-2xl font-semibold">Enjoying Golden?</h2>
             <p className="mt-2 text-muted">How is it helping your cooking? It takes two seconds.</p>
             <div className="mt-5 flex justify-center gap-2" role="radiogroup" aria-label="Rating">
               {[1, 2, 3, 4, 5].map((n) => (

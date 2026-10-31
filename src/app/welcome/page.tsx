@@ -14,7 +14,7 @@ export default function WelcomePage() {
   return (
     <main className="relative mx-auto flex min-h-dvh max-w-lg flex-col overflow-hidden bg-surface">
       <div className="px-6 pt-10 text-center">
-        <Brand className="text-base" />
+        <Brand className="text-5xl" />
         <h1 className="mt-6 font-display text-[2.6rem]">
           Learn to cook <span className="text-accent">at your level</span>, one dish at a time
         </h1>

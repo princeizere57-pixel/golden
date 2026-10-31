@@ -1,4 +1,4 @@
-// Filled, 3D-style icons drawn for The Chef's Golden: soft gradients, a highlight and a contact
+// Filled, 3D-style icons drawn for Golden: soft gradients, a highlight and a contact
 // shadow give each one depth. Pure SVG, no assets. Ids are prefixed to stay unique per icon.
 
 type Props = { size?: number; className?: string };

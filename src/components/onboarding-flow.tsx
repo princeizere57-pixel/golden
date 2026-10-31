@@ -75,7 +75,7 @@ export function OnboardingFlow({ images, userName }: { images: string[]; userNam
       {stage.kind === "question" && (
         <QuestionStep
           key={stage.index}
-          intro={stage.index === 0 ? `Hi ${userName}! I'm The Chef's Golden, your cooking coach. A few quick questions so I can coach you at exactly the right level.` : undefined}
+          intro={stage.index === 0 ? `Hi ${userName}! I'm Golden, your cooking coach. A few quick questions so I can coach you at exactly the right level.` : undefined}
           index={stage.index}
           answers={answers}
           onChange={setAnswers}

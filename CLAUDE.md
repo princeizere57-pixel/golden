@@ -116,7 +116,7 @@ These set The Chef's AI apart; keep them original (no third-party mascots, icon 
 
 ## 10. Brand, gate, Mini You camera, email sign-in, analytics
 
-- **Name:** The Chef's Golden; "Gold" uses `.text-gold` (metallic gradient), "en" stays ink.
+- **Name:** Golden (large wordmark via `<Brand className="text-…">`); "Gold" uses `.text-gold` (metallic gradient), "en" stays ink.
 - **Gate:** `src/middleware.ts` + `src/lib/journey.ts`. Every page except `/welcome`, `/signin`, `/auth/*`, `/onboarding`, `/checkout`, `/api/*` redirects to `/welcome` until the `bac-journey` cookie is set, which `markJourneyDone()` only does for a signed-in user with a level (checkout: trial started or "Not now"). Sign out clears it.
 - **Mini You photo:** onboarding starts with `PhotoCapture` (recommendations first; camera permission requested only on tap; upload fallback). Modes: drawn chef, photo face (`PhotoFace` with mood badge) or 3D cartoon (`src/lib/ai/cartoon.ts`, Gemini image model, explicit opt-in because it sends the photo to Google).
 - **Email sign-in:** Supabase magic link (`sendMagicLink`) returning to `/auth/callback`.
