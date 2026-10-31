@@ -22,7 +22,7 @@ const TABS = [
 
 export function Brand({ className = "text-3xl" }: { className?: string }) {
   return (
-    <span className={`font-display leading-none ${className}`}>
+    <span className={`font-sans font-bold leading-none tracking-tight ${className}`}>
       <span className="text-gold">Gold</span>en
     </span>
   );

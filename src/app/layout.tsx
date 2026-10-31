@@ -1,14 +1,16 @@
 import type { Metadata, Viewport } from "next";
 import { cookies } from "next/headers";
-import { Archivo, Geist } from "next/font/google";
+import localFont from "next/font/local";
 import { PageViews } from "@/components/page-views";
 import { SiteHeader, TabBar } from "@/components/site-chrome";
 import { TimerProvider, TimerTray } from "@/components/timers";
 import { JOURNEY_COOKIE } from "@/lib/journey";
 import "./globals.css";
 
-const body = Geist({ variable: "--font-body", subsets: ["latin"] });
-const display = Archivo({ variable: "--font-display", subsets: ["latin"], axes: ["wdth"] });
+// Fonts ship with the app (src/app/fonts, from Google Fonts, SIL Open Font License) so they never
+// depend on reaching Google at startup. Both are variable fonts: Geist (weight), Archivo (weight + width).
+const body = localFont({ src: "./fonts/Geist-latin-var.woff2", variable: "--font-body", weight: "100 900", display: "swap" });
+const display = localFont({ src: "./fonts/Archivo-latin-var.woff2", variable: "--font-display", weight: "100 900", display: "swap" });
 
 export const metadata: Metadata = {
   title: { default: "Golden", template: "%s · Golden" },
