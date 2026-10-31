@@ -9,8 +9,14 @@ export interface Avatar {
   hairStyle: "short" | "curly" | "long" | "none";
   beard: boolean;
   glasses: boolean;
-  /** Small JPEG data URL of the uploaded profile photo. */
+  /** Small JPEG data URL of the profile photo (camera or upload). */
   photo?: string;
+  /** Show the photo itself as Mini You's face (default when a photo exists). */
+  photoFace?: boolean;
+  /** Optional 3D cartoon chef generated from the photo (JPEG data URL). */
+  cartoon?: string;
+  /** Prefer the cartoon over the drawn figure when one exists. */
+  useCartoon?: boolean;
 }
 
 export type LogKind = "cooked" | "mistake" | "fixed" | "rank" | "saved" | "listed" | "quiz";

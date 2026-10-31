@@ -8,26 +8,29 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { saveOnboarding } from "@/app/actions/viewer";
 import { MiniYou } from "@/components/mini-you";
+import { PhotoCapture } from "@/components/photo-capture";
+import { track } from "@/lib/analytics";
 import { LEVEL_PITCH, QUESTIONS, prefsFromAnswers, skillFromAnswers, type Answers } from "@/lib/skill/quiz";
 
 const BUILD_LINES = ["Reading your answers…", "Matching techniques to your level…", "Picking your first recipes…", "Setting up cook mode…"];
 
-type Stage = { kind: "question"; index: number } | { kind: "building" } | { kind: "result" };
+type Stage = { kind: "mini" } | { kind: "question"; index: number } | { kind: "building" } | { kind: "result" };
 
 export function OnboardingFlow({ images, userName }: { images: string[]; userName: string }) {
   const router = useRouter();
-  const [stage, setStage] = useState<Stage>({ kind: "question", index: 0 });
+  const [stage, setStage] = useState<Stage>({ kind: "mini" });
   const [answers, setAnswers] = useState<Answers>({});
   const [line, setLine] = useState(0);
   const { skill } = skillFromAnswers(answers);
 
-  const steps = QUESTIONS.length + 2;
-  const position = stage.kind === "question" ? stage.index : stage.kind === "building" ? QUESTIONS.length : QUESTIONS.length + 1;
+  const steps = QUESTIONS.length + 3;
+  const position = stage.kind === "mini" ? 0 : stage.kind === "question" ? stage.index + 1 : stage.kind === "building" ? QUESTIONS.length + 1 : QUESTIONS.length + 2;
   const progress = ((position + 1) / steps) * 100;
 
   useEffect(() => {
     if (stage.kind !== "building") return;
     saveOnboarding({ skill, ...prefsFromAnswers(answers) });
+    track("onboarding_completed", { skill });
     const tick = setInterval(() => setLine((l) => Math.min(BUILD_LINES.length - 1, l + 1)), 700);
     const done = setTimeout(() => setStage({ kind: "result" }), 2900);
     return () => {
@@ -38,7 +41,8 @@ export function OnboardingFlow({ images, userName }: { images: string[]; userNam
 
   function back() {
     if (stage.kind === "question" && stage.index > 0) setStage({ kind: "question", index: stage.index - 1 });
-    else if (stage.kind === "question") router.push("/welcome");
+    else if (stage.kind === "question") setStage({ kind: "mini" });
+    else if (stage.kind === "mini") router.push("/signin");
     else setStage({ kind: "question", index: QUESTIONS.length - 1 });
   }
 
@@ -56,10 +60,22 @@ export function OnboardingFlow({ images, userName }: { images: string[]; userNam
         </Link>
       </div>
 
+      {stage.kind === "mini" && (
+        <section className="step-in flex flex-1 flex-col">
+          <h1 className="mt-6 font-display text-[2.1rem]">
+            First, let&apos;s make <span className="text-accent">your Mini You</span>
+          </h1>
+          <p className="mt-2 text-muted">Your cooking buddy celebrates your wins and keeps you going when things go wrong.</p>
+          <div className="mt-5 flex flex-1 flex-col">
+            <PhotoCapture onDone={() => setStage({ kind: "question", index: 0 })} onSkip={() => setStage({ kind: "question", index: 0 })} />
+          </div>
+        </section>
+      )}
+
       {stage.kind === "question" && (
         <QuestionStep
           key={stage.index}
-          intro={stage.index === 0 ? `Hi ${userName}! I'm your Chef's AI. A few quick questions so I can coach you at exactly the right level.` : undefined}
+          intro={stage.index === 0 ? `Hi ${userName}! I'm The Chef's Golden, your cooking coach. A few quick questions so I can coach you at exactly the right level.` : undefined}
           index={stage.index}
           answers={answers}
           onChange={setAnswers}

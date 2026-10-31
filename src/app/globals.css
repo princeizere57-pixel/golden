@@ -157,3 +157,21 @@ body {
     scroll-behavior: auto !important;
   }
 }
+
+/* Metallic gold for the "Gold" in The Chef's Golden. */
+.text-gold {
+  background: linear-gradient(135deg, #a6761d 0%, #f6d77a 35%, #d4a32a 55%, #fbe7a1 72%, #b07d1a 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+@keyframes flicker {
+  0%, 100% { transform: scaleY(1); opacity: 1; }
+  50% { transform: scaleY(1.08) translateY(-0.4px); opacity: 0.88; }
+}
+.flicker {
+  animation: flicker 0.9s ease-in-out infinite;
+  transform-origin: 50% 100%;
+  transform-box: fill-box;
+}

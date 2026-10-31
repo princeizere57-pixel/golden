@@ -1,4 +1,4 @@
-// Filled, 3D-style icons drawn for The Chef's AI: soft gradients, a highlight and a contact
+// Filled, 3D-style icons drawn for The Chef's Golden: soft gradients, a highlight and a contact
 // shadow give each one depth. Pure SVG, no assets. Ids are prefixed to stay unique per icon.
 
 type Props = { size?: number; className?: string };
@@ -151,6 +151,32 @@ export function FlameIcon({ size = 28, className }: Props) {
       <Shadow rx={7} />
       <path d="M16 3c1 4.5 7.5 7 7.5 14a7.5 7.5 0 0 1-15 0c0-4 2.4-5.6 3.4-8.4.6 2.2 1.6 3.2 2.6 3.6C14 8.6 15 5.6 16 3z" fill="url(#flame-outer)" />
       <path d="M16 13.5c.6 2.4 3.6 3.6 3.6 7a3.6 3.6 0 0 1-7.2 0c0-2.2 1.4-3 2-4.6.6.8 1 1 1.6 1.2-.2-1.2 0-2.4 0-3.6z" fill="#ffe066" />
+    </svg>
+  );
+}
+
+/** Plan a meal: a frying pan with flames rising under it. */
+export function PanFireIcon({ size = 28, className }: Props) {
+  return (
+    <svg viewBox="0 0 32 32" width={size} height={size} className={className} aria-hidden>
+      <defs>
+        <linearGradient id="pan-body" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="#868e96" /><stop offset="1" stopColor="#212529" /></linearGradient>
+        <linearGradient id="pan-handle" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stopColor="#5c4033" /><stop offset="1" stopColor="#2b1d16" /></linearGradient>
+        <linearGradient id="pan-flame" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stopColor="#e8590c" /><stop offset="0.6" stopColor="#ff922b" /><stop offset="1" stopColor="#ffd43b" /></linearGradient>
+      </defs>
+      <ellipse cx="15" cy="30" rx="10" ry="1.4" fill="#000" opacity="0.12" />
+      <g className="flicker">
+        <path d="M8 29c-1.6-2.8.8-4.2.3-7 1.8 1.6 2.6 3 2 4.6.8-.8 1.2-2 1-3.4 1.6 1.6 2 3.6.8 5.8z" fill="url(#pan-flame)" />
+        <path d="M13.6 29c-2-3.4 1-5.6.2-9.2 2.4 2.2 3.4 4.2 2.6 6.2 1-1 1.5-2.6 1.2-4.2 2 2.2 2.4 4.8.8 7.2z" fill="url(#pan-flame)" />
+        <path d="M19.6 29c-1.4-2.6.6-3.8.2-6.4 1.6 1.4 2.4 2.8 1.8 4.2.7-.7 1-1.8.8-3 1.5 1.5 1.8 3.4.7 5.2z" fill="url(#pan-flame)" />
+      </g>
+      <path d="M3 13.5h22a11 5.5 0 0 1-22 0z" fill="url(#pan-body)" />
+      <ellipse cx="14" cy="13.5" rx="11" ry="3" fill="#495057" />
+      <ellipse cx="14" cy="13.2" rx="9" ry="2.2" fill="#343a40" />
+      <circle cx="11" cy="12.8" r="1.6" fill="#ffd43b" />
+      <circle cx="10.6" cy="12.5" r="0.7" fill="#fff" />
+      <rect x="24" y="11.6" width="7.5" height="2.6" rx="1.3" transform="rotate(-12 24 13)" fill="url(#pan-handle)" />
+      <path d="M6 16.5c2 1.6 5 2.4 8 2.4" stroke="#fff" strokeOpacity="0.35" strokeWidth="1.2" strokeLinecap="round" fill="none" />
     </svg>
   );
 }

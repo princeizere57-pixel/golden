@@ -27,6 +27,24 @@ export async function getUser(): Promise<User | null> {
   }
 }
 
+/** Emails a one-tap sign-in link (Supabase magic link) that returns to /auth/callback. */
+export async function sendMagicLink(email: string, origin: string, fetchImpl: typeof fetch = fetch): Promise<boolean> {
+  const url = supabaseUrl();
+  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  if (!url || !key || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email) || !/^https?:\/\/[^/]+$/.test(origin)) return false;
+  try {
+    const res = await fetchImpl(`${url}/auth/v1/otp?redirect_to=${encodeURIComponent(`${origin}/auth/callback`)}`, {
+      method: "POST",
+      headers: { apikey: key, "Content-Type": "application/json" },
+      body: JSON.stringify({ email, create_user: true }),
+      signal: AbortSignal.timeout(15_000),
+    });
+    return res.ok;
+  } catch {
+    return false;
+  }
+}
+
 /** Asks Supabase who an access token belongs to. Returns null for invalid or expired tokens. */
 export async function verifySupabaseToken(accessToken: string, fetchImpl: typeof fetch = fetch): Promise<User | null> {
   const url = supabaseUrl();

@@ -3,7 +3,8 @@
 import { randomUUID } from "node:crypto";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import { USER_COOKIE, supabaseConfigured, verifySupabaseToken, type User } from "@/lib/auth";
+import { USER_COOKIE, sendMagicLink, supabaseConfigured, verifySupabaseToken, type User } from "@/lib/auth";
+import { JOURNEY_COOKIE } from "@/lib/journey";
 import { PLAN_COOKIE, PREFS_COOKIE, SKILL_COOKIE } from "@/lib/viewer";
 
 const MONTH = 60 * 60 * 24 * 30;
@@ -20,6 +21,13 @@ export async function completeGoogleSignIn(accessToken: string): Promise<{ ok: b
   return { ok: true };
 }
 
+/** Email sign-in: Supabase sends a magic link; the callback signs the user in. */
+export async function requestEmailLink(email: string, origin: string): Promise<{ ok: boolean; error?: string }> {
+  if (!supabaseConfigured()) return { ok: false, error: "Email sign-in needs Supabase keys." };
+  const ok = await sendMagicLink(email.trim().toLowerCase(), origin);
+  return ok ? { ok: true } : { ok: false, error: "We couldn't send the email. Check the address and try again in a minute." };
+}
+
 /** Development stand-in for Google when Supabase isn't configured. */
 export async function demoSignIn(form: FormData) {
   if (supabaseConfigured()) throw new Error("Demo sign-in is disabled when Supabase is configured");
@@ -31,6 +39,6 @@ export async function demoSignIn(form: FormData) {
 
 export async function signOut() {
   const jar = await cookies();
-  for (const name of [USER_COOKIE, SKILL_COOKIE, PREFS_COOKIE, PLAN_COOKIE]) jar.delete(name);
+  for (const name of [USER_COOKIE, SKILL_COOKIE, PREFS_COOKIE, PLAN_COOKIE, JOURNEY_COOKIE]) jar.delete(name);
   redirect("/welcome");
 }

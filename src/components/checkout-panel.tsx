@@ -2,8 +2,9 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { setDemoPlan } from "@/app/actions/viewer";
+import { finishJourney, markJourneyDone, setDemoPlan } from "@/app/actions/viewer";
 import { MiniYou } from "@/components/mini-you";
+import { track } from "@/lib/analytics";
 
 interface Props {
   user: { id: string; name: string; email: string };
@@ -34,7 +35,9 @@ export function CheckoutPanel({ user, level, premium, whop, stripeReady, country
         <MiniYou size={150} mood="proud" />
         <h1 className="mt-4 font-display text-[2rem]">You&apos;re on <span className="text-accent">Premium</span></h1>
         <p className="mt-2 text-muted">Everything is unlocked for {user.email}. Manage your plan in Account.</p>
-        <Link href="/" className="mt-8 flex min-h-14 w-full items-center justify-center rounded-full bg-button text-lg font-semibold text-button-ink">Back to my recipes</Link>
+        <form action={finishJourney} className="mt-8 w-full">
+          <button className="flex min-h-14 w-full items-center justify-center rounded-full bg-button text-lg font-semibold text-button-ink">Back to my recipes</button>
+        </form>
         <Link href="/account" className="mt-2 flex min-h-12 items-center justify-center font-medium">Account</Link>
       </main>
     );
@@ -44,6 +47,8 @@ export function CheckoutPanel({ user, level, premium, whop, stripeReady, country
     setBusy(true);
     setError(null);
     try {
+      track("checkout_started", { provider: "stripe", interval });
+      await markJourneyDone();
       const res = await fetch("/api/billing/stripe/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -91,7 +96,7 @@ export function CheckoutPanel({ user, level, premium, whop, stripeReady, country
       <div className="mt-auto pt-8">
         {whopUrl ? (
           <>
-            <a href={whopUrl} className="flex min-h-14 w-full items-center justify-center rounded-full bg-button text-lg font-semibold text-button-ink">Start my free trial</a>
+            <a href={whopUrl} onClick={async (e) => { e.preventDefault(); track("checkout_started", { provider: "whop", interval }); await markJourneyDone(); window.location.assign(whopUrl); }} className="flex min-h-14 w-full items-center justify-center rounded-full bg-button text-lg font-semibold text-button-ink">Start my free trial</a>
             <p className="mt-2 text-center text-xs text-muted">Secure checkout by Whop. Use {user.email} so we can match your membership.</p>
           </>
         ) : stripeReady ? (
@@ -105,7 +110,9 @@ export function CheckoutPanel({ user, level, premium, whop, stripeReady, country
           </form>
         )}
         {error && <p role="alert" className="mt-2 text-center text-sm text-tomato">{error}</p>}
-        <Link href="/" className="mt-3 flex min-h-12 items-center justify-center font-medium">Not now, take me to my recipes</Link>
+        <form action={finishJourney}>
+          <button className="mt-3 flex min-h-12 w-full items-center justify-center font-medium">Not now, take me to my recipes</button>
+        </form>
       </div>
     </main>
   );

@@ -8,7 +8,7 @@ import { thumb } from "@/lib/mealdb/convert";
 
 export const metadata: Metadata = { title: "Find your level" };
 
-/** Step 2 of first run: after sign-in, the Chef's AI asks its questions; checkout follows. */
+/** Step 2 of first run: after sign-in, The Chef's Golden asks its questions; checkout follows. */
 export default async function OnboardingPage() {
   const user = await getUser();
   if (!user) redirect("/signin");

@@ -8,6 +8,7 @@ import { useCallback, useEffect, useState } from "react";
 import { FixMyMistake } from "@/components/fix-my-mistake";
 import { FlameIcon, TrophyIcon } from "@/components/icons-3d";
 import { MiniYou } from "@/components/mini-you";
+import { track } from "@/lib/analytics";
 import { rankFor } from "@/lib/gamify";
 import { readProgress, recordCooked, setMood } from "@/lib/progress-store";
 import { SkillSlider } from "@/components/skill-steps";
@@ -57,6 +58,7 @@ export function CookView({ recipe, initialSkill, exitHref = `/recipes/${recipe.s
 
   function finish() {
     setDone(recordCooked(recipe.title, recipe.image));
+    track("dish_cooked", { recipe: recipe.slug });
   }
 
   const go = useCallback((delta: number) => setIndex((i) => Math.min(steps.length - 1, Math.max(0, i + delta))), [steps.length]);

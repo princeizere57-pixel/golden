@@ -67,8 +67,10 @@ function Face({ mood }: { mood: Mood }) {
 }
 
 export function MiniYouFigure({ avatar = DEFAULT_AVATAR, mood = "neutral", size = 120, className = "", headOnly = false }: { avatar?: Avatar; mood?: Mood; size?: number; className?: string; headOnly?: boolean }) {
-  const { skin, hair, hairStyle, beard, glasses } = avatar;
+  const { skin, hair, hairStyle, beard, glasses, photo, photoFace, cartoon, useCartoon } = avatar;
+  const usePhoto = Boolean(photo) && photoFace !== false;
   const uid = useId().replace(/:/g, "");
+  if (cartoon && useCartoon !== false && !headOnly) return <CartoonFigure image={cartoon} mood={mood} size={size} className={className} />;
   const anim = mood === "happy" || mood === "proud" ? "mini-bounce" : mood === "sad" ? "mini-droop" : "";
   return (
     <svg viewBox={headOnly ? "22 14 76 86" : "0 0 120 150"} width={size} height={headOnly ? size : size * 1.25} className={`${anim} ${className}`} role="img" aria-label={`Mini You, feeling ${mood}`}>
@@ -89,9 +91,13 @@ export function MiniYouFigure({ avatar = DEFAULT_AVATAR, mood = "neutral", size 
           <rect x="54" y="98" width="12" height="12" rx="4" fill={darken(skin, 0.08)} />
         </g>
       )}
-      {hairStyle === "long" && <path d="M33 70c-2 16 0 30 6 36h42c6-6 8-20 6-36z" fill={hair} />}
+      {!usePhoto && hairStyle === "long" && <path d="M33 70c-2 16 0 30 6 36h42c6-6 8-20 6-36z" fill={hair} />}
       <circle cx="35" cy="76" r="5" fill={darken(skin, 0.1)} />
       <circle cx="85" cy="76" r="5" fill={darken(skin, 0.1)} />
+      {usePhoto ? (
+        <PhotoFace uid={uid} photo={photo!} mood={mood} />
+      ) : (
+        <>
       <circle cx="60" cy="74" r="26" fill={`url(#skin${uid})`} />
       {hairStyle === "short" && <path d="M35 66c1-8 6-12 10-13l-3 12zM85 66c-1-8-6-12-10-13l3 12z" fill={hair} />}
       {hairStyle === "curly" && (
@@ -107,6 +113,8 @@ export function MiniYouFigure({ avatar = DEFAULT_AVATAR, mood = "neutral", size 
           <circle cx="52" cy="74" r="6.5" /><circle cx="68" cy="74" r="6.5" /><path d="M58.5 74h3M45.5 73l-9-2M74.5 73l9-2" />
         </g>
       )}
+        </>
+      )}
       {/* Chef's hat. */}
       <g>
         <circle cx="44" cy="38" r="11" fill={`url(#white${uid})`} />
@@ -117,6 +125,43 @@ export function MiniYouFigure({ avatar = DEFAULT_AVATAR, mood = "neutral", size 
         <path d="M52 26a9 9 0 0 1 9-5" stroke="#fff" strokeWidth="2.5" strokeLinecap="round" fill="none" />
       </g>
     </svg>
+  );
+}
+
+const MOOD_EMOJI: Record<Mood, string> = { neutral: "🙂", happy: "😄", proud: "🤩", sad: "😢", focused: "🧐" };
+
+/** The user's own photo as Mini You's face, with a mood badge so emotions still show. */
+function PhotoFace({ uid, photo, mood }: { uid: string; photo: string; mood: Mood }) {
+  return (
+    <g>
+      <defs>
+        <clipPath id={`face${uid}`}><circle cx="60" cy="74" r="26" /></clipPath>
+      </defs>
+      <image href={photo} x="34" y="48" width="52" height="52" preserveAspectRatio="xMidYMid slice" clipPath={`url(#face${uid})`} />
+      <circle cx="60" cy="74" r="26" fill="none" stroke="#fff" strokeWidth="2.5" />
+      {(mood === "happy" || mood === "proud") && (
+        <path d="M90 50l2 4 4 1-4 2-1 4-2-4-4-1 4-2zM28 62l1.4 2.8 2.8.7-2.8 1.4-.7 2.8-1.4-2.8-2.8-.7 2.8-1.4z" fill="#fcc419" />
+      )}
+      {mood === "sad" && <path d="M41 80q2.5 5 0 7.5a2.5 2.5 0 0 1-3.6-2.5q1-2.5 3.6-5z" fill="#74c0fc" className="mini-tear" />}
+      <circle cx="84" cy="94" r="10" fill="#fff" stroke="#e9ecef" />
+      <text x="84" y="98.5" textAnchor="middle" fontSize="13">{MOOD_EMOJI[mood]}</text>
+    </g>
+  );
+}
+
+/** The 3D cartoon version of you, with the same mood badge and animations as the drawn chef. */
+function CartoonFigure({ image, mood, size, className }: { image: string; mood: Mood; size: number; className: string }) {
+  const anim = mood === "happy" || mood === "proud" ? "mini-bounce" : mood === "sad" ? "mini-droop" : "";
+  return (
+    <span className={`relative inline-block ${anim} ${className}`} style={{ width: size, height: size * 1.25 }} role="img" aria-label={`Mini You, feeling ${mood}`}>
+      {/* eslint-disable-next-line @next/next/no-img-element -- generated avatar stored on the device */}
+      <img src={image} alt="" className="h-full w-full object-contain mix-blend-multiply" />
+      <span className="absolute bottom-[8%] right-[6%] flex h-[22%] w-[22%] items-center justify-center rounded-full border border-line bg-white shadow" style={{ fontSize: size * 0.13 }} aria-hidden>
+        {MOOD_EMOJI[mood]}
+      </span>
+      {mood === "sad" && <span aria-hidden className="mini-tear absolute left-[38%] top-[26%] h-[5%] w-[3%] rounded-full bg-[#74c0fc]" />}
+      {(mood === "happy" || mood === "proud") && <span aria-hidden className="absolute right-[12%] top-[6%]" style={{ fontSize: size * 0.12 }}>✨</span>}
+    </span>
   );
 }
 

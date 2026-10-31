@@ -113,3 +113,13 @@ These set The Chef's AI apart; keep them original (no third-party mascots, icon 
 - `/checkout` sends buyers to Whop's hosted checkout when `WHOP_CHECKOUT_URL_YEAR` / `WHOP_CHECKOUT_URL_MONTH` are set (links copied from the Whop dashboard); otherwise Stripe if configured, otherwise a labelled demo. Signed-in Premium users see a "You're on Premium" screen instead of a redirect.
 - `/api/billing/whop/webhook` verifies Whop's Standard Webhooks signature (`webhook-id`, `webhook-timestamp`, `webhook-signature: v1,<base64>`; HMAC-SHA256 over `id.timestamp.body`; 5-minute window) with `WHOP_WEBHOOK_SECRET`, then maps the membership status (`src/lib/billing/whop.ts`) into `subscriptions` with `provider = 'whop'` and `whop_user_id` (migration 0003).
 - Linking a Whop membership to an app account uses `metadata.app_user_id` when present; otherwise match on `whop_user_id`. Static checkout links can't carry our user ID, so confirm the account match before granting Premium in production.
+
+## 10. Brand, gate, Mini You camera, email sign-in, analytics
+
+- **Name:** The Chef's Golden; "Gold" uses `.text-gold` (metallic gradient), "en" stays ink.
+- **Gate:** `src/middleware.ts` + `src/lib/journey.ts`. Every page except `/welcome`, `/signin`, `/auth/*`, `/onboarding`, `/checkout`, `/api/*` redirects to `/welcome` until the `bac-journey` cookie is set, which `markJourneyDone()` only does for a signed-in user with a level (checkout: trial started or "Not now"). Sign out clears it.
+- **Mini You photo:** onboarding starts with `PhotoCapture` (recommendations first; camera permission requested only on tap; upload fallback). Modes: drawn chef, photo face (`PhotoFace` with mood badge) or 3D cartoon (`src/lib/ai/cartoon.ts`, Gemini image model, explicit opt-in because it sends the photo to Google).
+- **Email sign-in:** Supabase magic link (`sendMagicLink`) returning to `/auth/callback`.
+- **Analytics:** `src/lib/analytics.ts` (PostHog capture API, no-op without `NEXT_PUBLIC_POSTHOG_KEY`, honours Do Not Track) + `PageViews`.
+- **Tabs:** Discover, For you, Plan a meal (pan on fire), Shopping list, Saved.
+- Setup steps for Supabase, Google, Gemini, Whop, analytics and Vercel: `docs/SETUP.md`.

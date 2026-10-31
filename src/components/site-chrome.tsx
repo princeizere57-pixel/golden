@@ -5,7 +5,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LensIcon, NotepadIcon, SackIcon, SteamingDishIcon } from "@/components/icons-3d";
+import { LensIcon, NotepadIcon, PanFireIcon, SackIcon, SteamingDishIcon } from "@/components/icons-3d";
 import { MiniYou } from "@/components/mini-you";
 import { useShopping } from "@/components/recipe-actions";
 
@@ -15,6 +15,7 @@ const COOK = /\/cook$/;
 const TABS = [
   { href: "/", label: "Discover", Icon: LensIcon },
   { href: "/for-you", label: "For you", Icon: SteamingDishIcon },
+  { href: "/plan", label: "Plan a meal", Icon: PanFireIcon },
   { href: "/shopping", label: "Shopping list", Icon: NotepadIcon },
   { href: "/saved", label: "Saved", Icon: SackIcon },
 ];
@@ -22,13 +23,13 @@ const TABS = [
 export function Brand({ className = "" }: { className?: string }) {
   return (
     <span className={`font-display text-xl ${className}`}>
-      The Chef&apos;s <span className="text-accent">AI</span>
+      The Chef&apos;s <span className="text-gold">Gold</span>en
     </span>
   );
 }
 
 /** Tab pages carry their own big title on phones, so the header only shows there on wide screens. */
-const TAB_PAGES = /^\/(for-you|shopping|saved)?$/;
+const TAB_PAGES = /^\/(for-you|shopping|saved|plan)?$/;
 
 export function SiteHeader() {
   const path = usePathname();
@@ -51,7 +52,7 @@ export function TabBar() {
   if (FULL_SCREEN.test(path) || COOK.test(path)) return null;
   return (
     <nav aria-label="Tabs" className="fixed inset-x-3 bottom-3 z-30 mx-auto max-w-lg rounded-[1.75rem] border border-line bg-bg/90 shadow-[0_8px_30px_rgba(0,0,0,0.12)] backdrop-blur-md mb-[env(safe-area-inset-bottom)]">
-      <ul className="grid grid-cols-4">
+      <ul className="grid grid-cols-5">
         {TABS.map((tab) => {
           const active = tab.href === "/" ? path === "/" || path.startsWith("/explore") : path.startsWith(tab.href);
           const badge = tab.href === "/shopping" && toBuy > 0 ? toBuy : 0;

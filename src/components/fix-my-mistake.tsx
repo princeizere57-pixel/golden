@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import { fixMistakeAction } from "@/app/actions/adapt";
 import { MiniYou } from "@/components/mini-you";
+import { track } from "@/lib/analytics";
 import { XP } from "@/lib/gamify";
 import { recordFixed, recordMistake } from "@/lib/progress-store";
 import { MISTAKES, fixMistake, type Fix, type MistakeId } from "@/lib/recovery/fixes";
@@ -26,6 +27,7 @@ export function FixMyMistake({ slug, dish, defaultVolumeMl }: { slug: string; di
 
   function worked() {
     if (fix) recordFixed(fix.headline);
+    track("mistake_fixed", { mistake });
     setRescued(true);
   }
 
