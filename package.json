@@ -9,7 +9,8 @@
     "lint": "eslint",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
-    "data:mealdb": "node scripts/seed-mealdb.mts"
+    "data:mealdb": "node scripts/seed-mealdb.mts",
+    "prebuild": "node scripts/seed-mealdb.mts || node -e \"console.log('Recipe cache skipped; pages use the live TheMealDB API')\""
   },
   "dependencies": {
     "@whop/elements": "1.9.0",
@@ -31,5 +32,8 @@
     "tailwindcss": "^4",
     "typescript": "^5",
     "vitest": "^3.2.4"
+  },
+  "engines": {
+    "node": ">=22.18"
   }
 }
