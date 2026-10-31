@@ -37,6 +37,13 @@ export async function demoSignIn(form: FormData) {
   redirect("/onboarding");
 }
 
+/** "Use a different account" on the sign-in page: forget this account and stay on sign-in. */
+export async function switchAccount() {
+  const jar = await cookies();
+  for (const name of [USER_COOKIE, SKILL_COOKIE, PREFS_COOKIE, PLAN_COOKIE, JOURNEY_COOKIE]) jar.delete(name);
+  redirect("/signin");
+}
+
 export async function signOut() {
   const jar = await cookies();
   for (const name of [USER_COOKIE, SKILL_COOKIE, PREFS_COOKIE, PLAN_COOKIE, JOURNEY_COOKIE]) jar.delete(name);
