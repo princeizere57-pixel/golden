@@ -9,7 +9,7 @@ import { orchestrate } from "@/lib/timing/orchestrate";
 import type { Recipe } from "@/lib/types";
 
 export function MealPlanner({ recipes }: { recipes: Pick<Recipe, "slug" | "title" | "blocks">[] }) {
-  const [chosen, setChosen] = useState<string[]>(recipes.slice(0, 2).map((r) => r.slug));
+  const [chosen, setChosen] = useState<string[]>(recipes.map((r) => r.slug));
   const [startedAt, setStartedAt] = useState<number | null>(null);
   const [now, setNow] = useState(0);
   const alerted = useRef(new Set<string>());

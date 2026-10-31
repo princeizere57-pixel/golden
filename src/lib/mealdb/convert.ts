@@ -56,6 +56,22 @@ export function mealSteps(instructions: string | null | undefined): string[] {
     .filter((line) => line.length > 2 && !/^step\s*\d+$/i.test(line));
 }
 
+/** The plain ingredient names, in the same order as mealIngredients. */
+export function ingredientNames(meal: Meal): string[] {
+  const names: string[] = [];
+  for (let i = 1; i <= 20; i++) {
+    const name = meal[`strIngredient${i}`]?.trim();
+    if (name) names.push(name);
+  }
+  return names;
+}
+
+/** "https://www.youtube.com/watch?v=abc123" → "abc123". */
+export function youtubeId(url: string | null | undefined): string | undefined {
+  const m = url?.match(/(?:v=|youtu\.be\/|embed\/)([A-Za-z0-9_-]{11})/);
+  return m?.[1];
+}
+
 export function mealIngredients(meal: Meal): string[] {
   const lines: string[] = [];
   for (let i = 1; i <= 20; i++) {
@@ -73,6 +89,7 @@ export const thumb = (url: string) => `${url.replace(/\/(preview|small|medium|la
 export function mealToRecipe(meal: Meal): Recipe | null {
   const steps = mealSteps(meal.strInstructions);
   const ingredients = mealIngredients(meal);
+  const names = ingredientNames(meal);
   if (!meal.strMeal || !steps.length || !ingredients.length) return null;
   const category = meal.strCategory?.trim() || "Miscellaneous";
   return {
@@ -85,7 +102,8 @@ export function mealToRecipe(meal: Meal): Recipe | null {
     serves: 4,
     colourway: colourwayFor(meal.strMeal),
     premium: false,
-    ingredients: ingredients.map(parseIngredient),
+    ingredients: ingredients.map((line, i) => ({ ...parseIngredient(line, i), icon: names[i] })),
+    youtube: youtubeId(meal.strYoutube),
     blocks: steps.map(stepToBlock),
     image: meal.strMealThumb?.startsWith("https://") ? meal.strMealThumb : undefined,
     video: undefined,

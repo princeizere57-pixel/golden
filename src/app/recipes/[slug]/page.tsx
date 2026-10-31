@@ -54,7 +54,10 @@ export default async function RecipePage({ params }: Props) {
         {locked ? (
           <Link href="/checkout" className="mt-6 flex min-h-14 items-center justify-center rounded-full bg-button font-semibold text-button-ink">Unlock with a free trial</Link>
         ) : (
-          <Link href={`/recipes/${recipe.slug}/cook`} className="mt-6 flex min-h-14 items-center justify-center rounded-full bg-button font-semibold text-button-ink">Start cook mode</Link>
+          <>
+            <Link href={`/plan?dish=${recipe.slug}`} className="mt-6 flex min-h-14 items-center justify-center rounded-full border-2 border-button font-semibold">Plan &amp; cook this</Link>
+            <Link href={`/recipes/${recipe.slug}/cook`} className="mt-3 flex min-h-14 items-center justify-center rounded-full bg-button font-semibold text-button-ink">Start cook mode</Link>
+          </>
         )}
       </aside>
       <section aria-label="Method">

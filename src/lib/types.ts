@@ -17,6 +17,8 @@ export interface Ingredient {
   prep?: string;
   /** Original line, kept for imported recipes whose quantities couldn't be parsed exactly. */
   raw?: string;
+  /** Ingredient name as TheMealDB knows it, for its ingredient picture. */
+  icon?: string;
 }
 
 /** Attention a block needs: active blocks need the cook's hands; passive ones run on their own. */
@@ -71,6 +73,8 @@ export interface Recipe {
   colourway: Colourway;
   /** Optional muted loop for the discovery card. */
   video?: string;
+  /** YouTube video ID of a cooking video for this recipe, when one exists. */
+  youtube?: string;
   /** Poster/still image. */
   image?: string;
   /** Who the image belongs to, when it isn't ours (shown as "Photo: name"). */

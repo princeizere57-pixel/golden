@@ -29,3 +29,11 @@ describe("fixMistake", () => {
     expect(fixMistake("sauce-too-thick", { volumeMl: 0, severity: 1 }).amounts[0].amount).toBe("5 ml");
   });
 });
+
+describe("new mistakes", () => {
+  it("rescues dry meat, burnt bottoms and bland dishes with amounts", () => {
+    expect(fixMistake("overcooked-meat", { volumeMl: 500 }).amounts[0]).toEqual({ what: "Warm stock or pan juices", amount: "120 ml" });
+    expect(fixMistake("burnt-bottom", { volumeMl: 500, severity: 1 }).headline).toMatch(/clean pan/);
+    expect(fixMistake("too-bland", { volumeMl: 1000, severity: 2 }).amounts[0]).toEqual({ what: "Salt", amount: "1 tsp" });
+  });
+});

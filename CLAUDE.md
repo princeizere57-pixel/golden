@@ -123,3 +123,10 @@ These set The Chef's AI apart; keep them original (no third-party mascots, icon 
 - **Analytics:** `src/lib/analytics.ts` (PostHog capture API, no-op without `NEXT_PUBLIC_POSTHOG_KEY`, honours Do Not Track) + `PageViews`.
 - **Tabs:** Discover, For you, Plan a meal (pan on fire), Shopping list, Saved.
 - Setup steps for Supabase, Google, Gemini, Whop, analytics and Vercel: `docs/SETUP.md`.
+
+## 11. Plan a meal (recipe-first flow)
+
+- `/plan` (bottom tab): pick a dish rated for the cook's level from seeds + the TheMealDB library; `/plan?dish=a&dish=b` (up to 4) shows, in order: video (YouTube, privacy-enhanced, loads on tap), ingredient pills with TheMealDB ingredient pictures (`src/lib/ingredient-icons.ts`, pantry items marked), the orchestrated timeline with chimes/vibration (`MealPlanner`), "Cooking more than one dish?" add-ons, the skill-adapted method per dish, then the inline `FixPanel`.
+- `FixPanel`: optional photo (shrunk to 512 px in the browser, never stored); with `GEMINI_API_KEY`, `src/lib/ai/diagnose.ts` asks Gemini to pick the closest problem from `MISTAKES`; the fix itself always comes from `src/lib/recovery/fixes.ts`. Without a key the cook taps what they see.
+- Recipe and meal pages have "Plan & cook this".
+- Gate: the app opens once signed in + a level (`journeyComplete`), so leaving checkout another way no longer locks people out.

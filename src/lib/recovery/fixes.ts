@@ -9,7 +9,10 @@ export type MistakeId =
   | "too-spicy"
   | "sauce-too-thin"
   | "sauce-too-thick"
-  | "overcooked-pasta";
+  | "overcooked-pasta"
+  | "overcooked-meat"
+  | "burnt-bottom"
+  | "too-bland";
 
 export interface Mistake {
   id: MistakeId;
@@ -24,6 +27,9 @@ export const MISTAKES: Mistake[] = [
   { id: "sauce-too-thin", label: "Sauce too thin" },
   { id: "sauce-too-thick", label: "Sauce too thick" },
   { id: "overcooked-pasta", label: "Pasta overcooked" },
+  { id: "overcooked-meat", label: "Meat dry or overcooked" },
+  { id: "burnt-bottom", label: "Burnt on the bottom" },
+  { id: "too-bland", label: "Tastes bland" },
 ];
 
 export interface FixInput {
@@ -150,5 +156,47 @@ export function fixMistake(mistake: MistakeId, input: FixInput): Fix {
         ],
         amounts: [{ what: "Oil", amount: tbsp(Math.max(1, volume / 400)) }],
       };
+    case "overcooked-meat": {
+      // Rehydrate in a little seasoned liquid: about 60 ml per 250 g of meat (volume ≈ weight here).
+      const liquid = (volume / 250) * 60;
+      return {
+        mistake,
+        headline: "Slice it thin and rest it in warm sauce",
+        steps: [
+          "Slice the meat thinly across the grain: shorter fibres feel more tender.",
+          "Warm stock or the pan juices with a knob of butter; don't let it boil.",
+          "Let the slices sit in the warm liquid for 2–3 minutes, then serve with the sauce spooned over.",
+        ],
+        amounts: [{ what: "Warm stock or pan juices", amount: ml(liquid) }, { what: "Butter", amount: tbsp(Math.max(1, volume / 500)) }],
+      };
+    }
+    case "burnt-bottom":
+      return {
+        mistake,
+        headline: "Don't stir: move the good part to a clean pan",
+        steps: [
+          "Take the pan off the heat straight away and don't scrape the bottom.",
+          "Gently spoon the unburnt top into a clean pan, leaving the scorched layer behind.",
+          "Taste it: if it's smoky, add a splash of milk or cream and a pinch of sugar to soften the bitterness.",
+        ],
+        amounts: [{ what: "Milk or cream (if it tastes smoky)", amount: tbsp(Math.max(1, (volume / 250) * severity)) }],
+      };
+    case "too-bland": {
+      // Season in rounds: about ⅛ tsp salt per 250 ml, plus a little acid to wake it up.
+      const salt = Math.round((volume / 250) * 0.125 * severity * 100) / 100;
+      return {
+        mistake,
+        headline: "Season in small rounds: salt, then acid",
+        steps: [
+          "Add the salt, stir, and taste after 30 seconds.",
+          "Add a squeeze of lemon or a dash of vinegar to brighten it.",
+          "Still flat? Add something savoury: a little soy sauce, parmesan or stock powder.",
+        ],
+        amounts: [
+          { what: "Salt", amount: `${salt} tsp` },
+          { what: "Lemon juice or vinegar", amount: `${Math.round((volume / 500) * severity * 10) / 10} tsp` },
+        ],
+      };
+    }
   }
 }

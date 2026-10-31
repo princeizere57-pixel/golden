@@ -84,3 +84,17 @@ describe("TheMealDB conversion", () => {
     expect(thumb("https://x/a.jpg/medium")).toBe("https://x/a.jpg/medium");
   });
 });
+
+describe("ingredient pictures and videos", () => {
+  it("keeps TheMealDB's ingredient names and the YouTube ID", async () => {
+    const { mealToRecipe, youtubeId } = await import("@/lib/mealdb/convert");
+    const { ingredientIconUrl } = await import("@/lib/ingredient-icons");
+    const r = mealToRecipe({ ...meal, strYoutube: "https://www.youtube.com/watch?v=1IszT_guI08" })!;
+    expect(r.ingredients[2].icon).toBe("Chopped Tomatoes");
+    expect(r.youtube).toBe("1IszT_guI08");
+    expect(youtubeId("https://youtu.be/1IszT_guI08")).toBe("1IszT_guI08");
+    expect(youtubeId("")).toBeUndefined();
+    expect(ingredientIconUrl(r.ingredients[2])).toBe("https://www.themealdb.com/images/ingredients/Chopped%20Tomatoes-Small.png");
+    expect(ingredientIconUrl({ name: "chopped garlic" })).toBe("https://www.themealdb.com/images/ingredients/Garlic-Small.png");
+  });
+});
