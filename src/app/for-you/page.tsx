@@ -48,7 +48,10 @@ export default async function ForYouPage() {
 
       <div className="mt-6 px-4">
         <KitchenLog limit={4} />
-        <Link href="/you" className="mt-3 inline-block text-sm font-medium underline">Full kitchen log and Mini You</Link>
+        <div className="mt-3 flex flex-wrap gap-x-5 gap-y-2 text-sm font-medium">
+          <Link href="/you" className="underline">Full kitchen log and Mini You</Link>
+          <Link href="/community" className="underline">Apprentice Meets Master community</Link>
+        </div>
       </div>
 
       {PATH[viewer.skill].map((step, i) => {

@@ -2,6 +2,8 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { CollectionCard, DishOfTheDay, PhotoCard, QuickTile, Rail, SearchBar } from "@/components/discover";
 import { MiniYou } from "@/components/mini-you";
+import { PantryRail } from "@/components/pantry";
+import { recipeHref } from "@/lib/links";
 import { ReviewPrompt } from "@/components/recipe-actions";
 import { XpChip } from "@/components/xp-chip";
 import { RECIPES } from "@/lib/data/recipes";
@@ -97,6 +99,8 @@ export default async function Discover({ searchParams }: { searchParams: Promise
       <Rail heading="New recipes">
         {RECIPES.map((r) => <PhotoCard key={r.slug} recipe={r} badge="NEW" />)}
       </Rail>
+
+      <PantryRail recipes={library.slice(0, 200).map((r) => ({ slug: r.slug, href: recipeHref(r), title: r.title, image: r.image ? thumb(r.image) : undefined, ingredients: r.ingredients.map((i) => i.name) }))} />
 
       {picks.length > 0 && <Rail heading="Right at your level" href="/for-you">{picks.map((r) => <PhotoCard key={r.slug} recipe={r} />)}</Rail>}
 

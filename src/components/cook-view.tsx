@@ -142,7 +142,8 @@ function Celebration({ recipe, result }: { recipe: Recipe; result: { xp: number;
         </div>
         <p className="mt-1 text-sm text-[#6d6761]">{rank.next ? `${rank.toNext} XP to ${rank.next}` : "Top rank. Respect, chef."}</p>
         <Link href="/" className="mt-6 flex min-h-14 items-center justify-center rounded-full bg-[#facc15] text-lg font-semibold">Back to Discover</Link>
-        <Link href="/you" className="mt-2 flex min-h-12 items-center justify-center font-medium">See Mini You</Link>
+        <Link href="/community" className="mt-2 flex min-h-12 items-center justify-center font-medium">Share it with the community</Link>
+        <Link href="/you" className="flex min-h-12 items-center justify-center font-medium">See Mini You</Link>
       </div>
     </div>
   );

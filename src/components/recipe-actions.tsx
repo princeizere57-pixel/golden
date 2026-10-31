@@ -3,7 +3,8 @@
 // Save, add-to-shopping-list and share buttons, the review prompt, and the store hook.
 
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
-import { STORE_EVENT, addToShopping, isSaved, listSaved, listShopping, toggleSaved } from "@/lib/device-store";
+import { STORE_EVENT, addToShopping, isSaved, listPantry, listSaved, listShopping, toggleSaved } from "@/lib/device-store";
+import { covers } from "@/lib/pantry";
 import { formatDuration, recipeHref, totalMinutes } from "@/lib/links";
 import { recordActivity } from "@/lib/progress-store";
 import type { Recipe } from "@/lib/types";
@@ -63,7 +64,7 @@ export function AddToListButton({ recipe }: { recipe: Recipe }) {
   }
   return (
     <button
-      onClick={() => logListed(recipe, addToShopping(recipe.slug, recipe.title, recipeHref(recipe), recipe.ingredients.map((i) => i.raw ?? `${i.quantity ? `${i.quantity} ${i.unit === "pc" ? "" : i.unit} ` : ""}${i.name}`.replace(/\s+/g, " ").trim())))}
+      onClick={() => logListed(recipe, addToShopping(recipe.slug, recipe.title, recipeHref(recipe), recipe.ingredients.filter((i) => !listPantry().some((p) => covers(p, i.name))).map((i) => i.raw ?? `${i.quantity ? `${i.quantity} ${i.unit === "pc" ? "" : i.unit} ` : ""}${i.name}`.replace(/\s+/g, " ").trim())))}
       className="flex min-h-12 flex-1 items-center justify-center gap-2 rounded-full border border-line font-semibold"
       aria-live="polite"
     >

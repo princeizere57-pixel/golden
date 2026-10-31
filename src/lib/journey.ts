@@ -6,7 +6,7 @@ export const JOURNEY_COOKIE = "bac-journey";
 /** Pages that belong to the sequence (plus framework and API paths) and are always reachable. */
 export function isJourneyPath(pathname: string): boolean {
   return (
-    /^\/(welcome|signin|auth|onboarding|checkout)(\/|$)/.test(pathname) ||
+    /^\/(welcome|signin|auth|onboarding|checkout|giveaway)(\/|$)/.test(pathname) ||
     pathname.startsWith("/api/") ||
     pathname.startsWith("/_next/") ||
     /\.[a-z0-9]+$/i.test(pathname)

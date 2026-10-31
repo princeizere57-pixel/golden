@@ -9,7 +9,7 @@ Everything below goes into a file named `.env.local` in the project folder (copy
    - Project URL → `NEXT_PUBLIC_SUPABASE_URL`
    - `anon` public key → `NEXT_PUBLIC_SUPABASE_ANON_KEY`
    - `service_role` key → `SUPABASE_SERVICE_ROLE_KEY` (server only, keep secret)
-3. **SQL Editor**: run the files in `supabase/migrations/` in order (`0001_init.sql`, `0002_imported_recipes.sql`, `0003_whop.sql`).
+3. **SQL Editor**: paste the whole of `supabase/setup_all.sql` and press **Run** (once). It creates every table: profiles, recipes, subscriptions, giveaway entries, orders and the community.
 4. **Authentication → URL Configuration**:
    - Site URL: your live address (e.g. `https://thechefsgolden.vercel.app`), or `http://localhost:3000` while testing.
    - Redirect URLs: add `http://localhost:3000/auth/callback` and `https://<your-live-domain>/auth/callback` (and your preview tunnel URL if you use one).
@@ -34,7 +34,24 @@ Everything below goes into a file named `.env.local` in the project folder (copy
 2. The 3D cartoon uses `GEMINI_IMAGE_MODEL` (default `gemini-2.5-flash-image`). Image generation may need billing enabled on the Google project.
 3. The selfie is sent to Gemini **only** when the user taps "Make my 3D cartoon"; the app says so on that screen.
 
-## 3. Whop: payments
+## 3. Whop: payments (embedded checkout)
+
+The checkout page shows Whop's payment form inside Golden (Whop Elements). Offers and prices live in `src/lib/billing/offers.ts`: Golden Yearly ($45/year, 7-day trial), Golden Monthly ($7.99/month, 7-day trial), Golden for Life ($99 once) and Gift a Year ($45 once).
+
+**Option A: plans you create in Whop (simplest)**
+1. In Whop, create one plan per offer with the same price, type and trial.
+2. Copy each plan ID (`plan_…`) into `.env.local`: `WHOP_PLAN_YEAR`, `WHOP_PLAN_MONTH`, `WHOP_PLAN_LIFETIME`, `WHOP_PLAN_GIFT`.
+
+**Option B: let Golden create them (also enables Buy now, pay later)**
+1. Whop dashboard → Developer → API keys: create a key → `WHOP_API_KEY`.
+2. Your company ID (`biz_…`) → `WHOP_COMPANY_ID`.
+3. Golden then creates a checkout configuration per purchase with metadata `order_id`, `golden_user_id`, `offer` (and `referred_by` for referrals). Ticking **Buy now, pay later** enables Klarna, Afterpay/Clearpay, Affirm, Sezzle, Zip and 3-month instalments where Whop offers them.
+
+**Webhook (both options)**
+- Developer → Webhooks: URL `https://<your-live-domain>/api/billing/whop/webhook`, events `payment.succeeded`, `membership.activated`, `membership.updated`. Secret (`ws_…`) → `WHOP_WEBHOOK_SECRET`. Golden marks the order paid and grants access from the webhook, never from the browser.
+- After payment Whop returns buyers to `/checkout/return` with `payment` and `status`.
+
+### Older link-based setup
 1. In your Whop dashboard create a **product** (e.g. "The Chef's Golden Premium") with two **plans**: $45/year and $7.99/month, each with a **7-day free trial**.
 2. Copy each plan's **checkout link** →
    ```

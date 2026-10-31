@@ -35,15 +35,23 @@ export function formatClock(ms: number): string {
   return `${m}:${String(s).padStart(2, "0")}`;
 }
 
-function chime() {
+/** Two soft Web Audio tones plus a haptic buzz on phones that support it. */
+export function chime(pattern: number[] = [200, 100, 200]) {
   try {
     const ctx = new AudioContext();
-    const osc = ctx.createOscillator();
-    osc.frequency.value = 880;
-    osc.connect(ctx.destination);
-    osc.start();
-    osc.stop(ctx.currentTime + 0.4);
-    navigator.vibrate?.([200, 100, 200]);
+    [880, 1175].forEach((freq, i) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      const at = ctx.currentTime + i * 0.18;
+      osc.frequency.value = freq;
+      gain.gain.setValueAtTime(0.0001, at);
+      gain.gain.exponentialRampToValueAtTime(0.3, at + 0.02);
+      gain.gain.exponentialRampToValueAtTime(0.0001, at + 0.35);
+      osc.connect(gain).connect(ctx.destination);
+      osc.start(at);
+      osc.stop(at + 0.4);
+    });
+    navigator.vibrate?.(pattern);
   } catch {
     // Audio may be blocked until the user interacts; the visual alert still shows.
   }

@@ -67,3 +67,16 @@ export function toggleShopping(id: string) {
 
 export const clearDone = () => write(SHOPPING, listShopping().filter((x) => !x.done));
 export const clearShopping = () => write(SHOPPING, []);
+
+const PANTRY = "bac-pantry";
+
+/** What the cook already has at home (ingredient names, lower-case). */
+export const listPantry = () => read<string>(PANTRY);
+
+export function addPantry(item: string) {
+  const name = item.trim().toLowerCase().slice(0, 40);
+  if (!name) return;
+  write(PANTRY, [...new Set([...listPantry(), name])]);
+}
+
+export const removePantry = (item: string) => write(PANTRY, listPantry().filter((p) => p !== item));
