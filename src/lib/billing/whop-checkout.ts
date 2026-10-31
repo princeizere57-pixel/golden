@@ -34,7 +34,8 @@ export async function prepareWhopCheckout(offer: Offer, metadata: GoldenMetadata
     const config = await client.checkoutConfigurations.create({
       account_id: process.env.WHOP_COMPANY_ID!,
       metadata: { ...metadata },
-      redirect_url: returnUrl,
+      // Whop only accepts https return addresses (not http://localhost); the embed's own returnUrl covers local runs.
+      ...(returnUrl.startsWith("https://") ? { redirect_url: returnUrl } : {}),
       ...(planId
         ? { plan_id: planId }
         : {
@@ -49,11 +50,12 @@ export async function prepareWhopCheckout(offer: Offer, metadata: GoldenMetadata
               trial_period_days: offer.trialDays || undefined,
             },
           }),
-      ...(payLater ? { payment_method_configuration: { enabled: [...PAY_LATER_METHODS], include_platform_defaults: true } } : {}),
+      ...(payLater ? { payment_method_configuration: { enabled: [...PAY_LATER_METHODS], disabled: [], include_platform_defaults: true } } : {}),
     });
     return { ok: true, checkoutConfiguration: config.id };
   } catch (err) {
-    console.error("[whop] checkout configuration failed", (err as Error).message);
+    const body = (err as { body?: unknown }).body;
+    console.error("[whop] checkout configuration failed", body ? JSON.stringify(body) : (err as Error).message);
     return { ok: false, error: "Whop couldn't start checkout. Check WHOP_API_KEY and WHOP_COMPANY_ID." };
   }
 }
