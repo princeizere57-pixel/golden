@@ -8,6 +8,9 @@ import { MiniYou } from "@/components/mini-you";
 interface Props {
   user: { id: string; name: string; email: string };
   level: string;
+  premium: boolean;
+  /** Whop checkout links per plan, when configured. */
+  whop: { year?: string; month?: string };
   stripeReady: boolean;
   country: string | null;
   trialDays: number;
@@ -18,11 +21,24 @@ interface Props {
 }
 
 /** Plan choice and trial start, after sign-in and the skill questions. */
-export function CheckoutPanel({ user, level, stripeReady, country, trialDays, trialEnds, plans, zero, methods }: Props) {
+export function CheckoutPanel({ user, level, premium, whop, stripeReady, country, trialDays, trialEnds, plans, zero, methods }: Props) {
   const [interval, setInterval] = useState<"year" | "month">("year");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const then = interval === "year" ? `${plans.year.price}/year` : `${plans.month.price}/month`;
+  const whopUrl = whop[interval];
+
+  if (premium) {
+    return (
+      <main className="mx-auto flex min-h-dvh max-w-lg flex-col items-center justify-center px-6 text-center">
+        <MiniYou size={150} mood="proud" />
+        <h1 className="mt-4 font-display text-[2rem]">You&apos;re on <span className="text-accent">Premium</span></h1>
+        <p className="mt-2 text-muted">Everything is unlocked for {user.email}. Manage your plan in Account.</p>
+        <Link href="/" className="mt-8 flex min-h-14 w-full items-center justify-center rounded-full bg-button text-lg font-semibold text-button-ink">Back to my recipes</Link>
+        <Link href="/account" className="mt-2 flex min-h-12 items-center justify-center font-medium">Account</Link>
+      </main>
+    );
+  }
 
   async function start() {
     setBusy(true);
@@ -70,17 +86,22 @@ export function CheckoutPanel({ user, level, stripeReady, country, trialDays, tr
         <div className="flex justify-between"><dt>{trialDays}-day free trial ends</dt><dd>{trialEnds}</dd></div>
         <div className="flex justify-between"><dt>Then</dt><dd>{then}</dd></div>
       </dl>
-      <p className="mt-3 text-xs text-muted">We&apos;ll remind you before your trial ends. Cancel any time in Account. Pay with {methods.join(", ")}.</p>
+      <p className="mt-3 text-xs text-muted">We&apos;ll remind you before your trial ends. Cancel any time in Account.{whopUrl ? "" : ` Pay with ${methods.join(", ")}.`}</p>
 
       <div className="mt-auto pt-8">
-        {stripeReady ? (
+        {whopUrl ? (
+          <>
+            <a href={whopUrl} className="flex min-h-14 w-full items-center justify-center rounded-full bg-button text-lg font-semibold text-button-ink">Start my free trial</a>
+            <p className="mt-2 text-center text-xs text-muted">Secure checkout by Whop. Use {user.email} so we can match your membership.</p>
+          </>
+        ) : stripeReady ? (
           <button onClick={start} disabled={busy} className="min-h-14 w-full rounded-full bg-button text-lg font-semibold text-button-ink disabled:opacity-60">
             {busy ? "Opening secure checkout…" : "Start my free trial"}
           </button>
         ) : (
           <form action={setDemoPlan.bind(null, "premium")}>
             <button className="min-h-14 w-full rounded-full bg-button text-lg font-semibold text-button-ink">Start my free trial (demo)</button>
-            <p className="mt-2 text-center text-xs text-muted">Demo mode: Stripe isn&apos;t set up, so no payment is taken.</p>
+            <p className="mt-2 text-center text-xs text-muted">Demo mode: Whop isn&apos;t connected yet, so no payment is taken.</p>
           </form>
         )}
         {error && <p role="alert" className="mt-2 text-center text-sm text-tomato">{error}</p>}

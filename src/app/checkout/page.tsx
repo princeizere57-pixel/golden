@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { CheckoutPanel } from "@/components/checkout-panel";
 import { getUser } from "@/lib/auth";
 import { ENTITIES, PRICES, TRIAL_DAYS, annualSavingPercent, formatMoney, routeEntity } from "@/lib/billing/routing";
+import { whopCheckoutUrl } from "@/lib/billing/whop";
 import { getViewer } from "@/lib/viewer";
 
 export const metadata: Metadata = { title: "Checkout" };
@@ -16,7 +17,6 @@ export default async function CheckoutPage() {
   if (!user) redirect("/signin");
   const viewer = await getViewer();
   if (!viewer.onboarded) redirect("/onboarding");
-  if (viewer.plan === "premium") redirect("/");
 
   const country = (await headers()).get("x-vercel-ip-country");
   const entity = routeEntity(country);
@@ -27,6 +27,8 @@ export default async function CheckoutPage() {
     <CheckoutPanel
       user={{ id: user.id, name: user.name, email: user.email }}
       level={LEVEL[viewer.skill]}
+      premium={viewer.plan === "premium"}
+      whop={{ year: whopCheckoutUrl("year"), month: whopCheckoutUrl("month") }}
       stripeReady={Boolean(process.env.STRIPE_US_SECRET_KEY || process.env.STRIPE_UK_SECRET_KEY)}
       country={country}
       trialDays={TRIAL_DAYS}

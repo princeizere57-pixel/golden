@@ -37,16 +37,7 @@ export function SiteHeader() {
     <header className={`sticky top-0 z-30 border-b border-line bg-bg/90 backdrop-blur ${TAB_PAGES.test(path) ? "hidden lg:block" : ""}`}>
       <nav className="mx-auto flex max-w-6xl items-center gap-4 px-4 py-3" aria-label="Main">
         <Link href="/"><Brand /></Link>
-        <div className="ml-auto hidden items-center gap-1 text-sm font-medium lg:flex">
-          <Link href="/explore" className="rounded-full px-3 py-2.5 hover:bg-surface">Explore</Link>
-          <Link href="/for-you" className="rounded-full px-3 py-2.5 hover:bg-surface">For you</Link>
-          <Link href="/shopping" className="rounded-full px-3 py-2.5 hover:bg-surface">Shopping list</Link>
-          <Link href="/saved" className="rounded-full px-3 py-2.5 hover:bg-surface">Saved</Link>
-          <Link href="/import" className="rounded-full px-3 py-2.5 hover:bg-surface">Import</Link>
-          <Link href="/plan" className="rounded-full px-3 py-2.5 hover:bg-surface">Plan a meal</Link>
-          <Link href="/account" className="rounded-full px-3 py-2.5 hover:bg-surface">Account</Link>
-        </div>
-        <Link href="/premium" className="ml-auto rounded-full bg-button px-4 py-2.5 text-sm font-semibold text-button-ink lg:ml-2">Try free</Link>
+        <Link href="/checkout" className="ml-auto rounded-full bg-button px-4 py-2.5 text-sm font-semibold text-button-ink">Try free</Link>
         <Link href="/you" aria-label="Mini You and your progress" className="overflow-hidden rounded-full bg-accent-soft"><MiniYou headOnly size={42} /></Link>
       </nav>
     </header>

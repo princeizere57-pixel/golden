@@ -6,11 +6,13 @@ import type { BillingEntity } from "@/lib/types";
 export type SubscriptionStatus = "trialing" | "active" | "grace" | "past_due" | "paused" | "canceled" | "expired" | "revoked";
 
 export interface SubscriptionUpdate {
-  provider: Channel;
-  /** Stripe subscription ID, App Store originalTransactionId or Play purchase token. */
+  provider: Channel | "whop";
+  /** Stripe subscription ID, App Store originalTransactionId, Play purchase token or Whop membership ID. */
   externalId: string;
   status: SubscriptionStatus;
   userId?: string;
+  /** Whop's own user ID (user_…), so a membership can be linked to an account later. */
+  whopUserId?: string;
   entity?: BillingEntity;
   currentPeriodEnd?: string;
 }
@@ -30,6 +32,7 @@ export async function saveSubscription(update: SubscriptionUpdate, fetchImpl: ty
     external_id: update.externalId,
     status: update.status,
     user_id: update.userId,
+    whop_user_id: update.whopUserId,
     entity: update.entity,
     current_period_end: update.currentPeriodEnd,
     updated_at: new Date().toISOString(),

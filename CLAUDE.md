@@ -107,3 +107,9 @@ These set The Chef's AI apart; keep them original (no third-party mascots, icon 
 - **Mini You** (`mini-you.tsx`): a cartoon chef (white hat and double-breasted jacket) built from the user's avatar. Uploading a photo (`profile-studio.tsx`) samples skin and hair colour on-device; hair style, beard and glasses are adjustable. Moods: neutral, focused (cook mode), happy (dish finished, mistake fixed), proud (rank-up), sad (Fix My Mistake opened). Moods fade after 6 h.
 - **Game layer** (`src/lib/gamify.ts`, pure and tested; state in `progress-store.ts`, on-device): XP (cooked +50, fixed +15), chef ranks Kitchen Porter → Head Chef, day streaks. Cook mode's "I made it!" shows a celebration with XP, streak and rank progress.
 - **Kitchen log** (`kitchen-log.tsx`): activity cards (3D icon, **Title** · detail, photo, green tick) with Mini You commenting on top. Shown on For you and `/you`.
+
+## 9. Whop checkout
+
+- `/checkout` sends buyers to Whop's hosted checkout when `WHOP_CHECKOUT_URL_YEAR` / `WHOP_CHECKOUT_URL_MONTH` are set (links copied from the Whop dashboard); otherwise Stripe if configured, otherwise a labelled demo. Signed-in Premium users see a "You're on Premium" screen instead of a redirect.
+- `/api/billing/whop/webhook` verifies Whop's Standard Webhooks signature (`webhook-id`, `webhook-timestamp`, `webhook-signature: v1,<base64>`; HMAC-SHA256 over `id.timestamp.body`; 5-minute window) with `WHOP_WEBHOOK_SECRET`, then maps the membership status (`src/lib/billing/whop.ts`) into `subscriptions` with `provider = 'whop'` and `whop_user_id` (migration 0003).
+- Linking a Whop membership to an app account uses `metadata.app_user_id` when present; otherwise match on `whop_user_id`. Static checkout links can't carry our user ID, so confirm the account match before granting Premium in production.
