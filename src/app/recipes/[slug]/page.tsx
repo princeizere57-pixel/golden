@@ -27,7 +27,7 @@ export default async function RecipePage({ params }: Props) {
   const total = recipe.blocks.reduce((s, b) => s + b.minutes, 0);
 
   return (
-    <main className="mx-auto grid max-w-6xl gap-10 px-4 py-10 pb-24 lg:grid-cols-[1fr_2fr]">
+    <main className="mx-auto grid gap-10 px-4 py-10 pb-24">
       <aside>
         <SourcePhoto recipe={recipe} className="mb-6 aspect-square" />
         <p className="text-sm text-muted">{recipe.category} · {recipe.chef}</p>

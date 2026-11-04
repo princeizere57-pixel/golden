@@ -51,7 +51,7 @@ export function PhotoCard({ recipe, badge, wide = false }: { recipe: Recipe; bad
 export function CollectionCard({ title, line, href, recipes }: { title: string; line: string; href: string; recipes: Recipe[] }) {
   const [cover, ...rest] = recipes;
   return (
-    <Link href={href} className="group relative block w-[19rem] shrink-0 overflow-hidden rounded-3xl bg-charcoal text-white sm:w-[22rem]">
+    <Link href={href} className="group relative block w-[19rem] shrink-0 overflow-hidden rounded-3xl bg-charcoal text-white">
       {cover && img(cover) && (
         // eslint-disable-next-line @next/next/no-img-element -- TheMealDB CDN photo
         <img src={img(cover)} alt="" loading="lazy" className="aspect-[4/5] w-full object-cover opacity-90 transition-transform duration-500 group-hover:scale-105" />
@@ -84,7 +84,7 @@ export function DishOfTheDay({ recipe }: { recipe: Recipe }) {
         <Link href={href} className="block">
           {img(recipe) && (
             // eslint-disable-next-line @next/next/no-img-element -- TheMealDB CDN photo
-            <img src={recipe.image} alt="" loading="lazy" className="aspect-[4/5] w-full object-cover sm:aspect-[16/9]" />
+            <img src={recipe.image} alt="" loading="lazy" className="aspect-[4/5] w-full object-cover" />
           )}
           <span className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
           <span className="absolute inset-x-0 bottom-0 p-5">

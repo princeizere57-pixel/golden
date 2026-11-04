@@ -6,7 +6,7 @@ export const metadata: Metadata = { title: "Shopping list" };
 
 export default function ShoppingPage() {
   return (
-    <main className="mx-auto max-w-3xl px-4 pb-10 pt-6">
+    <main className="mx-auto px-4 pb-10 pt-6">
       <h1 className="font-display text-[2.3rem]">Shopping list</h1>
       <div className="mt-6"><PantryEditor /></div>
       <ShoppingList />

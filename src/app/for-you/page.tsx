@@ -37,7 +37,7 @@ export default async function ForYouPage() {
   const next = NEXT[viewer.skill];
 
   return (
-    <main className="mx-auto max-w-6xl pb-10">
+    <main className="mx-auto pb-10">
       <div className="px-4 pt-6">
         <h1 className="font-display text-[2.3rem]">For you</h1>
         <p className="mt-2 text-muted">

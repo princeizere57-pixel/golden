@@ -30,7 +30,7 @@ export function ImportPanel() {
 
   return (
     <div>
-      <form onSubmit={submit} className="flex flex-col gap-3 sm:flex-row">
+      <form onSubmit={submit} className="flex flex-col gap-3">
         <label htmlFor="link" className="sr-only">Recipe link</label>
         <input
           id="link"

@@ -9,7 +9,7 @@ export const metadata: Metadata = { title: "Golden Giveaway rules" };
 export default function GiveawayRules() {
   const ends = new Date(GIVEAWAY.endsAt).toLocaleString("en-GB", { dateStyle: "long", timeStyle: "short", timeZone: "UTC" });
   return (
-    <main className="mx-auto max-w-2xl px-5 py-10">
+    <main className="mx-auto px-5 py-10">
       <Link href="/" className="text-sm underline">← Back</Link>
       <h1 className="mt-4 font-display text-[2.2rem]">The Golden Giveaway: official rules</h1>
       <ol className="mt-6 list-decimal space-y-4 pl-5">

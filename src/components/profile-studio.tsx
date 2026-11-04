@@ -23,7 +23,7 @@ export function ProfileStudio() {
   const streak = liveStreak(p.lastCookDay, p.streak, dayKey(new Date()));
 
   return (
-    <div className="grid gap-8 lg:grid-cols-[1fr_1.2fr]">
+    <div className="grid gap-8">
       <section className="flex flex-col items-center rounded-3xl bg-accent-soft p-6">
         <MiniYou size={190} mood={preview} />
         <p className="mt-2 font-display text-2xl">{rank.title}</p>

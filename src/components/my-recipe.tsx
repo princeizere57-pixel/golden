@@ -16,7 +16,7 @@ function useImport(slug: string) {
 
 function Missing() {
   return (
-    <main className="mx-auto max-w-2xl px-4 py-16 text-center">
+    <main className="mx-auto px-4 py-16 text-center">
       <h1 className="text-2xl font-bold">Recipe not found on this device</h1>
       <p className="mt-2 text-muted">Imports are saved privately in this browser.</p>
       <Link href="/import" className="mt-6 inline-flex min-h-12 items-center rounded-full bg-button px-6 font-semibold text-button-ink">Import a recipe</Link>
@@ -36,10 +36,10 @@ function Credit({ recipe }: { recipe: Recipe }) {
 
 export function MyRecipe({ slug, skill }: { slug: string; skill: SkillLevel }) {
   const recipe = useImport(slug);
-  if (recipe === undefined) return <main className="mx-auto max-w-6xl px-4 py-10 text-muted">Loading…</main>;
+  if (recipe === undefined) return <main className="mx-auto px-4 py-10 text-muted">Loading…</main>;
   if (!recipe) return <Missing />;
   return (
-    <main className="mx-auto grid max-w-6xl gap-10 px-4 py-10 pb-24 lg:grid-cols-[1fr_2fr]">
+    <main className="mx-auto grid gap-10 px-4 py-10 pb-24">
       <aside>
         <SourcePhoto recipe={recipe} className="mb-6 aspect-[4/3]" />
         <p className="text-sm text-muted">My imports · private</p>

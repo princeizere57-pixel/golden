@@ -35,12 +35,12 @@ export default async function PlanPage({ searchParams }: { searchParams: Promise
 
   if (!dishes.length) {
     return (
-      <main className="mx-auto max-w-5xl px-4 pb-10 pt-6">
+      <main className="mx-auto px-4 pb-10 pt-6">
         <h1 className="font-display text-[2.3rem]">Plan a meal</h1>
         <p className="mt-2 text-muted">
           Pick a dish made for your <strong className="text-ink">{LEVEL[viewer.skill]}</strong> level. You&apos;ll get the ingredients, the method step by step, timers that keep every dish on track, and help if anything goes wrong.
         </p>
-        <ul className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+        <ul className="mt-6 grid grid-cols-2 gap-4">
           {suggestions.map((r) => (
             <li key={r.slug}><PlanCard recipe={r} href={planHref([r.slug])} /></li>
           ))}
@@ -54,7 +54,7 @@ export default async function PlanPage({ searchParams }: { searchParams: Promise
   const volume = main.ingredients.reduce((v, i) => v + (i.unit === "ml" || i.unit === "g" ? i.quantity : 0), 0);
 
   return (
-    <main className="mx-auto max-w-3xl px-4 pb-10 pt-6">
+    <main className="mx-auto px-4 pb-10 pt-6">
       <Link href="/plan" className="text-sm underline">← Choose a different meal</Link>
       <h1 className="mt-3 font-display text-[2.1rem]">{dishes.map((d) => d.title).join(" + ")}</h1>
       <p className="mt-1 text-muted">{difficulty(main).label} · about {formatDuration(dishes.reduce((m, d) => Math.max(m, totalMinutes(d)), 0))} · written for your {LEVEL[viewer.skill]} level</p>

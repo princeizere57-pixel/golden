@@ -31,7 +31,7 @@ export default async function ExplorePage({ searchParams }: { searchParams: Prom
       : "More to try";
 
   return (
-    <main className="mx-auto max-w-6xl px-4 py-10 pb-24">
+    <main className="mx-auto px-4 py-10 pb-24">
       <h1 className="text-3xl font-bold tracking-tight">Explore recipes</h1>
       <p className="mt-2 text-muted">Dishes from around the world, ranked for your skill level and rewritten for it in cook mode.</p>
 
@@ -97,7 +97,7 @@ function Grid({ heading, items, empty }: { heading: string; items: Array<{ recip
       {items.length === 0 ? (
         <p className="mt-2 text-muted">{empty}</p>
       ) : (
-        <ul className="mt-4 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+        <ul className="mt-4 grid grid-cols-2 gap-4">
           {items.map(({ recipe, difficulty: d }) => (
             <li key={recipe.slug}>
               <Link href={`/meals/${recipe.slug.slice(MEALDB_PREFIX.length)}`} className="group block">

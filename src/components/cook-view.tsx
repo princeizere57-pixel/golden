@@ -78,7 +78,7 @@ export function CookView({ recipe, initialSkill, exitHref = `/recipes/${recipe.s
 
   return (
     <div className="cook-mode min-h-[calc(100vh-57px)] px-4 py-6">
-      <div className="mx-auto flex max-w-3xl flex-col gap-6">
+      <div className="mx-auto flex flex-col gap-6">
         <div className="flex items-center justify-between gap-4 text-sm">
           <Link href={exitHref} className="inline-flex min-h-16 items-center underline">Exit cook mode</Link>
           <span className="text-muted">{awake ? "Screen stays on" : "Screen may sleep"}</span>
@@ -89,11 +89,11 @@ export function CookView({ recipe, initialSkill, exitHref = `/recipes/${recipe.s
           <div className="h-full bg-accent transition-all" style={{ width: `${((index + 1) / steps.length) * 100}%` }} />
         </div>
 
-        <article aria-live="polite" className="rounded-3xl border border-line bg-surface p-6 sm:p-10">
+        <article aria-live="polite" className="rounded-3xl border border-line bg-surface p-6">
           <p className="text-sm font-semibold uppercase tracking-wide text-muted">
             Step {index + 1} of {steps.length} · {block.kind === "heat" ? `${block.heat} heat` : block.kind === "prep" ? "prep" : "timer"}
           </p>
-          <ul className="mt-4 space-y-3 text-2xl font-medium leading-snug sm:text-3xl">
+          <ul className="mt-4 space-y-3 text-2xl font-medium leading-snug">
             {step.instructions.map((line, i) => <li key={i}>{line}</li>)}
           </ul>
           {step.notes.length > 0 && <ul className="mt-6 space-y-1 text-lg text-muted">{step.notes.map((n, i) => <li key={i}>{n}</li>)}</ul>}

@@ -26,10 +26,13 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
     <html lang="en">
       <body className={`${body.variable} ${display.variable} antialiased`}>
         <TimerProvider>
-          <SiteHeader welcomeAtRoot={welcomeAtRoot} />
-          <div className="pb-24">{children}</div>
-          <TabBar welcomeAtRoot={welcomeAtRoot} />
-          <TimerTray />
+          {/* Golden is a phone app: every screen renders in one centred, phone-width frame. */}
+          <div className="app-frame">
+            <SiteHeader welcomeAtRoot={welcomeAtRoot} />
+            <div className="pb-24">{children}</div>
+            <TabBar welcomeAtRoot={welcomeAtRoot} />
+            <TimerTray />
+          </div>
           <PageViews />
         </TimerProvider>
       </body>

@@ -141,7 +141,7 @@ export default function WelcomePage() {
         <Link href="/giveaway" className="mt-3 inline-block text-sm underline">Official rules</Link>
       </section>
 
-      <div className="fixed inset-x-0 bottom-0 z-20 mx-auto max-w-lg rounded-t-3xl bg-bg px-6 pb-6 pt-4 shadow-[0_-8px_30px_rgba(0,0,0,0.08)]">
+      <div className="fixed inset-x-0 bottom-0 z-20 mx-auto max-w-[480px] rounded-t-3xl bg-bg px-6 pb-6 pt-4 shadow-[0_-8px_30px_rgba(0,0,0,0.08)]">
         <Link href="/signin" className="flex min-h-14 w-full items-center justify-center rounded-full bg-button text-lg font-semibold text-button-ink">Start leveling up: {TRIAL_HEADLINE_DAYS} days free</Link>
         <Link href="/signin" className="mt-2 flex min-h-11 w-full items-center justify-center text-base font-medium">I already have an account</Link>
       </div>

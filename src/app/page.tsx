@@ -63,7 +63,7 @@ export default async function Discover({ searchParams }: { searchParams: Promise
   };
 
   return (
-    <main className="mx-auto max-w-6xl pb-10">
+    <main className="mx-auto pb-10">
       <div className="flex items-center justify-between px-4 pt-6">
         <h1 className="font-display text-[2.3rem]">Discover</h1>
         <div className="flex gap-2">
@@ -77,7 +77,7 @@ export default async function Discover({ searchParams }: { searchParams: Promise
         </div>
       </div>
 
-      <div className="sticky top-0 z-20 bg-bg/95 px-4 py-3 backdrop-blur lg:top-[61px]">
+      <div className="sticky top-0 z-20 bg-bg/95 px-4 py-3 backdrop-blur">
         <SearchBar />
       </div>
 
@@ -87,7 +87,7 @@ export default async function Discover({ searchParams }: { searchParams: Promise
         Cooking at <strong className="text-ink">{LEVEL[viewer.skill]}</strong> level. Every recipe is rewritten for you.
       </p>
 
-      <nav aria-label="Quick links" className="mt-4 grid grid-cols-2 gap-2.5 px-4 sm:grid-cols-3">
+      <nav aria-label="Quick links" className="mt-4 grid grid-cols-2 gap-2.5 px-4">
         {TILES.map((t) => <QuickTile key={t.label} href={`/explore?c=${t.category}`} label={t.label} image={firstImage(t.category)} />)}
       </nav>
 

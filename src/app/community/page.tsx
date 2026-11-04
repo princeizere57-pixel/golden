@@ -23,7 +23,7 @@ export default async function CommunityPage() {
   const posts = await listPosts();
 
   return (
-    <main className="mx-auto max-w-2xl px-4 pb-10 pt-6">
+    <main className="mx-auto px-4 pb-10 pt-6">
       <h1 className="font-display text-[2.2rem]">Apprentice Meets Master</h1>
       <p className="mt-2 text-muted">Share what you cooked, ask for help when it goes sideways, and learn from cooks a level above you.</p>
 

@@ -175,3 +175,32 @@ body {
   transform-origin: 50% 100%;
   transform-box: fill-box;
 }
+
+/* Phone-first frame: the whole app is one 480 px column; wider screens see it centred on a soft backdrop. */
+html {
+  background: #ece8e1;
+}
+.app-frame {
+  position: relative;
+  width: 100%;
+  max-width: 480px;
+  min-height: 100dvh;
+  margin-inline: auto;
+  background: var(--bg);
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.04), 0 10px 40px rgba(0, 0, 0, 0.08);
+  overflow-x: clip;
+}
+@media (max-width: 480px) {
+  html {
+    background: var(--bg);
+  }
+  .app-frame {
+    box-shadow: none;
+  }
+}
+/* The body paints the backdrop too, so it matches the frame's surroundings on wide screens. */
+@media (min-width: 481px) {
+  body {
+    background: #ece8e1;
+  }
+}

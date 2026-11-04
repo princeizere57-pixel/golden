@@ -101,7 +101,7 @@ export function SavedGrid() {
   const saved = useSaved();
   if (!saved.length) return <p className="mt-4 text-muted">Tap Save on any recipe and it will appear here.</p>;
   return (
-    <ul className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+    <ul className="mt-6 grid grid-cols-2 gap-4">
       {saved.map((r) => (
         <li key={r.slug}>
           <a href={r.href} className="group block">
