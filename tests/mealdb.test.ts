@@ -98,3 +98,17 @@ describe("ingredient pictures and videos", () => {
     expect(ingredientIconUrl({ name: "chopped garlic" })).toBe("https://www.themealdb.com/images/ingredients/Garlic-Small.png");
   });
 });
+
+describe("step pictures", () => {
+  it("finds the ingredients a step mentions", async () => {
+    const { ingredientsInStep } = await import("@/lib/ingredient-icons");
+    const ings = [
+      { id: "a", name: "Garlic", quantity: 2, unit: "pc" as const, icon: "Garlic" },
+      { id: "b", name: "Chopped Tomatoes", quantity: 400, unit: "g" as const, icon: "Chopped Tomatoes" },
+      { id: "c", name: "Olive Oil", quantity: 1, unit: "tbsp" as const, icon: "Olive Oil" },
+    ];
+    expect(ingredientsInStep(ings, "Fry the garlic in the oil, then add the tomatoes.").map((i) => i.id)).toEqual(["a", "b", "c"]);
+    expect(ingredientsInStep(ings, "Bring water to the boil.")).toEqual([]);
+    expect(ingredientsInStep(ings, "anything", ["b"]).map((i) => i.id)).toEqual(["b"]);
+  });
+});

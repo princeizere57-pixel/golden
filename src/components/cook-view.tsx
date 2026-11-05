@@ -13,6 +13,8 @@ import { rankFor } from "@/lib/gamify";
 import { readProgress, recordCooked, setMood } from "@/lib/progress-store";
 import { SkillSlider } from "@/components/skill-steps";
 import { formatClock, useTimers } from "@/components/timers";
+import { ingredientIconUrl, ingredientsInStep } from "@/lib/ingredient-icons";
+import { markPlanDone } from "@/lib/plan-progress";
 import { adaptRecipe } from "@/lib/skill/adapt";
 import type { Recipe, SkillLevel } from "@/lib/types";
 
@@ -58,6 +60,7 @@ export function CookView({ recipe, initialSkill, exitHref = `/recipes/${recipe.s
 
   function finish() {
     setDone(recordCooked(recipe.title, recipe.image));
+    markPlanDone(recipe.slug);
     track("dish_cooked", { recipe: recipe.slug });
   }
 
@@ -98,6 +101,8 @@ export function CookView({ recipe, initialSkill, exitHref = `/recipes/${recipe.s
           </ul>
           {step.notes.length > 0 && <ul className="mt-6 space-y-1 text-lg text-muted">{step.notes.map((n, i) => <li key={i}>{n}</li>)}</ul>}
 
+          <StepPictures recipe={recipe} index={index} last={last} />
+
           {(step.kind === "timing" || step.attention === "passive") && (
             <button
               onClick={() => start({ id: timerId, label: step.timerLabel ?? `Step ${index + 1}`, recipeSlug: recipe.slug }, step.minutes)}
@@ -118,13 +123,44 @@ export function CookView({ recipe, initialSkill, exitHref = `/recipes/${recipe.s
         </div>
       </div>
       <FixMyMistake slug={recipe.slug} dish={recipe.title} defaultVolumeMl={Math.max(250, Math.round(volume / 50) * 50)} />
-      {done && <Celebration recipe={recipe} result={done} />}
+      {done && <Celebration recipe={recipe} result={done} backToPlan={exitHref.startsWith("/plan") ? exitHref : undefined} />}
+    </div>
+  );
+}
+
+/** Pictures for the current step: the ingredients it uses, and the finished dish on the last step. */
+function StepPictures({ recipe, index, last }: { recipe: Recipe; index: number; last: boolean }) {
+  const block = recipe.blocks[index];
+  const used = ingredientsInStep(recipe.ingredients, block.text, block.kind === "prep" ? block.ingredientIds : []).slice(0, 6);
+  if (!used.length && !(last && recipe.image)) return null;
+  return (
+    <div className="mt-6">
+      {used.length > 0 && (
+        <ul className="flex flex-wrap gap-3" aria-label="Ingredients in this step">
+          {used.map((i) => (
+            <li key={i.id} className="flex w-[4.5rem] flex-col items-center text-center">
+              <span className="flex h-16 w-16 items-center justify-center rounded-2xl bg-white">
+                {/* eslint-disable-next-line @next/next/no-img-element -- TheMealDB ingredient picture */}
+                <img src={ingredientIconUrl(i, "Medium")} alt="" className="h-14 w-14 object-contain" loading="lazy" onError={(e) => (e.currentTarget.style.visibility = "hidden")} />
+              </span>
+              <span className="mt-1 line-clamp-2 text-xs capitalize text-muted">{i.icon ?? i.name}</span>
+            </li>
+          ))}
+        </ul>
+      )}
+      {last && recipe.image && (
+        <figure className="mt-4">
+          {/* eslint-disable-next-line @next/next/no-img-element -- finished dish photo */}
+          <img src={recipe.image} alt={`Finished ${recipe.title}`} className="aspect-video w-full rounded-2xl object-cover" />
+          <figcaption className="mt-1 text-sm text-muted">What you&apos;re aiming for</figcaption>
+        </figure>
+      )}
     </div>
   );
 }
 
 /** Finished-dish screen: Mini You celebrates, with XP, streak and rank progress. */
-function Celebration({ recipe, result }: { recipe: Recipe; result: { xp: number; streak: number; rankedUp: boolean } }) {
+function Celebration({ recipe, result, backToPlan }: { recipe: Recipe; result: { xp: number; streak: number; rankedUp: boolean }; backToPlan?: string }) {
   const progress = readProgress();
   const rank = rankFor(progress.xp);
   return (
@@ -141,7 +177,11 @@ function Celebration({ recipe, result }: { recipe: Recipe; result: { xp: number;
           <div className="h-full rounded-full bg-[#facc15]" style={{ width: `${rank.progress * 100}%` }} />
         </div>
         <p className="mt-1 text-sm text-[#6d6761]">{rank.next ? `${rank.toNext} XP to ${rank.next}` : "Top rank. Respect, chef."}</p>
-        <Link href="/" className="mt-6 flex min-h-14 items-center justify-center rounded-full bg-[#facc15] text-lg font-semibold">Back to Discover</Link>
+        {backToPlan ? (
+          <Link href={backToPlan} className="mt-6 flex min-h-14 items-center justify-center rounded-full bg-[#facc15] text-lg font-semibold">Back to my meal plan</Link>
+        ) : (
+          <Link href="/" className="mt-6 flex min-h-14 items-center justify-center rounded-full bg-[#facc15] text-lg font-semibold">Back to Discover</Link>
+        )}
         <Link href="/community" className="mt-2 flex min-h-12 items-center justify-center font-medium">Share it with the community</Link>
         <Link href="/you" className="flex min-h-12 items-center justify-center font-medium">See Mini You</Link>
       </div>

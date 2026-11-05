@@ -49,3 +49,12 @@ describe("links", () => {
     expect(formatDuration(70)).toBe("1 hr 10 mins");
   });
 });
+
+it("only accepts meal-plan back links", async () => {
+  const { safePlanBack } = await import("@/lib/links");
+  expect(safePlanBack("/plan?dish=fluffy-rice&dish=mealdb-52893&active=fluffy-rice")).toBe("/plan?dish=fluffy-rice&dish=mealdb-52893&active=fluffy-rice");
+  expect(safePlanBack("https://evil.example")).toBeUndefined();
+  expect(safePlanBack("//evil.example")).toBeUndefined();
+  expect(safePlanBack("/planner")).toBeUndefined();
+  expect(safePlanBack(undefined)).toBeUndefined();
+});

@@ -17,3 +17,13 @@ export function formatDuration(minutes: number): string {
   const rest = m % 60;
   return rest ? `${h} hr ${rest} mins` : `${h} hr`;
 }
+
+/** A "back" address from the query string, accepted only when it points inside the meal plan. */
+export const safePlanBack = (back: string | undefined) => (back && /^\/plan(\?[\w%=&.-]*)?$/.test(back) ? back : undefined);
+
+/** Meal plans hold up to this many dishes. */
+export const MAX_DISHES = 4;
+
+/** Address of a meal plan, optionally opened on one dish. */
+export const planHref = (slugs: string[], active?: string) =>
+  `/plan?${slugs.map((s) => `dish=${encodeURIComponent(s)}`).join("&")}${active ? `&active=${encodeURIComponent(active)}` : ""}`;

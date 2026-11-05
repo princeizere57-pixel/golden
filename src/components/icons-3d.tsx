@@ -155,28 +155,30 @@ export function FlameIcon({ size = 28, className }: Props) {
   );
 }
 
-/** Plan a meal: a frying pan with flames rising under it. */
+/** Plan a meal: tall flames rising out of a wide dark pan, with a black handle. */
 export function PanFireIcon({ size = 28, className }: Props) {
   return (
     <svg viewBox="0 0 32 32" width={size} height={size} className={className} aria-hidden>
       <defs>
-        <linearGradient id="pan-body" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="#868e96" /><stop offset="1" stopColor="#212529" /></linearGradient>
-        <linearGradient id="pan-handle" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stopColor="#5c4033" /><stop offset="1" stopColor="#2b1d16" /></linearGradient>
-        <linearGradient id="pan-flame" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stopColor="#e8590c" /><stop offset="0.6" stopColor="#ff922b" /><stop offset="1" stopColor="#ffd43b" /></linearGradient>
+        <linearGradient id="pf-outer" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stopColor="#e03131" /><stop offset="0.55" stopColor="#f76707" /><stop offset="1" stopColor="#ff922b" /></linearGradient>
+        <linearGradient id="pf-mid" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stopColor="#fd7e14" /><stop offset="1" stopColor="#fcc419" /></linearGradient>
+        <linearGradient id="pf-pan" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="#5c6670" /><stop offset="1" stopColor="#2b3138" /></linearGradient>
       </defs>
-      <ellipse cx="15" cy="30" rx="10" ry="1.4" fill="#000" opacity="0.12" />
+      <ellipse cx="15" cy="30.2" rx="12" ry="1.3" fill="#000" opacity="0.12" />
       <g className="flicker">
-        <path d="M8 29c-1.6-2.8.8-4.2.3-7 1.8 1.6 2.6 3 2 4.6.8-.8 1.2-2 1-3.4 1.6 1.6 2 3.6.8 5.8z" fill="url(#pan-flame)" />
-        <path d="M13.6 29c-2-3.4 1-5.6.2-9.2 2.4 2.2 3.4 4.2 2.6 6.2 1-1 1.5-2.6 1.2-4.2 2 2.2 2.4 4.8.8 7.2z" fill="url(#pan-flame)" />
-        <path d="M19.6 29c-1.4-2.6.6-3.8.2-6.4 1.6 1.4 2.4 2.8 1.8 4.2.7-.7 1-1.8.8-3 1.5 1.5 1.8 3.4.7 5.2z" fill="url(#pan-flame)" />
+        {/* Outer red-orange flames: tall in the middle, licking out to both sides. */}
+        <path d="M5 21C3.6 17.5 4.4 14.6 6.2 12.8c-.2 2 .4 3.4 1.4 4.2-.6-3.6.6-7 3-9.2-.4 2.6.2 4.6 1.4 5.8-.2-4.4 1.2-8.4 4.4-11.2-.6 3.6.2 6.4 1.8 8.2.4-2.6 1.6-4.6 3.4-5.8-.8 2.8-.4 5.4 1 7.2.6-1.6 1.6-2.8 2.8-3.4-.6 2-.4 3.8.6 5.4.4-.8 1-1.4 1.8-1.8-.4 2.6-.8 5.6-2.2 8.8z" fill="url(#pf-outer)" />
+        {/* Inner orange-yellow flames. */}
+        <path d="M8 21c-.6-2.6.2-4.6 1.6-5.8 0 1.4.4 2.4 1.2 3-.2-2.8.8-5.2 2.6-6.8-.2 2 .4 3.4 1.4 4.2.2-3 1.2-5.6 3-7.2-.4 2.6.2 4.6 1.4 5.8.4-1.6 1.2-2.8 2.4-3.4-.4 2-.2 3.6.8 5-.2 1.8-.6 3.6-1.4 5.2z" fill="url(#pf-mid)" />
+        <path d="M11.6 21c-.2-1.6.4-2.8 1.4-3.6 0 .8.4 1.4.8 1.8.2-1.6.8-3 2-4 0 1.2.4 2.2 1.2 2.8.4-1 1-1.8 1.8-2.2-.2 1.4 0 2.6.6 3.6-.2.6-.4 1.2-.8 1.6z" fill="#fff3bf" opacity="0.9" />
       </g>
-      <path d="M3 13.5h22a11 5.5 0 0 1-22 0z" fill="url(#pan-body)" />
-      <ellipse cx="14" cy="13.5" rx="11" ry="3" fill="#495057" />
-      <ellipse cx="14" cy="13.2" rx="9" ry="2.2" fill="#343a40" />
-      <circle cx="11" cy="12.8" r="1.6" fill="#ffd43b" />
-      <circle cx="10.6" cy="12.5" r="0.7" fill="#fff" />
-      <rect x="24" y="11.6" width="7.5" height="2.6" rx="1.3" transform="rotate(-12 24 13)" fill="url(#pan-handle)" />
-      <path d="M6 16.5c2 1.6 5 2.4 8 2.4" stroke="#fff" strokeOpacity="0.35" strokeWidth="1.2" strokeLinecap="round" fill="none" />
+      {/* Pan: wide shallow body with a lighter rim. */}
+      <path d="M2.5 20.5h22.5c-.6 4.4-4.4 7.5-11.25 7.5S3.1 24.9 2.5 20.5z" fill="url(#pf-pan)" />
+      <ellipse cx="13.75" cy="20.6" rx="11.25" ry="1.7" fill="#6c757d" />
+      <path d="M5 23.4c2 1.6 5 2.4 8 2.4" stroke="#fff" strokeOpacity="0.25" strokeWidth="1" strokeLinecap="round" fill="none" />
+      {/* Handle: light band, then a long black grip. */}
+      <path d="M24.6 22.2l1.8-.6.6 1.6-1.8.6z" fill="#dee2e6" />
+      <path d="M26.4 21.6l4.6-1.6c.6-.2 1 .2.8.8l-.2.6c-.1.4-.4.6-.8.7l-3.8 1.1z" fill="#212529" />
     </svg>
   );
 }
