@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Golden</string>
+    <string name="title_activity_main">Golden</string>
+    <string name="package_name">com.golden.cooking</string>
+    <string name="custom_url_scheme">com.golden.cooking</string>
+</resources>

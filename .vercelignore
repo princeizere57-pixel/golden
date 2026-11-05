@@ -4,3 +4,7 @@
 node_modules
 .next
 src/data/mealdb-recipes.json
+android
+ios
+mobile
+capacitor.config.ts
