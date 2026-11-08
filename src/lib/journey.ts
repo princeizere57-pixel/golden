@@ -3,13 +3,15 @@
 // which sets JOURNEY_COOKIE). Until then the home address shows the welcome page.
 
 export const JOURNEY_COOKIE = "bac-journey";
+/** Request header the middleware sets on the full-width landing page. */
+export const LANDING_HEADER = "x-golden-landing";
 const USER_COOKIE = "bac-user";
 const SKILL_COOKIE = "bac-skill";
 
 /** Pages that belong to the sequence (plus framework and API paths) and are always reachable. */
 export function isJourneyPath(pathname: string): boolean {
   return (
-    /^\/(welcome|signin|auth|onboarding|checkout|giveaway)(\/|$)/.test(pathname) ||
+    /^\/(welcome|signin|auth|onboarding|checkout|giveaway|guarantee)(\/|$)/.test(pathname) ||
     pathname.startsWith("/api/") ||
     pathname.startsWith("/_next/") ||
     /\.[a-z0-9]+$/i.test(pathname)

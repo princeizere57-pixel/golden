@@ -19,9 +19,11 @@ export interface OfferView {
   name: string;
   tagline: string;
   priceLine: string;
+  regularPrice?: string;
   kind: "core" | "upsell";
   badge?: string;
   includes: string[];
+  excludes: string[];
   embedReady: boolean;
   planType: "renewal" | "one_time";
 }
@@ -31,13 +33,15 @@ interface Props {
   level: string;
   premium: boolean;
   offers: OfferView[];
+  defaultOffer: string;
+  launch: { left: number; spots: number; endsOn: string; open: boolean };
   payLaterReady: boolean;
   drawDate: string;
   benefits: string[];
 }
 
-export function CheckoutPanel({ user, level, premium, offers, payLaterReady, drawDate, benefits }: Props) {
-  const [chosen, setChosen] = useState("year");
+export function CheckoutPanel({ user, level, premium, offers, defaultOffer, launch, payLaterReady, drawDate, benefits }: Props) {
+  const [chosen, setChosen] = useState(defaultOffer);
   const [payLater, setPayLater] = useState(false);
   const [session, setSession] = useState<Extract<StartCheckout, { ok: true }> | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -126,8 +130,13 @@ export function CheckoutPanel({ user, level, premium, offers, payLaterReady, dra
       </section>
 
       {/* 3. Plans and upgrades */}
-      <fieldset className="mt-7 space-y-3" disabled={Boolean(session)}>
-        <legend className="mb-1 text-lg font-semibold">Choose your plan</legend>
+      {launch.open && (
+        <p className="mt-7 rounded-2xl border-2 border-button bg-[#fef9c3] p-3 text-center text-sm font-semibold">
+          Founding price: 80% off the Executive Chef System. {launch.left.toLocaleString("en-US")} of {launch.spots.toLocaleString("en-US")} spots left, ends {launch.endsOn}.
+        </p>
+      )}
+      <fieldset className="mt-4 space-y-3" disabled={Boolean(session)}>
+        <legend className="mb-1 text-lg font-semibold">Start your free 3-Day Zero-Waste Challenge, then</legend>
         {offers.filter((o) => o.kind === "core").map((o) => <OfferCard key={o.id} offer={o} checked={chosen === o.id} onChange={() => setChosen(o.id)} />)}
         {offers.some((o) => o.kind === "upsell") && (
           <>
@@ -165,6 +174,9 @@ export function CheckoutPanel({ user, level, premium, offers, payLaterReady, dra
         )}
         {error && <p role="alert" className="mt-2 text-center text-sm text-tomato">{error}</p>}
         <p className="mt-3 text-center text-xs text-muted">Secure payment by Whop. Cancel any time before your trial ends and you won&apos;t be charged.</p>
+        {chosen === "executive" && (
+          <p className="mt-2 text-center text-xs text-muted">Backed by the <Link href="/guarantee" className="underline">10 Perfect Dishes Money-Back Guarantee</Link>.</p>
+        )}
       </section>
 
       <form action={finishJourney}>
@@ -187,9 +199,15 @@ function OfferCard({ offer, checked, onChange }: { offer: OfferView; checked: bo
           <span className="block text-sm text-muted">{offer.tagline}</span>
         </span>
       </span>
-      <span className="mt-1 block pl-9 text-sm font-bold">{offer.priceLine}</span>
-      {checked && offer.kind === "upsell" && (
-        <ul className="mt-2 space-y-1 pl-9 text-sm">{offer.includes.map((i) => <li key={i}>✓ {i}</li>)}</ul>
+      <span className="mt-1 block pl-9 text-sm font-bold">
+        {offer.regularPrice && <span className="mr-2 font-normal text-muted line-through">{offer.regularPrice}</span>}
+        {offer.priceLine}
+      </span>
+      {checked && (
+        <ul className="mt-2 space-y-1 pl-9 text-sm">
+          {offer.includes.map((i) => <li key={i}>✓ {i}</li>)}
+          {offer.excludes.map((i) => <li key={i} className="text-muted line-through">✕ {i}</li>)}
+        </ul>
       )}
       {offer.badge && <span className="absolute -top-2.5 right-4 rounded-full bg-button px-2.5 py-0.5 text-xs font-bold text-button-ink">{offer.badge}</span>}
     </label>

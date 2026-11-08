@@ -1,18 +1,20 @@
 import { describe, expect, it } from "vitest";
-import { OFFERS, TRIAL_HEADLINE_DAYS, newOrderId, offerById, priceLine } from "@/lib/billing/offers";
+import { OFFERS, TRIAL_HEADLINE_DAYS, newOrderId, offerById, perMonth, percentOff, priceLine } from "@/lib/billing/offers";
 import { covers, isStaple, pantryMatch } from "@/lib/pantry";
 
 describe("offers", () => {
-  it("matches the plans configured in Whop", () => {
-    expect(offerById("year")).toMatchObject({ name: "Golden Year", price: 45.09, planType: "renewal", billingPeriodDays: 365, trialDays: 3, planEnv: "WHOP_PLAN_YEAR" });
-    expect(offerById("month")).toMatchObject({ price: 7.99, planType: "renewal", billingPeriodDays: 30, trialDays: 3, planEnv: "WHOP_PLAN_MONTH" });
-    expect(OFFERS.map((o) => o.id)).toEqual(["year", "month"]);
-    expect(offerById("lifetime")).toBeUndefined();
+  it("follows the Grand Slam money model", () => {
+    expect(offerById("executive")).toMatchObject({ name: "Golden Executive Chef System", price: 100, regularPrice: 500, planType: "renewal", billingPeriodDays: 365, trialDays: 3, planEnv: "WHOP_PLAN_EXECUTIVE" });
+    expect(offerById("experience")).toMatchObject({ name: "The Golden Experience", price: 50, billingPeriodDays: 365, trialDays: 3, planEnv: "WHOP_PLAN_EXPERIENCE" });
+    expect(OFFERS.map((o) => o.id)).toEqual(["executive", "experience"]);
+    expect(offerById("year")).toBeUndefined();
+    expect(percentOff(offerById("executive")!)).toBe(80);
   });
 
   it("describes prices for buyers", () => {
-    expect(priceLine(offerById("year")!)).toBe("3 days free, then $45.09/year");
-    expect(priceLine(offerById("month")!)).toBe("3 days free, then $7.99/month");
+    expect(priceLine(offerById("executive")!)).toBe("3 days free, then $100/year");
+    expect(priceLine(offerById("experience")!)).toBe("3 days free, then $50/year");
+    expect(perMonth(offerById("executive")!)).toBe("$8.33");
     expect(TRIAL_HEADLINE_DAYS).toBe(3);
   });
 

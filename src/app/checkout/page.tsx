@@ -2,7 +2,8 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { CheckoutPanel } from "@/components/checkout-panel";
 import { getUser } from "@/lib/auth";
-import { OFFERS, priceLine } from "@/lib/billing/offers";
+import { launchState } from "@/lib/billing/launch";
+import { DEFAULT_OFFER, OFFERS, money, priceLine } from "@/lib/billing/offers";
 import { whopApiConfigured, whopEmbedConfigured } from "@/lib/billing/whop-checkout";
 import { GIVEAWAY } from "@/lib/giveaway";
 import { getViewer } from "@/lib/viewer";
@@ -21,6 +22,7 @@ export default async function CheckoutPage() {
   if (!user) redirect("/signin");
   const viewer = await getViewer();
   if (!viewer.onboarded) redirect("/onboarding");
+  const launch = await launchState();
 
   return (
     <CheckoutPanel
@@ -32,15 +34,19 @@ export default async function CheckoutPage() {
         name: o.name,
         tagline: o.tagline,
         priceLine: priceLine(o),
+        regularPrice: o.regularPrice ? `${money(o.regularPrice)}/year` : undefined,
         kind: o.kind,
         badge: o.badge,
         includes: o.includes,
+        excludes: o.excludes ?? [],
         embedReady: whopEmbedConfigured(o),
         planType: o.planType,
       }))}
+      defaultOffer={DEFAULT_OFFER}
+      launch={{ left: launch.left, spots: launch.spots, endsOn: new Date(launch.endsAt).toLocaleDateString("en-US", { month: "long", day: "numeric", timeZone: "UTC" }), open: launch.open }}
       payLaterReady={whopApiConfigured()}
       drawDate={new Date(GIVEAWAY.endsAt).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric", timeZone: "UTC" })}
-      benefits={[...BENEFITS[viewer.skill], "Pantry-first recipes, smart shopping lists and the Apprentice Meets Master community"]}
+      benefits={[...BENEFITS[viewer.skill], "Pantry-to-Plate Matcher, Chinese, Korean and Italian technique modules, and the community"]}
     />
   );
 }

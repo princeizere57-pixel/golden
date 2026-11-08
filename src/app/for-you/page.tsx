@@ -44,6 +44,16 @@ export default async function ForYouPage() {
           Your skill path at <strong className="text-ink">{LEVEL[viewer.skill]}</strong> level.{" "}
           <Link href="/onboarding" className="underline">Retake the quiz</Link>
         </p>
+        <div className="mt-4 grid grid-cols-2 gap-3">
+          <Link href="/challenge" className="rounded-2xl bg-charcoal p-4 text-white">
+            <span className="block text-xs font-semibold uppercase tracking-wide text-[#facc15]">Start here</span>
+            <span className="mt-1 block font-semibold leading-snug">3-Day Zero-Waste Challenge</span>
+          </Link>
+          <Link href="/modules" className="rounded-2xl border-2 border-button p-4">
+            <span className="block text-xs font-semibold uppercase tracking-wide text-muted">Technique</span>
+            <span className="mt-1 block font-semibold leading-snug">Chinese, Korean &amp; Italian modules</span>
+          </Link>
+        </div>
       </div>
 
       <div className="mt-6 px-4">

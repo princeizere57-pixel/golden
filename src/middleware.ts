@@ -1,5 +1,5 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { isJourneyPath, journeyComplete } from "@/lib/journey";
+import { LANDING_HEADER, isJourneyPath, journeyComplete } from "@/lib/journey";
 
 const REF_COOKIE = "bac-ref";
 
@@ -12,10 +12,16 @@ export function middleware(req: NextRequest) {
   const { pathname, searchParams } = req.nextUrl;
   const done = journeyComplete(req.cookies);
 
+  // The landing page is full width; the layout skips the phone frame when it sees this header.
+  const landing = (!done && pathname === "/") || pathname === "/welcome";
+  const headers = new Headers(req.headers);
+  headers.delete(LANDING_HEADER);
+  if (landing) headers.set(LANDING_HEADER, "1");
+
   let res: NextResponse;
-  if (done || isJourneyPath(pathname)) res = NextResponse.next();
-  // Serve the welcome page at "/" itself, keeping the address bar on the bare site address.
-  else if (pathname === "/") res = NextResponse.rewrite(new URL("/welcome", req.url));
+  if (done || isJourneyPath(pathname)) res = NextResponse.next({ request: { headers } });
+  // Serve the landing page at "/" itself, keeping the address bar on the bare site address.
+  else if (pathname === "/") res = NextResponse.rewrite(new URL("/welcome", req.url), { request: { headers } });
   else res = NextResponse.redirect(new URL("/", req.url));
 
   const ref = searchParams.get("ref")?.toUpperCase();

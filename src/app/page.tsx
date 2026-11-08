@@ -6,7 +6,7 @@ import { PantryRail } from "@/components/pantry";
 import { recipeHref } from "@/lib/links";
 import { ReviewPrompt } from "@/components/recipe-actions";
 import { XpChip } from "@/components/xp-chip";
-import { LOWEST_PRICE, TRIAL_HEADLINE_DAYS } from "@/lib/billing/offers";
+import { TRIAL_HEADLINE_DAYS, offerById } from "@/lib/billing/offers";
 import { RECIPES } from "@/lib/data/recipes";
 import { byCategory, dishOfTheDay, forLevel, libraryRecipes } from "@/lib/library";
 import { totalMinutes } from "@/lib/links";
@@ -124,7 +124,7 @@ export default async function Discover({ searchParams }: { searchParams: Promise
       {viewer.plan === "free" && (
         <section className="mx-4 mt-12 rounded-3xl bg-accent-soft p-7">
           <h2 className="font-display text-2xl">Cook anything, at your level</h2>
-          <p className="mt-2 max-w-xl text-muted">Every recipe rewritten for you, hands-free cook mode and Fix My Mistake. {TRIAL_HEADLINE_DAYS} days free, then $45.09 a year or ${LOWEST_PRICE} a month.</p>
+          <p className="mt-2 max-w-xl text-muted">Every recipe rewritten for you, hands-free cook mode and Fix My Mistake. {TRIAL_HEADLINE_DAYS}-day Zero-Waste Challenge free, then the Executive Chef System at a ${offerById("executive")!.price} a year founding price (80% off).</p>
           <Link href="/checkout" className="mt-4 inline-flex min-h-12 items-center rounded-full bg-button px-6 font-semibold text-button-ink">Start free trial</Link>
         </section>
       )}
