@@ -26,7 +26,7 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
   if ((await headers()).get(LANDING_HEADER)) {
     return (
       <html lang="en">
-        <body className={`${body.variable} ${display.variable} bg-bg antialiased`}>
+        <body className={`${body.variable} ${display.variable} bg-black antialiased`}>
           {children}
           <PageViews />
         </body>
