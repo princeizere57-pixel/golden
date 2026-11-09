@@ -13,7 +13,7 @@ export function middleware(req: NextRequest) {
   const done = journeyComplete(req.cookies);
 
   // The landing page is full width; the layout skips the phone frame when it sees this header.
-  const landing = (!done && pathname === "/") || pathname === "/welcome";
+  const landing = pathname === "/landing";
   const headers = new Headers(req.headers);
   headers.delete(LANDING_HEADER);
   if (landing) headers.set(LANDING_HEADER, "1");
