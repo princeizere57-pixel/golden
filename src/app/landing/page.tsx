@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { FlameIcon, HatIcon, LifebuoyIcon, PanFireIcon, SteamingDishIcon, TrophyIcon } from "@/components/icons-3d";
 import { Countdown } from "@/components/landing/countdown";
-import { DoctorScreen, PantryScreen, Phone, SkillScreen, TimelineScreen } from "@/components/landing/phone";
+import { Phone, type Screen } from "@/components/landing/phone";
 import { Brand } from "@/components/site-chrome";
 import { launchState } from "@/lib/billing/launch";
 import { ATTRACTION, GUARANTEE, money, offerById, percentOff, perMonth } from "@/lib/billing/offers";
@@ -17,9 +18,16 @@ export const metadata: Metadata = {
 const executive = offerById("executive")!;
 const experience = offerById("experience")!;
 
-const NAV = [
-  ["Problem", "#problem"],
+/** Every part of the page, listed at the top so visitors can jump straight to it. */
+const SECTIONS = [
+  ["The problem", "#problem"],
+  ["Who it's for", "#avatars"],
   ["How it works", "#system"],
+  ["Real costs", "#pains"],
+  ["What you get", "#stack"],
+  ["Results", "#equation"],
+  ["Milestones", "#ranks"],
+  ["Compare", "#contrast"],
   ["Pricing", "#pricing"],
   ["Guarantee", "#guarantee"],
   ["FAQ", "#faq"],
@@ -30,19 +38,22 @@ const AVATARS = [
     title: "Ambitious professionals",
     pain: "You need real, nutrient-dense food to perform, but you don't have hours to plan, shop and babysit pans.",
     win: "Dinner planned from what you already have, cooked in under 35 hands-on minutes.",
-    tint: "from-[#5b4a12] to-[#14110a]",
+    photo: "/landing/avatar-professional.jpg",
+    alt: "A professional woman in a blazer cooking a quick stir-fry after work",
   },
   {
     title: "Busy parents",
     pain: "Different tastes, tight schedules and the nightly pressure to put something healthy on the table.",
     win: "One timeline for the whole family meal, so nothing burns while you help with homework.",
-    tint: "from-[#5a3518] to-[#140d08]",
+    photo: "/landing/avatar-parent.jpg",
+    alt: "A father and his young daughter laughing while they cook dinner together",
   },
   {
     title: "Home cooking enthusiasts",
     pain: "You know the basics, but multi-course timing and hosting turn into stress at the stove.",
     win: "Restaurant-style pacing and technique modules, so you cook freely and stay with your guests.",
-    tint: "from-[#3e4416] to-[#10110a]",
+    photo: "/landing/avatar-enthusiast.jpg",
+    alt: "A home cook serving a multi-course dinner to friends by candlelight",
   },
 ];
 
@@ -53,13 +64,13 @@ const FRUSTRATIONS = [
   ["Multi-dish chaos", "Two burners, one oven, three dishes and no idea what goes first."],
 ];
 
-const PILLARS: { tag: string; title: string; mechanism: string; text: string; screen: ReactNode; Icon: (p: { size?: number }) => ReactNode }[] = [
+const PILLARS: { tag: string; title: string; mechanism: string; text: string; screen: Screen; Icon: (p: { size?: number }) => ReactNode }[] = [
   {
     tag: "Pillar I · Prevention",
     title: "Mistakes stopped before they start",
     mechanism: "Skill-Adaptation Engine",
     text: "Every recipe recalibrates to your level and your kitchen: micro-steps and sensory cues for beginners, pro shorthand for confident cooks, technique and food science for chefs. Switch levels mid-cook.",
-    screen: <SkillScreen />,
+    screen: "cook",
     Icon: HatIcon,
   },
   {
@@ -67,7 +78,7 @@ const PILLARS: { tag: string; title: string; mechanism: string; text: string; sc
     title: "Your dish, rescued in seconds",
     mechanism: "'Fix My Mistake' AI Doctor",
     text: "Too salty, split, burnt or bland? Snap a photo or tap what you see. You get exact amounts for your pan, built on acid, fat, salt, sugar and heat, before dinner goes in the bin.",
-    screen: <DoctorScreen />,
+    screen: "fix",
     Icon: LifebuoyIcon,
   },
   {
@@ -75,7 +86,7 @@ const PILLARS: { tag: string; title: string; mechanism: string; text: string; sc
     title: "Every dish lands hot, together",
     mechanism: "Multi-Dish Timing Orchestrator",
     text: "Up to four recipes merge into one master timeline. Golden staggers every start, gives you one active task at a time, and chimes and vibrates when it's time to switch.",
-    screen: <TimelineScreen />,
+    screen: "timeline",
     Icon: PanFireIcon,
   },
 ];
@@ -141,30 +152,37 @@ export default async function LandingPage() {
   const totalValue = VALUE_STACK.reduce((s, v) => s + v.value, 0);
 
   return (
-    <div className="min-h-dvh overflow-x-hidden bg-black font-sans text-white">
-      {/* Floating pill navigation */}
-      <header className="sticky top-3 z-40 px-3 sm:top-5 sm:px-6">
-        <nav aria-label="Main" className="mx-auto flex max-w-6xl items-center justify-between rounded-full border border-white/10 bg-[#0d0d0d]/80 py-2 pl-5 pr-2 backdrop-blur-xl sm:pl-7">
-          <Link href="/" aria-label="Golden home"><Brand className="text-2xl text-white sm:text-3xl" /></Link>
-          <div className="hidden items-center gap-8 text-[15px] text-white/60 lg:flex">
-            {NAV.map(([label, href]) => <a key={href} href={href} className="transition hover:text-white">{label}</a>)}
-          </div>
-          <Link href="/signin" className="rounded-full bg-[#facc15] px-5 py-2.5 text-[15px] font-semibold text-black transition hover:bg-[#fde047] sm:px-6 sm:py-3">Try free</Link>
+    <div className="min-h-dvh overflow-x-hidden bg-black font-sans text-white [&_[id]]:scroll-mt-44">
+      <header className="sticky top-0 z-40 bg-black/85 backdrop-blur-xl">
+        {/* Countdown and founding spots left, always at the top */}
+        <a href="#pricing" className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 bg-[#facc15] px-3 py-2 text-center text-sm font-semibold text-black">
+          <span>{launch.open ? `${pct}% off founding price ends in` : "Founding price"}</span>
+          <Countdown endsAt={launch.endsAt} compact />
+          <span className="rounded-full bg-black px-2.5 py-0.5 text-[#facc15]">{launch.left.toLocaleString("en-US")} of {launch.spots.toLocaleString("en-US")} spots left</span>
+        </a>
+        <nav aria-label="Main" className="mx-auto flex max-w-6xl items-center justify-between px-4 pt-3 sm:px-6">
+          <Link href="/landing" aria-label="Golden home"><Brand className="text-2xl text-white sm:text-3xl" /></Link>
+          <Link href="/signin" className="rounded-full bg-[#facc15] px-5 py-2.5 text-[15px] font-semibold text-black transition hover:bg-[#fde047] sm:px-6">Try free</Link>
+        </nav>
+        {/* Every section of the page, one tap away */}
+        <nav aria-label="Sections" className="mx-auto max-w-6xl overflow-x-auto px-4 py-3 [scrollbar-width:none] sm:px-6">
+          <ul className="flex w-max gap-2">
+            {SECTIONS.map(([label, href]) => (
+              <li key={href}><a href={href} className="block whitespace-nowrap rounded-full border border-white/15 px-4 py-2 text-sm text-white/75 transition hover:border-[#facc15] hover:text-white">{label}</a></li>
+            ))}
+          </ul>
         </nav>
       </header>
 
       <main>
         {/* 1. Hero: the avatar, the 7 PM problem, the promise */}
-        <section className="relative px-5 pb-16 pt-16 text-center sm:pt-24">
+        <section className="relative px-5 pb-16 pt-12 text-center sm:pt-20">
           <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 mx-auto h-[36rem] max-w-4xl bg-[radial-gradient(ellipse_at_center,rgba(250,204,21,0.18),transparent_65%)]" />
-          <p className="relative mx-auto inline-flex rounded-full border border-white/15 px-4 py-1.5 text-sm text-white/70">
-            {launch.open ? `Founding launch · ${pct}% off · ${launch.left.toLocaleString("en-US")} of ${launch.spots.toLocaleString("en-US")} spots left` : "The Golden Executive Chef System"}
-          </p>
-          <h1 className="relative mx-auto mt-6 max-w-5xl text-[2.9rem] font-bold leading-[1.02] tracking-tight sm:text-7xl lg:text-[5.6rem]">
+          <h1 className="relative mx-auto max-w-5xl text-[2.9rem] font-bold leading-[1.02] tracking-tight sm:text-7xl lg:text-[5.6rem]">
             It&apos;s 7:00 PM. Dinner, <span className="text-gold">on autopilot.</span>
           </h1>
           <p className="relative mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-white/70 sm:text-xl">
-            Golden is built for the exhausted professional or parent walking through the door at 7:00 PM who doesn&apos;t want to browse recipes. You want to know exactly how to turn three random leftovers into dinner, avoid burning them, and get the meat and the vegetables finished at the exact same moment, without panic.
+            Home at 7 PM, three random leftovers, no plan? Golden turns them into dinner and times every dish to land hot together, in under 30 minutes. It&apos;s all done for you: just follow along.
           </p>
           <div className="relative mx-auto mt-9 flex max-w-xl flex-col gap-3 whitespace-nowrap sm:flex-row sm:justify-center">
             <Link href="/signin" className="rounded-full bg-[#facc15] px-8 py-4 text-lg font-semibold text-black transition hover:bg-[#fde047]">Start the free 3-day challenge</Link>
@@ -173,9 +191,9 @@ export default async function LandingPage() {
           <p className="relative mt-4 text-sm text-white/50">$0 today · cancel any time · iPhone, Android and web</p>
 
           <div className="relative mx-auto mt-16 flex max-w-5xl items-end justify-center gap-2">
-            <div className="hidden translate-y-10 md:block"><Phone tilt="left"><PantryScreen /></Phone></div>
-            <Phone tilt="none" className="z-10"><TimelineScreen /></Phone>
-            <div className="hidden translate-y-10 md:block"><Phone tilt="right"><DoctorScreen /></Phone></div>
+            <div className="hidden translate-y-10 md:block"><Phone screen="discover" tilt="left" /></div>
+            <Phone screen="plan" tilt="none" priority className="z-10" />
+            <div className="hidden translate-y-10 md:block"><Phone screen="fix" tilt="right" /></div>
           </div>
         </section>
 
@@ -205,10 +223,14 @@ export default async function LandingPage() {
           </h2>
           <div className="mx-auto mt-12 grid max-w-6xl gap-5 md:grid-cols-3">
             {AVATARS.map((a) => (
-              <article key={a.title} className={`flex min-h-[22rem] flex-col justify-end rounded-[2.5rem] bg-gradient-to-b ${a.tint} p-7`}>
-                <h3 className="text-2xl font-semibold">For {a.title.toLowerCase()}</h3>
-                <p className="mt-3 text-white/60">{a.pain}</p>
-                <p className="mt-4 border-t border-white/10 pt-4 font-medium text-[#fde68a]">{a.win}</p>
+              <article key={a.title} className="relative flex min-h-[34rem] flex-col justify-end overflow-hidden rounded-[2.5rem] p-7">
+                <Image src={a.photo} alt={a.alt} fill sizes="(min-width: 768px) 33vw, 100vw" className="object-cover" />
+                <div aria-hidden className="absolute inset-0 bg-gradient-to-b from-transparent via-black/55 to-black/95" />
+                <div className="relative">
+                  <h3 className="text-2xl font-semibold">For {a.title.toLowerCase()}</h3>
+                  <p className="mt-3 text-white/75">{a.pain}</p>
+                  <p className="mt-4 border-t border-white/15 pt-4 font-medium text-[#fde68a]">{a.win}</p>
+                </div>
               </article>
             ))}
           </div>
@@ -231,7 +253,7 @@ export default async function LandingPage() {
                   <p className="mt-2 text-lg font-semibold text-[#facc15]">{p.mechanism}</p>
                   <p className="mt-4 max-w-lg text-lg leading-relaxed text-white/65">{p.text}</p>
                 </div>
-                <div className="flex-1"><Phone tilt={i % 2 ? "left" : "right"}>{p.screen}</Phone></div>
+                <div className="flex-1"><Phone screen={p.screen} tilt={i % 2 ? "left" : "right"} /></div>
               </div>
             ))}
           </div>

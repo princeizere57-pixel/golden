@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 const pad = (n: number) => String(n).padStart(2, "0");
 
 /** Days, hours, minutes and seconds until the founding price ends. */
-export function Countdown({ endsAt }: { endsAt: string }) {
+export function Countdown({ endsAt, compact = false }: { endsAt: string; compact?: boolean }) {
   const end = Date.parse(endsAt);
   const [now, setNow] = useState<number | null>(null);
   useEffect(() => {
@@ -18,6 +18,14 @@ export function Countdown({ endsAt }: { endsAt: string }) {
   const parts = left === null
     ? ["--", "--", "--", "--"]
     : [Math.floor(left / 86_400_000), Math.floor(left / 3_600_000) % 24, Math.floor(left / 60_000) % 60, Math.floor(left / 1000) % 60].map(pad);
+
+  if (compact) {
+    return (
+      <span role="timer" aria-label="Time left at the founding price" className="font-bold tabular-nums">
+        {parts[0]}d {parts[1]}h {parts[2]}m {parts[3]}s
+      </span>
+    );
+  }
 
   return (
     <div role="timer" aria-label="Time left at the founding price" className="flex justify-center gap-2 sm:gap-3">
