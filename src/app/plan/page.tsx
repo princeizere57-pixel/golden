@@ -76,7 +76,7 @@ export default async function PlanPage({ searchParams }: { searchParams: Promise
         <h2 id="current" className="font-display text-[1.7rem]">{current.title}</h2>
         <p className="mt-1 text-muted">{difficulty(current).label} · about {formatDuration(totalMinutes(current))} · written for your {LEVEL[viewer.skill]} level</p>
 
-        <div className="mt-4">
+        <div className="mt-4 md:max-w-3xl">
           {current.youtube ? (
             <VideoSnippet id={current.youtube} title={current.title} />
           ) : current.image ? (

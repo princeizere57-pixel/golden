@@ -25,7 +25,7 @@ export function DishPicker({ options }: { options: DishOption[] }) {
 
   return (
     <>
-      <ul className="mt-6 grid grid-cols-2 gap-4">
+      <ul className="mt-6 grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
         {options.map((o) => {
           const on = picked.includes(o.slug);
           const full = !on && picked.length >= MAX_DISHES;

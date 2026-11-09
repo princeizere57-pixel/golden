@@ -81,7 +81,7 @@ export function CookView({ recipe, initialSkill, exitHref = `/recipes/${recipe.s
 
   return (
     <div className="cook-mode min-h-[calc(100vh-57px)] px-4 py-6">
-      <div className="mx-auto flex flex-col gap-6">
+      <div className="mx-auto flex max-w-3xl flex-col gap-6">
         <div className="flex items-center justify-between gap-4 text-sm">
           <Link href={exitHref} className="inline-flex min-h-16 items-center underline">Exit cook mode</Link>
           <span className="text-muted">{awake ? "Screen stays on" : "Screen may sleep"}</span>

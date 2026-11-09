@@ -176,7 +176,8 @@ body {
   transform-box: fill-box;
 }
 
-/* Phone-first frame: the whole app is one 480 px column; wider screens see it centred on a soft backdrop. */
+/* Phone-first frame: on phones the app fills the screen as one column (max 480 px); from tablet
+   width up, in a desktop browser, it extends into a wide layout (max 1180 px) on a soft backdrop. */
 html {
   background: #ece8e1;
 }
@@ -189,6 +190,11 @@ html {
   background: var(--bg);
   box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.04), 0 10px 40px rgba(0, 0, 0, 0.08);
   overflow-x: clip;
+}
+@media (min-width: 768px) {
+  .app-frame {
+    max-width: 1180px;
+  }
 }
 @media (max-width: 480px) {
   html {

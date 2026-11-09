@@ -97,7 +97,7 @@ function Grid({ heading, items, empty }: { heading: string; items: Array<{ recip
       {items.length === 0 ? (
         <p className="mt-2 text-muted">{empty}</p>
       ) : (
-        <ul className="mt-4 grid grid-cols-2 gap-4">
+        <ul className="mt-4 grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
           {items.map(({ recipe, difficulty: d }) => (
             <li key={recipe.slug}>
               <Link href={`/meals/${recipe.slug.slice(MEALDB_PREFIX.length)}`} className="group block">

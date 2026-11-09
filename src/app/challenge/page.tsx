@@ -15,7 +15,7 @@ const DAYS = [
       "Wilted herbs and greens go in iced water for 10 minutes; most perk right back up.",
       "Add the \"use tonight\" pile to your Golden pantry so recipes are matched to it.",
     ],
-    cta: { label: "Add items to my pantry", href: "/shopping#pantry" },
+    cta: { label: "Match my fridge to a meal", href: "/pantry" },
   },
   {
     day: 2,
@@ -28,7 +28,7 @@ const DAYS = [
       "Creamy pan sauce: fry onion or garlic, add stock or pasta water, reduce by half, finish with butter, cream or cheese. For pasta, chicken and vegetables.",
       "Taste each one and balance it: flat needs acid, harsh needs fat or sugar, dull needs salt.",
     ],
-    cta: { label: "See dinners from my pantry", href: "/" },
+    cta: { label: "Find dinners for my leftovers", href: "/pantry" },
   },
   {
     day: 3,
