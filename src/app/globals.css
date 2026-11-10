@@ -248,3 +248,60 @@ html {
     background: #ece8e1;
   }
 }
+
+/* Golden's claw: the loading mark (src/components/claw-loader.tsx). The gold claw image is the
+   base; a soft band of sunlight, clipped to the claw's own shape, sweeps diagonally from the top of
+   the strokes to their bottom ends. */
+.claw-mark {
+  position: relative;
+  display: inline-block;
+  flex-shrink: 0;
+  background: url("/brand/claw.png") center / contain no-repeat;
+}
+.claw-mark::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  -webkit-mask: url("/brand/claw.png") center / contain no-repeat;
+  mask: url("/brand/claw.png") center / contain no-repeat;
+  background: linear-gradient(135deg, transparent 38%, rgba(255, 251, 225, 0.25) 44%, rgba(255, 255, 245, 0.95) 50%, rgba(255, 251, 225, 0.25) 56%, transparent 62%) 0 0 / 200% 200% no-repeat;
+  background-position: 100% 100%;
+  opacity: 0;
+}
+.claw-loader {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .claw-mark::after {
+    animation: claw-shine 1.6s cubic-bezier(0.45, 0, 0.3, 1) infinite;
+  }
+  .claw-loader .claw-mark {
+    animation: claw-glow 1.6s ease-in-out infinite;
+  }
+  /* Only shows if loading takes a moment, so fast pages don't flash it. */
+  .claw-loader {
+    animation: claw-in 0.25s ease-out 0.12s both;
+  }
+}
+@keyframes claw-shine {
+  0% { background-position: 100% 100%; opacity: 1; }
+  70% { background-position: 0 0; opacity: 1; }
+  100% { background-position: 0 0; opacity: 0; }
+}
+@keyframes claw-glow {
+  0%, 100% { filter: drop-shadow(0 0 0 rgba(250, 204, 21, 0)); }
+  50% { filter: drop-shadow(0 0 14px rgba(250, 204, 21, 0.45)); }
+}
+@keyframes claw-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .claw-mark::after { display: none; }
+}

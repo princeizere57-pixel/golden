@@ -18,6 +18,7 @@ import { TIER_NAME, type Tier } from "@/lib/billing/entitlements";
 import type { OfferId } from "@/lib/billing/offers";
 import type { Store } from "@/lib/native/user-agent";
 import { track } from "@/lib/analytics";
+import { ClawInline } from "@/components/claw-loader";
 
 const WhopEmbed = dynamic(() => import("@/components/whop-embed").then((m) => m.WhopEmbed), { ssr: false });
 
@@ -159,7 +160,7 @@ export function CheckoutPanel({ user, level, tier, store: serverStore, offers, d
 
       {/* 4. Payment: Google Play in the Android app, nothing in the iPhone app (yet), Whop on the web */}
       {store === null ? (
-        <p className="mt-6 py-4 text-center text-muted" role="status">Loading payment…</p>
+        <p className="mt-6 py-4 text-center"><ClawInline text="Loading payment…" /></p>
       ) : android ? (
         <PlayCheckout offerId={chosen} offerName={offer.name} userId={user.id} />
       ) : store === "none" ? (

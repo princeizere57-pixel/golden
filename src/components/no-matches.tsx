@@ -10,6 +10,7 @@ import { useState, useTransition } from "react";
 import { generateRecipeAction } from "@/app/actions/import";
 import { saveImport } from "@/lib/import/store";
 import { unlockHref } from "@/components/plan-lock";
+import { ClawMark } from "@/components/claw-loader";
 
 /** `canWrite`: recipe writing is part of Executive; other plans see it with the plan that unlocks it. */
 export function NoMatches({ query, canWrite }: { query: string; canWrite: boolean }) {
@@ -47,7 +48,7 @@ export function NoMatches({ query, canWrite }: { query: string; canWrite: boolea
         </Link>
       ) : !unavailable && (
         <button onClick={write} disabled={pending} className="mt-4 min-h-14 w-full rounded-full bg-button text-lg font-semibold text-button-ink disabled:opacity-70">
-          {pending ? "Writing your recipe…" : `Write a recipe for “${query}”`}
+          {pending ? <span className="inline-flex items-center gap-2"><ClawMark size={30} />Writing your recipe…</span> : `Write a recipe for “${query}”`}
         </button>
       )}
       {error && <p role="alert" className="mt-3 text-sm text-tomato">{error}</p>}
