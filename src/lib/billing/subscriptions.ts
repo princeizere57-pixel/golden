@@ -106,8 +106,9 @@ export async function activeAccess(userId: string, fetchImpl: typeof fetch = fet
   try {
     const res = await fetchImpl(`${url}/rest/v1/subscriptions?user_id=eq.${userId}&select=*`, {
       headers: { apikey: key, Authorization: `Bearer ${key}` },
-      next: { revalidate: 30 },
-    } as RequestInit);
+      // Always fresh: a cached answer would keep a new buyer locked out right after paying.
+      cache: "no-store",
+    });
     if (!res.ok) return null;
     return accessFrom((await res.json()) as SubscriptionRow[]);
   } catch {

@@ -1,8 +1,30 @@
-# Be a Chef
+# Golden
 
 Recipes that adapt to your skill level, a hands-free cook mode with parallel timers, multi-dish timing, and "Fix My Mistake". Built with Next.js (App Router), React 19, Tailwind v4, TypeScript, Supabase, Gemini and Stripe.
 
 See [CLAUDE.md](CLAUDE.md) for the architecture and the Mob-derived design decisions.
+
+## Everything is in this repository
+
+You (and anyone you add on GitHub) can run, change and ship Golden with ordinary tools, without
+Claude Code or any AI subscription. Nothing lives outside the repo except your own accounts and
+their secret keys.
+
+| Where | What |
+|---|---|
+| `src/` | The whole app: pages (`src/app`), components, server actions, billing, AI fallbacks |
+| `supabase/` | Database schema and migrations (`setup_all.sql` = all of them in order) |
+| `android/`, `ios/`, `capacitor.config.ts`, `mobile/www` | The phone apps (Capacitor) |
+| `public/` | Images, step pictures, brand icons |
+| `design/brand/` | The original claw artwork and the scripts that make every icon |
+| `docs/SETUP.md` | Step-by-step setup: Supabase, Google sign-in, Gemini, Whop, Google Play, Vercel, building the phone apps |
+| `docs/BACKEND.md` | Backend handover: tables, environment variables, server actions, open items |
+| `docs/MOBILE.md` | The phone apps |
+| `CLAUDE.md` | Architecture and product rules (plain Markdown; useful to any developer) |
+| `.env.example` | Every setting the app reads. The real values (keys, secrets) are kept in your Vercel project's Environment Variables and your Supabase, Whop and Google consoles, never in git. Keep your own copy of them somewhere safe. |
+
+Typical workflow without Claude: edit in any editor (VS Code, Android Studio, Xcode), run the
+checks below, commit and push to GitHub; Vercel deploys `main` automatically.
 
 ## Run it
 
