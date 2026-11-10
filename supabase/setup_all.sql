@@ -187,6 +187,22 @@ alter table orders enable row level security;
 alter table community_posts enable row level security;
 alter table community_replies enable row level security;
 
+-- ===== supabase/migrations/0006_feedback.sql =====
+-- In-app feedback: a 1–5 rating and an optional note, asked after the third finished meal.
+-- Written by the server (service role) only; nobody can read it from the browser.
+
+create table if not exists feedback (
+  id bigserial primary key,
+  user_id uuid references auth.users on delete set null,
+  rating smallint not null check (rating between 1 and 5),
+  message text check (char_length(message) <= 1000),
+  meals_finished int,
+  created_at timestamptz not null default now()
+);
+create index if not exists feedback_created on feedback (created_at desc);
+
+alter table feedback enable row level security;
+
 -- ===== supabase/migrations/0005_seed_recipes.sql =====
 -- Seed recipes, generated from src/lib/data (recipes.ts + real-time-recipes.ts) by
 -- src/lib/data/recipes-sql.ts. Do not edit by hand: change the recipes, then run

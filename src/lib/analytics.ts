@@ -16,7 +16,8 @@ export type AnalyticsEvent =
   | "trial_started"
   | "dish_cooked"
   | "mistake_fixed"
-  | "pantry_match";
+  | "pantry_match"
+  | "feedback_sent";
 
 function distinctId(): string {
   try {

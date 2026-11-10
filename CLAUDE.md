@@ -148,6 +148,7 @@ These set The Chef's AI apart; keep them original (no third-party mascots, icon 
 - **Decision first, extras after:** checkout shows level benefits → plan choice → payment, then the giveaway.
 - **Feedback on every tap:** buttons and links press in slightly (`globals.css`, off under reduced motion). Visible focus ring everywhere.
 - **Focus while cooking:** no upsell in the header in cook mode; controls on the dark theme need visible borders.
+- **Feedback** (`FeedbackPrompt` on Discover, rules in `src/lib/feedback.ts`): asked only after the 3rd finished meal ("I made it!"); one bottom sheet with a 5-face rating and an optional note box that opens ready to type; thanks shows at once and the sheet closes itself while `sendFeedback` saves to the Supabase `feedback` table (migration 0006, service role only) in the background. "Not now" waits 3 more meals; after sending it never asks again. Replaces the old visit-based star prompt.
 - **Honest persuasion:** scarcity and countdowns must be real (the founding spots count comes from Supabase and the end date is fixed); no made-up statistics, any figure needs a source.
 
 
