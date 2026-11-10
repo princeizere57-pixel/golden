@@ -4,6 +4,7 @@ import { PhotoCard, Rail } from "@/components/discover";
 import { KitchenLog } from "@/components/kitchen-log";
 import { forLevel, libraryRecipes } from "@/lib/library";
 import { difficulty } from "@/lib/skill/difficulty";
+import { can } from "@/lib/billing/entitlements";
 import { getViewer } from "@/lib/viewer";
 
 export const metadata: Metadata = { title: "For you" };
@@ -44,9 +45,9 @@ export default async function ForYouPage() {
           Your skill path at <strong className="text-ink">{LEVEL[viewer.skill]}</strong> level.{" "}
           <Link href="/onboarding" className="underline">Retake the quiz</Link>
         </p>
-        <Link href="/pantry" className="mt-4 block rounded-2xl bg-accent-soft p-4">
+        <Link href={can(viewer.tier, "pantry") ? "/pantry" : "/checkout?plan=executive"} className="mt-4 block rounded-2xl bg-accent-soft p-4">
           <span className="block text-xs font-semibold uppercase tracking-wide text-muted">Pantry-to-Plate</span>
-          <span className="mt-1 block font-semibold leading-snug">Turn your leftovers into dinner</span>
+          <span className="mt-1 block font-semibold leading-snug">Turn your leftovers into dinner{!can(viewer.tier, "pantry") && <span className="ml-2 rounded-full bg-button px-2 py-0.5 text-[10px] font-bold text-button-ink">Executive</span>}</span>
         </Link>
       </div>
 

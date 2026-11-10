@@ -1,5 +1,8 @@
 import type { Metadata } from "next";
 import { PantryMatcher } from "@/components/pantry-matcher";
+import { LockedPage } from "@/components/plan-lock";
+import { can } from "@/lib/billing/entitlements";
+import { getViewer } from "@/lib/viewer";
 import { RECIPES } from "@/lib/data/recipes";
 import { libraryRecipes } from "@/lib/library";
 import { recipeHref } from "@/lib/links";
@@ -8,7 +11,8 @@ import { thumb } from "@/lib/mealdb/convert";
 export const metadata: Metadata = { title: "Pantry-to-Plate" };
 
 /** Pantry-to-Plate Matcher: leftovers in, a matching meal out. */
-export default function PantryPage() {
+export default async function PantryPage() {
+  if (!can((await getViewer()).tier, "pantry")) return <LockedPage feature="pantry" heading="Pantry-to-Plate" back={{ href: "/", label: "Back to Discover" }} />;
   const recipes = [...RECIPES, ...libraryRecipes()].map((r) => ({
     slug: r.slug,
     href: recipeHref(r),

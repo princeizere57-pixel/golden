@@ -1,8 +1,9 @@
 import { timingSafeEqual } from "node:crypto";
 import { NextResponse, type NextRequest } from "next/server";
 import { decodeRtdn, playStatus } from "@/lib/billing/google-play";
-import { getPlaySubscription, playApiConfigured, playExpiry, playPackageName, playStateToStatus } from "@/lib/billing/google-play-api";
+import { getPlaySubscription, playApiConfigured, playExpiry, playPackageName, playStatus as playSubscriptionStatus } from "@/lib/billing/google-play-api";
 import { saveSubscription, type SubscriptionUpdate } from "@/lib/billing/subscriptions";
+import { offerForPlayProduct } from "@/lib/billing/play-products";
 
 const sameSecret = (a: string, b: string) => a.length === b.length && timingSafeEqual(Buffer.from(a), Buffer.from(b));
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -28,9 +29,10 @@ export async function POST(req: NextRequest) {
     if (playApiConfigured()) {
       try {
         const sub = await getPlaySubscription(note.purchaseToken);
-        const status = playStateToStatus(sub.subscriptionState);
+        const status = playSubscriptionStatus(sub);
+        const offer = sub.lineItems?.map((l) => offerForPlayProduct(l.productId)).find(Boolean);
         const owner = sub.externalAccountIdentifiers?.obfuscatedExternalAccountId;
-        if (status) update = { provider: "google_play", externalId: note.purchaseToken, status, currentPeriodEnd: playExpiry(sub), ...(owner && UUID.test(owner) ? { userId: owner } : {}) };
+        if (status) update = { provider: "google_play", externalId: note.purchaseToken, status, currentPeriodEnd: playExpiry(sub), ...(offer ? { offer } : {}), ...(owner && UUID.test(owner) ? { userId: owner } : {}) };
       } catch (e) {
         // Ask Pub/Sub to redeliver later rather than guessing from the notification type.
         console.error("[rtdn] lookup failed", e);

@@ -5,6 +5,7 @@ import { getUser } from "@/lib/auth";
 import { newOrderId, offerById, type GoldenMetadata } from "@/lib/billing/offers";
 import { prepareWhopCheckout } from "@/lib/billing/whop-checkout";
 import { REF_COOKIE, isValidCode, referralCode } from "@/lib/giveaway";
+import { requestShell } from "@/lib/native/shell";
 import { SKILL_COOKIE } from "@/lib/viewer";
 
 export type StartCheckout =
@@ -13,6 +14,8 @@ export type StartCheckout =
 
 /** Starts a Whop checkout for the chosen offer with Golden's order and user IDs attached. */
 export async function startCheckout(offerId: string, payLater: boolean, origin: string): Promise<StartCheckout> {
+  // Inside the store apps, subscriptions go through the store's own billing, never Whop.
+  if (await requestShell()) return { ok: false, error: "In the app, subscribe through Google Play." };
   const user = await getUser();
   if (!user) return { ok: false, error: "Please sign in first." };
   const jar = await cookies();

@@ -18,18 +18,19 @@ export interface DishOption {
 }
 
 /** Grid of dishes at the cook's level; tick up to 4, then plan them together. */
-export function DishPicker({ options }: { options: DishOption[] }) {
+/** `max`: 1 on The Golden Experience (one dish at a time), up to MAX_DISHES on Executive. */
+export function DishPicker({ options, max = MAX_DISHES }: { options: DishOption[]; max?: number }) {
   const router = useRouter();
   const [picked, setPicked] = useState<string[]>([]);
   const toggle = (slug: string) =>
-    setPicked((p) => (p.includes(slug) ? p.filter((s) => s !== slug) : p.length < MAX_DISHES ? [...p, slug] : p));
+    setPicked((p) => (p.includes(slug) ? p.filter((s) => s !== slug) : max === 1 ? [slug] : p.length < max ? [...p, slug] : p));
 
   return (
     <>
       <ul className="mt-6 grid grid-cols-2 gap-4">
         {options.map((o) => {
           const on = picked.includes(o.slug);
-          const full = !on && picked.length >= MAX_DISHES;
+          const full = max > 1 && !on && picked.length >= max;
           return (
             <li key={o.slug}>
               <button onClick={() => toggle(o.slug)} disabled={full} aria-pressed={on} className="group block w-full text-left disabled:opacity-40">

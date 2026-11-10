@@ -1,6 +1,6 @@
 // Google Play subscriptions that match Golden's offers (src/lib/billing/offers.ts). Create these in
 // the Play Console under Monetize → Subscriptions with exactly these IDs: one product per offer,
-// a yearly auto-renewing base plan, and a "free trial" offer of 3 days on it.
+// a yearly auto-renewing base plan, and a "free trial" offer of 5 days on it.
 //
 // Pure helpers only (no network), shared by the checkout page and the server.
 
@@ -47,7 +47,7 @@ export interface PlayProductDetails {
 
 /**
  * The offer to buy: Play only returns offers this user is eligible for, so prefer one that starts
- * with a free phase (the 3-day trial), otherwise the plain base plan.
+ * with a free phase (the 5-day trial), otherwise the plain base plan.
  */
 export function pickPlayOffer(details: PlayProductDetails, basePlanId: string): PlayOffer | undefined {
   const onPlan = details.offers.filter((o) => o.basePlanId === basePlanId);
@@ -66,7 +66,7 @@ export function periodLabel(iso: string, perUnit = false): string {
   return `${n} ${n === 1 ? one : many}`;
 }
 
-/** Google Play's own price text for an offer, e.g. "3 days free, then US$100.00/year". */
+/** Google Play's own price text for an offer, e.g. "5 days free, then US$100.00/year". */
 export function describePlayOffer(offer: PlayOffer): string {
   const recurring = offer.phases.find((p) => p.recurrenceMode === 1) ?? offer.phases[offer.phases.length - 1];
   if (!recurring) return "";

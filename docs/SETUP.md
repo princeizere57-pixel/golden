@@ -35,11 +35,11 @@ Everything below goes into a file named `.env.local` in the project folder (copy
 
 ## 3. Whop: payments (embedded checkout)
 
-The checkout page shows Whop's payment form inside Golden (Whop Elements). Offers and prices live in `src/lib/billing/offers.ts` (identical in Golden and golden-v1): the **Golden Executive Chef System** ($100/year founding price, regular $500/year) and **The Golden Experience** ($50/year), both after the free 3-Day Zero-Waste Challenge (a 3-day trial).
+The checkout page shows Whop's payment form inside Golden (Whop Elements). Offers and prices live in `src/lib/billing/offers.ts` (identical in Golden and golden-v1): the **Golden Executive Chef System** ($100/year founding price, regular $500/year) and **The Golden Experience** ($50/year), both after the free 5-Day Zero-Waste Challenge (a 5-day trial with every feature unlocked).
 
 **Option A: plans you create in Whop (simplest)**
 1. In Whop, create one plan per offer with the same price, type and trial.
-2. Copy each plan ID (`plan_…`) into `.env.local`: `WHOP_PLAN_EXECUTIVE` ($100/year founding price) and `WHOP_PLAN_EXPERIENCE` ($50/year), both with a 3-day free trial.
+2. Copy each plan ID (`plan_…`) into `.env.local`: `WHOP_PLAN_EXECUTIVE` ($100/year founding price) and `WHOP_PLAN_EXPERIENCE` ($50/year), both with a 5-day free trial.
 
 **Option B: let Golden create them (also enables Buy now, pay later)**
 1. Whop dashboard → Developer → API keys: create a key → `WHOP_API_KEY`.
@@ -51,7 +51,7 @@ The checkout page shows Whop's payment form inside Golden (Whop Elements). Offer
 - After payment Whop returns buyers to `/checkout/return` with `payment` and `status`.
 
 ### Older link-based setup
-1. In your Whop dashboard create a **product** (e.g. "The Chef's Golden Premium") with two **plans**: $100/year (Executive Chef System) and $50/year (The Golden Experience), each with a **3-day free trial**.
+1. In your Whop dashboard create a **product** (e.g. "The Chef's Golden Premium") with two **plans**: $100/year (Executive Chef System) and $50/year (The Golden Experience), each with a **5-day free trial**.
 2. Copy each plan's **checkout link** →
    ```
    WHOP_CHECKOUT_URL_YEAR=https://whop.com/...
@@ -66,7 +66,7 @@ The checkout page shows Whop's payment form inside Golden (Whop Elements). Offer
 
 Inside the Android app Google Play is the merchant of record; the website keeps using Whop.
 
-1. **Play Console → Monetize → Subscriptions:** create two subscriptions with exactly these IDs, each with an auto-renewing yearly base plan `yearly` and a 3-day free-trial offer on it:
+1. **Play Console → Monetize → Subscriptions:** create two subscriptions with exactly these IDs, each with an auto-renewing yearly base plan `yearly` and a 5-day free-trial offer on it:
    - `golden_executive`: $100/year (Golden Executive Chef System)
    - `golden_experience`: $50/year (The Golden Experience)
 2. **Service account:** in Google Cloud create a service account and a JSON key. In the Play Console → Users and permissions, invite its email with *View financial data* and *Manage orders and subscriptions*. Put the whole JSON (one line) in `GOOGLE_PLAY_SERVICE_ACCOUNT_JSON` on Vercel (mark it sensitive).
@@ -86,3 +86,13 @@ How it works: the app shows Google Play's prices and purchase sheet (`PlayBillin
 3. Paste every variable from `.env.local` into **Settings → Environment Variables**.
 4. Deploy, then add the live URL to Supabase (step 1.4), Google (step 1.7.3) and Whop (steps 3.3–3.4).
 5. The recipe library cache isn't committed: add a build step or run `npm run data:mealdb` locally and let pages fall back to the live TheMealDB API (both work).
+
+## Build the phone apps (Android and iPhone)
+
+The apps load the live site, so most changes reach them without a new build. Rebuild when the
+icons, splash screen, app settings (`capacitor.config.ts`) or native code change.
+
+1. `npm install`, then `npx cap sync` (copies the settings and the offline page into `android/` and `ios/`; those copies are not in git).
+2. **Android** (any computer with Android Studio): `npx cap open android`, then Build → Generate Signed App Bundle (`.aab`) and upload it to a Play Console testing track. From a terminal with the Android SDK installed: `cd android && ./gradlew bundleRelease` (signing set up in `android/app/build.gradle`).
+3. **iPhone** (a Mac with Xcode): `npx cap open ios`, choose your team under Signing & Capabilities, then Product → Archive and upload to App Store Connect / TestFlight.
+4. After installing, check: the black claw icon and splash, the loader on page changes, and that checkout shows Google Play on Android and no payment option on iPhone (never Whop).

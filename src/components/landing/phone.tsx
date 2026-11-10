@@ -15,7 +15,7 @@ const ALT: Record<Screen, string> = {
   timeline: "The multi-dish timeline: one hands-on task at a time",
   cook: "Hands-free cook mode with the skill level slider",
   fix: "Fix My Mistake: snap the dish or tap what went wrong",
-  foryou: "For you: the 3-Day Challenge, technique modules and Mini You",
+  foryou: "For you: the 5-Day Challenge, technique modules and Mini You",
 };
 
 function StatusBar() {

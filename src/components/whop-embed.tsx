@@ -6,6 +6,7 @@ import { Checkout, CheckoutElement, WhopElements } from "@whop/elements-react";
 import { loadWhop } from "@whop/elements";
 import { useEffect, useState } from "react";
 import { track } from "@/lib/analytics";
+import { ClawInline } from "@/components/claw-loader";
 
 type Props = {
   plan?: string;
@@ -19,7 +20,7 @@ export function WhopEmbed({ plan, checkoutConfiguration, metadata, returnUrl, of
   // Load the SDK in the browser only.
   const [elements, setElements] = useState<ReturnType<typeof loadWhop> | null>(null);
   useEffect(() => setElements(loadWhop()), []);
-  if (!elements) return <p className="py-8 text-center text-muted">Loading secure checkout…</p>;
+  if (!elements) return <p className="py-8 text-center"><ClawInline text="Loading secure checkout…" /></p>;
 
   return (
     <WhopElements elements={elements}>
@@ -27,7 +28,7 @@ export function WhopEmbed({ plan, checkoutConfiguration, metadata, returnUrl, of
         {...(checkoutConfiguration ? { checkoutConfiguration } : { plan })}
         metadata={metadata}
         returnUrl={returnUrl}
-        fallback={<p className="py-8 text-center text-muted">Loading secure checkout…</p>}
+        fallback={<p className="py-8 text-center"><ClawInline text="Loading secure checkout…" /></p>}
         onComplete={(completion) => {
           if (completion.result === "payment") track("trial_started", { offer, provider: "whop" });
         }}

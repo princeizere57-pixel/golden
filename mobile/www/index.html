@@ -9,11 +9,17 @@
       h1 { font-size: 44px; margin: 0; font-weight: 800; letter-spacing: -0.02em; }
       .gold { background: linear-gradient(135deg, #a6761d, #f6d77a 35%, #d4a32a 55%, #fbe7a1 72%, #b07d1a); -webkit-background-clip: text; background-clip: text; color: transparent; }
       p { color: #6d6761; margin: 16px 0 28px; }
+      .claw { position: relative; width: 112px; height: 112px; margin: 0 auto 20px; background: url(claw.png) center / contain no-repeat; }
+      .claw::after { content: ""; position: absolute; inset: 0; -webkit-mask: url(claw.png) center / contain no-repeat; mask: url(claw.png) center / contain no-repeat;
+        background: linear-gradient(135deg, transparent 36%, rgba(184,134,11,.55) 42%, #f5c518 47%, #ffe27a 50%, #f5c518 53%, rgba(184,134,11,.55) 58%, transparent 64%) 0 0 / 200% 200% no-repeat; background-position: 100% 100%; opacity: 0; }
+      @media (prefers-reduced-motion: no-preference) { .claw::after { animation: shine 1.6s cubic-bezier(.45,0,.3,1) infinite; } }
+      @keyframes shine { 0% { background-position: 100% 100%; opacity: 1; } 70% { background-position: 0 0; opacity: 1; } 100% { background-position: 0 0; opacity: 0; } }
       button { min-height: 56px; padding: 0 32px; border: 0; border-radius: 999px; background: #facc15; color: #1f1d1b; font-size: 18px; font-weight: 600; }
     </style>
   </head>
   <body>
     <main>
+      <div class="claw" aria-hidden="true"></div>
       <h1><span class="gold">Gold</span>en</h1>
       <p>You're offline. Connect to the internet and we'll pick up right where you left off.</p>
       <button onclick="location.href='https://golden-two-pi.vercel.app'">Try again</button>

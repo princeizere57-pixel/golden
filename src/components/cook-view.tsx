@@ -42,7 +42,8 @@ function useWakeLock() {
   return held;
 }
 
-export function CookView({ recipe, initialSkill, exitHref = `/recipes/${recipe.slug}` }: { recipe: Recipe; initialSkill: SkillLevel; exitHref?: string }) {
+/** `canFix`: Fix My Mistake is part of Executive; other plans cook without the floating helper. */
+export function CookView({ recipe, initialSkill, canFix, exitHref = `/recipes/${recipe.slug}` }: { recipe: Recipe; initialSkill: SkillLevel; canFix: boolean; exitHref?: string }) {
   const [skill, setSkill] = useState(initialSkill);
   const [index, setIndex] = useState(0);
   const { timers, now, start } = useTimers();
@@ -138,7 +139,7 @@ export function CookView({ recipe, initialSkill, exitHref = `/recipes/${recipe.s
           )}
         </div>
       </div>
-      <FixMyMistake slug={recipe.slug} dish={recipe.title} defaultVolumeMl={Math.max(250, Math.round(volume / 50) * 50)} />
+      {canFix && <FixMyMistake slug={recipe.slug} dish={recipe.title} defaultVolumeMl={Math.max(250, Math.round(volume / 50) * 50)} />}
       {done && <Celebration recipe={recipe} result={done} backToPlan={exitHref.startsWith("/plan") ? exitHref : undefined} />}
     </div>
   );

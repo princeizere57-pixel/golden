@@ -1,53 +1,18 @@
-"use client";
-
-// Shown when a search finds nothing in Golden's library or TheMealDB: Golden offers to write an
-// original recipe for that dish (Gemini, saved privately like an import), or to import one
-// recipe page from a link. Either way the cook ends up in the same cook mode.
+// Shown when a search finds nothing in Golden's library or TheMealDB: one clear next step
+// (import that recipe from a link, kept private like every import), or keep browsing.
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useState, useTransition } from "react";
-import { generateRecipeAction } from "@/app/actions/import";
-import { saveImport } from "@/lib/import/store";
 
 export function NoMatches({ query }: { query: string }) {
-  const router = useRouter();
-  const [error, setError] = useState<string | null>(null);
-  const [unavailable, setUnavailable] = useState(false);
-  const [pending, start] = useTransition();
-
-  function write() {
-    setError(null);
-    start(async () => {
-      const result = await generateRecipeAction(query);
-      if (result.ok) {
-        saveImport(result.recipe);
-        router.push(`/my/${result.recipe.slug}`);
-        return;
-      }
-      if (result.reason === "sign-in") {
-        router.push("/signin");
-        return;
-      }
-      setUnavailable(result.reason === "unavailable");
-      setError(result.error);
-    });
-  }
-
   return (
-    <section className="mt-8 rounded-3xl bg-surface p-6" aria-live="polite">
+    <section className="mt-8 rounded-3xl bg-surface p-6">
       <h2 className="text-xl font-bold">No &ldquo;{query}&rdquo; in the library yet</h2>
-      <p className="mt-1 text-muted">Golden can write you an original recipe for it, ready for cook mode at your level, in about 15 seconds.</p>
-      {!unavailable && (
-        <button onClick={write} disabled={pending} className="mt-4 min-h-14 w-full rounded-full bg-button text-lg font-semibold text-button-ink disabled:opacity-70">
-          {pending ? "Writing your recipe…" : `Write a recipe for “${query}”`}
-        </button>
-      )}
-      {error && <p role="alert" className="mt-3 text-sm text-tomato">{error}</p>}
-      <Link href="/import" className="mt-3 flex min-h-12 items-center justify-center rounded-full border-2 border-button font-semibold">
-        Have a link? Import that recipe
+      <p className="mt-1 text-muted">Found it on another site? Paste the link and Golden turns it into steps at your level, with timers and cook mode.</p>
+      <Link href="/import" className="mt-4 flex min-h-14 items-center justify-center rounded-full bg-button text-lg font-semibold text-button-ink">
+        Import a recipe from a link
       </Link>
-      <p className="mt-3 text-xs text-muted">Recipes written or imported for you stay private on this device.</p>
+      <Link href="/explore" className="mt-2 flex min-h-12 items-center justify-center font-medium underline">Browse every recipe</Link>
+      <p className="mt-3 text-xs text-muted">Imported recipes stay private on this device.</p>
     </section>
   );
 }

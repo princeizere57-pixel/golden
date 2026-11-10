@@ -3,6 +3,7 @@ import Link from "next/link";
 import { FixPanel } from "@/components/fix-panel";
 import { IngredientPills } from "@/components/ingredient-pills";
 import { MealPlanner } from "@/components/meal-planner";
+import { LockedPage, PlanLock } from "@/components/plan-lock";
 import { DishCards, DishPicker, FinishDish, type DishOption } from "@/components/plan-dishes";
 import { SkillSteps } from "@/components/skill-steps";
 import { VideoSnippet } from "@/components/video-snippet";
@@ -11,6 +12,7 @@ import { forLevel, libraryRecipes } from "@/lib/library";
 import { MAX_DISHES, formatDuration, planHref, recipeHref, totalMinutes } from "@/lib/links";
 import { findRecipe } from "@/lib/mealdb/client";
 import { thumb } from "@/lib/mealdb/convert";
+import { can } from "@/lib/billing/entitlements";
 import { difficulty } from "@/lib/skill/difficulty";
 import type { Recipe } from "@/lib/types";
 import { getViewer } from "@/lib/viewer";
@@ -28,8 +30,14 @@ const option = (r: Recipe): DishOption => ({ slug: r.slug, title: r.title, image
  */
 export default async function PlanPage({ searchParams }: { searchParams: Promise<{ dish?: string | string[]; active?: string }> }) {
   const viewer = await getViewer();
+  if (!can(viewer.tier, "singleDishPlan")) return <LockedPage feature="singleDishPlan" heading="Plan a meal" back={{ href: "/explore", label: "Browse recipes instead" }} />;
+  // Executive times 2–4 dishes together; The Golden Experience plans one dish at a time.
+  const multi = can(viewer.tier, "multiDish");
+  const max = multi ? MAX_DISHES : 1;
+  const canFix = can(viewer.tier, "fixMyMistake");
   const params = await searchParams;
-  const slugs = [...new Set([params.dish ?? []].flat())].filter((s) => /^[a-z0-9-]{2,80}$/.test(s)).slice(0, MAX_DISHES);
+  const asked = [...new Set([params.dish ?? []].flat())].filter((s) => /^[a-z0-9-]{2,80}$/.test(s));
+  const slugs = asked.slice(0, max);
   const dishes = (await Promise.all(slugs.map((s) => findRecipe(s, getRecipe)))).filter((r): r is Recipe => Boolean(r));
 
   if (!dishes.length) {
@@ -40,9 +48,14 @@ export default async function PlanPage({ searchParams }: { searchParams: Promise
       <main className="mx-auto px-4 pb-10 pt-6">
         <h1 className="font-display text-[2.3rem]">Plan a meal</h1>
         <p className="mt-2 text-muted">
-          Pick one dish, or up to {MAX_DISHES} to cook together, made for your <strong className="text-ink">{LEVEL[viewer.skill]}</strong> level. We&apos;ll time them so everything finishes hot at once.
+          {multi ? (
+            <>Pick one dish, or up to {MAX_DISHES} to cook together, made for your <strong className="text-ink">{LEVEL[viewer.skill]}</strong> level. We&apos;ll time them so everything finishes hot at once.</>
+          ) : (
+            <>Pick a dish made for your <strong className="text-ink">{LEVEL[viewer.skill]}</strong> level. We&apos;ll time every step for you.</>
+          )}
         </p>
-        <DishPicker options={choices.map(option)} />
+        {!multi && <div className="mt-4"><PlanLock feature="multiDish" compact /></div>}
+        <DishPicker options={choices.map(option)} max={max} />
         <p className="mt-8 text-sm text-muted">Looking for something else? <Link href="/explore" className="underline">Explore every recipe</Link>, then tap &ldquo;Plan &amp; cook this&rdquo;.</p>
       </main>
     );
@@ -59,6 +72,7 @@ export default async function PlanPage({ searchParams }: { searchParams: Promise
     <main className="mx-auto px-4 pb-10 pt-6">
       <Link href="/plan" className="text-sm underline">← Choose different meals</Link>
       <h1 className="mt-3 font-display text-[2rem]">{dishes.length === 1 ? current.title : `Your ${dishes.length}-dish meal`}</h1>
+      {!multi && asked.length > 1 && <div className="mt-4"><PlanLock feature="multiDish" compact /></div>}
 
       {dishes.length > 1 && (
         <>
@@ -106,7 +120,11 @@ export default async function PlanPage({ searchParams }: { searchParams: Promise
       </section>
 
       <div className="mt-10">
-        <FixPanel dish={current.title} defaultVolumeMl={Math.max(250, Math.round(volume / 50) * 50)} aiReady={Boolean(process.env.GEMINI_API_KEY)} />
+        {canFix ? (
+          <FixPanel dish={current.title} defaultVolumeMl={Math.max(250, Math.round(volume / 50) * 50)} aiReady={Boolean(process.env.GEMINI_API_KEY)} />
+        ) : (
+          <PlanLock feature="fixMyMistake" compact />
+        )}
       </div>
     </main>
   );

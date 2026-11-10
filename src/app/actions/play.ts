@@ -9,6 +9,7 @@ import { getUser } from "@/lib/auth";
 import { acknowledgePlaySubscription, getPlaySubscription, judgePlaySubscription, playApiConfigured } from "@/lib/billing/google-play-api";
 import { offerForPlayProduct } from "@/lib/billing/play-products";
 import { ENTITLED, saveSubscription } from "@/lib/billing/subscriptions";
+import { planCookieValue } from "@/lib/billing/entitlements";
 import { signValue } from "@/lib/signed-cookie";
 import { PLAN_COOKIE } from "@/lib/viewer";
 
@@ -19,7 +20,8 @@ export type PlayResult = { ok: true; premium: boolean } | { ok: false; error: st
 export async function verifyPlayPurchase(productId: string, purchaseToken: string): Promise<PlayResult> {
   const user = await getUser();
   if (!user) return { ok: false, error: "Please sign in first." };
-  if (!offerForPlayProduct(productId)) return { ok: false, error: "Unknown plan." };
+  const offer = offerForPlayProduct(productId);
+  if (!offer) return { ok: false, error: "Unknown plan." };
   if (!/^[\w.:-]{20,2048}$/.test(purchaseToken)) return { ok: false, error: "That purchase couldn't be read." };
   if (!playApiConfigured()) return { ok: false, error: "Google Play purchases aren't switched on yet. You haven't been charged twice; contact support." };
 
@@ -33,13 +35,13 @@ export async function verifyPlayPurchase(productId: string, purchaseToken: strin
   }
   if (!verdict.ok) return { ok: false, error: verdict.reason };
 
-  await saveSubscription({ provider: "google_play", externalId: purchaseToken, status: verdict.status, userId: user.id, currentPeriodEnd: verdict.expiry }).catch((e) =>
+  await saveSubscription({ provider: "google_play", externalId: purchaseToken, status: verdict.status, userId: user.id, currentPeriodEnd: verdict.expiry, offer }).catch((e) =>
     console.error("[play] could not save subscription", e),
   );
   if (verdict.needsAck) await acknowledgePlaySubscription(productId, purchaseToken).catch((e) => console.error("[play] acknowledge failed", e));
 
   const jar = await cookies();
-  jar.set(PLAN_COOKIE, signValue(verdict.entitled ? "premium" : "free"), { maxAge: YEAR, sameSite: "lax", path: "/", httpOnly: true });
+  jar.set(PLAN_COOKIE, signValue(verdict.entitled ? planCookieValue(offer, verdict.status === "trialing" && verdict.expiry ? Date.parse(verdict.expiry) : undefined) : "free"), { maxAge: YEAR, sameSite: "lax", path: "/", httpOnly: true });
   if (verdict.entitled) await markJourneyDone();
   return { ok: true, premium: verdict.entitled };
 }

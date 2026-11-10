@@ -2,6 +2,8 @@ import { elapsedMinutes } from "@/lib/links";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { UnlockButton } from "@/components/plan-lock";
+import { can } from "@/lib/billing/entitlements";
 import { AddToListButton, SaveButton } from "@/components/recipe-actions";
 import { SkillSteps } from "@/components/skill-steps";
 import { SourcePhoto } from "@/components/source-photo";
@@ -24,7 +26,8 @@ export default async function RecipePage({ params }: Props) {
   const recipe = getRecipe((await params).slug);
   if (!recipe) notFound();
   const viewer = await getViewer();
-  const locked = recipe.premium && viewer.plan === "free";
+  const locked = recipe.premium && !can(viewer.tier, "premiumRecipes");
+  const canCook = can(viewer.tier, "cookMode");
   const total = elapsedMinutes(recipe.blocks);
 
   return (
@@ -49,7 +52,9 @@ export default async function RecipePage({ params }: Props) {
           ))}
         </ul>
         {locked ? (
-          <Link href="/checkout" className="mt-6 flex min-h-14 items-center justify-center rounded-full bg-button font-semibold text-button-ink">Unlock with a free trial</Link>
+          <UnlockButton feature="premiumRecipes" label="Unlock this recipe" />
+        ) : !canCook ? (
+          <UnlockButton feature="cookMode" label="Unlock cook mode" />
         ) : (
           <>
             <Link href={`/recipes/${recipe.slug}/cook`} className="mt-6 flex min-h-14 items-center justify-center rounded-full bg-button text-lg font-semibold text-button-ink">Start cook mode</Link>

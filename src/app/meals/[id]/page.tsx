@@ -2,6 +2,8 @@ import { elapsedMinutes } from "@/lib/links";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { UnlockButton } from "@/components/plan-lock";
+import { can } from "@/lib/billing/entitlements";
 import { AddToListButton, SaveButton } from "@/components/recipe-actions";
 import { SkillSteps } from "@/components/skill-steps";
 import { SourcePhoto } from "@/components/source-photo";
@@ -44,8 +46,14 @@ export default async function MealPage({ params }: Props) {
           <SaveButton recipe={recipe} />
           <AddToListButton recipe={recipe} />
         </div>
-        <Link href={`/plan?dish=mealdb-${id}`} className="mt-4 flex min-h-14 items-center justify-center rounded-full border-2 border-button font-semibold">Plan &amp; cook this</Link>
-        <Link href={`/meals/${id}/cook`} className="mt-3 flex min-h-14 items-center justify-center rounded-full bg-button font-semibold text-button-ink">Start cook mode</Link>
+        {can(viewer.tier, "cookMode") ? (
+          <>
+            <Link href={`/meals/${id}/cook`} className="mt-4 flex min-h-14 items-center justify-center rounded-full bg-button font-semibold text-button-ink">Start cook mode</Link>
+            <Link href={`/plan?dish=mealdb-${id}`} className="mt-3 flex min-h-12 items-center justify-center rounded-full border-2 border-button font-semibold">Plan &amp; cook this</Link>
+          </>
+        ) : (
+          <UnlockButton feature="cookMode" label="Unlock cook mode" />
+        )}
       </aside>
       <section aria-label="Method">
         <SkillSteps recipe={recipe} initialSkill={viewer.skill} />

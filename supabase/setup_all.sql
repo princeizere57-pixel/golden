@@ -203,6 +203,13 @@ create index if not exists feedback_created on feedback (created_at desc);
 
 alter table feedback enable row level security;
 
+-- ===== supabase/migrations/0007_plan_tiers.sql =====
+-- Which plan each subscription is for, so the app can unlock exactly what was bought
+-- (src/lib/billing/entitlements.ts). Rows without one (older rows, Stripe, App Store) count as
+-- Executive. Safe to run more than once.
+alter table subscriptions add column if not exists offer text
+  check (offer is null or offer in ('executive', 'experience'));
+
 -- ===== supabase/migrations/0005_seed_recipes.sql =====
 -- Seed recipes, generated from src/lib/data (recipes.ts + real-time-recipes.ts) by
 -- src/lib/data/recipes-sql.ts. Do not edit by hand: change the recipes, then run
