@@ -2,7 +2,7 @@
 
 // Save, add-to-shopping-list and share buttons, the review prompt, and the store hook.
 
-import { useEffect, useRef, useState, useSyncExternalStore } from "react";
+import { useRef, useState, useSyncExternalStore } from "react";
 import { STORE_EVENT, addToShopping, isSaved, listPantry, listSaved, listShopping, toggleSaved } from "@/lib/device-store";
 import { covers } from "@/lib/pantry";
 import { formatDuration, recipeHref, totalMinutes } from "@/lib/links";
@@ -122,61 +122,3 @@ export function SavedGrid() {
   );
 }
 
-const VISITS = "bac-visits";
-const REVIEWED = "bac-review-done";
-
-/** Bottom sheet that asks for a rating after a few visits; never shows again once answered. */
-export function ReviewPrompt() {
-  const [open, setOpen] = useState(false);
-  const [stars, setStars] = useState(0);
-  const [thanks, setThanks] = useState(false);
-
-  useEffect(() => {
-    try {
-      if (localStorage.getItem(REVIEWED)) return;
-      const visits = Number(localStorage.getItem(VISITS) ?? 0) + 1;
-      localStorage.setItem(VISITS, String(visits));
-      if (visits >= 3) {
-        const t = setTimeout(() => setOpen(true), 1500);
-        return () => clearTimeout(t);
-      }
-    } catch {}
-  }, []);
-
-  function close(done: boolean) {
-    try {
-      if (done) localStorage.setItem(REVIEWED, "1");
-      else localStorage.setItem(VISITS, "0");
-    } catch {}
-    setOpen(false);
-  }
-
-  if (!open) return null;
-  return (
-    <div className="fixed inset-0 z-50 flex items-end bg-black/40" onClick={() => close(false)}>
-      <div role="dialog" aria-modal="true" aria-labelledby="review-title" className="step-in mx-auto w-full max-w-lg rounded-t-3xl bg-bg px-6 pb-8 pt-7 text-center" onClick={(e) => e.stopPropagation()}>
-        {thanks ? (
-          <>
-            <h2 id="review-title" className="text-2xl font-semibold">Thank you!</h2>
-            <p className="mt-2 text-muted">Your rating helps us decide what to build next.</p>
-            <button onClick={() => close(true)} className="mt-6 min-h-14 w-full rounded-full bg-button text-lg font-semibold text-button-ink">Back to cooking</button>
-          </>
-        ) : (
-          <>
-            <h2 id="review-title" className="text-2xl font-semibold">Enjoying Golden?</h2>
-            <p className="mt-2 text-muted">How is it helping your cooking? It takes two seconds.</p>
-            <div className="mt-5 flex justify-center gap-2" role="radiogroup" aria-label="Rating">
-              {[1, 2, 3, 4, 5].map((n) => (
-                <button key={n} role="radio" aria-checked={stars === n} aria-label={`${n} star${n > 1 ? "s" : ""}`} onClick={() => setStars(n)} className={`h-12 w-12 text-3xl ${n <= stars ? "text-accent" : "text-line"}`}>
-                  ★
-                </button>
-              ))}
-            </div>
-            <button disabled={!stars} onClick={() => setThanks(true)} className="mt-5 min-h-14 w-full rounded-full bg-button text-lg font-semibold text-button-ink disabled:bg-line disabled:text-muted">Send rating</button>
-            <button onClick={() => close(false)} className="mt-2 min-h-12 w-full font-medium">Skip for now</button>
-          </>
-        )}
-      </div>
-    </div>
-  );
-}

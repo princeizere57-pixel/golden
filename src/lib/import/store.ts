@@ -25,7 +25,10 @@ function write(recipes: Recipe[]) {
 }
 
 export function saveImport(recipe: Recipe) {
-  write([recipe, ...listImports().filter((r) => r.source?.url !== recipe.source?.url)]);
+  // Re-importing the same page replaces it. Generated recipes have no source link, so they're
+  // only ever replaced by the same slug.
+  const url = recipe.source?.url;
+  write([recipe, ...listImports().filter((r) => r.slug !== recipe.slug && !(url && r.source?.url === url))]);
 }
 
 export function removeImport(slug: string) {

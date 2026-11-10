@@ -5,7 +5,7 @@ import { FridgeIcon } from "@/components/icons-3d";
 import { MiniYou } from "@/components/mini-you";
 import { PantryRail } from "@/components/pantry";
 import { recipeHref } from "@/lib/links";
-import { ReviewPrompt } from "@/components/recipe-actions";
+import { FeedbackPrompt } from "@/components/feedback-prompt";
 import { TodayCard } from "@/components/today-card";
 import { TRIAL_HEADLINE_DAYS, offerById } from "@/lib/billing/offers";
 import { RECIPES } from "@/lib/data/recipes";
@@ -155,7 +155,7 @@ export default async function Discover({ searchParams }: { searchParams: Promise
       )}
 
       <p className="mt-10 px-4 text-xs text-muted">Recipe photos from TheMealDB.</p>
-      <ReviewPrompt />
+      <FeedbackPrompt />
     </main>
   );
 }

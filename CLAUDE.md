@@ -124,6 +124,8 @@ These set The Chef's AI apart; keep them original (no third-party mascots, icon 
 - **Analytics:** `src/lib/analytics.ts` (PostHog capture API, no-op without `NEXT_PUBLIC_POSTHOG_KEY`, honours Do Not Track) + `PageViews`.
 - **Tabs:** Discover, For you, Plan a meal (pan on fire), Shopping list, Saved.
 - Setup steps for Supabase, Google, Gemini, Whop, analytics and Vercel: `docs/SETUP.md`.
+- Backend handover (tables, env, server actions, what is still on-device, open items): `docs/BACKEND.md`.
+- Recipes not in the library: `/explore` search offers "Write a recipe" (`generateRecipeAction`, `src/lib/ai/generate-recipe.ts`, Gemini, original wording, saved privately like an import); without `GEMINI_API_KEY` it offers import-from-link. Session and plan cookies are HMAC-signed (`src/lib/signed-cookie.ts`, `SESSION_SECRET`); Premium comes from `subscriptions` rows when signed in (`hasActiveSubscription`).
 
 ## 11. Plan a meal (recipe-first flow)
 
@@ -148,6 +150,7 @@ These set The Chef's AI apart; keep them original (no third-party mascots, icon 
 - **Decision first, extras after:** checkout shows level benefits → plan choice → payment, then the giveaway.
 - **Feedback on every tap:** buttons and links press in slightly (`globals.css`, off under reduced motion). Visible focus ring everywhere.
 - **Focus while cooking:** no upsell in the header in cook mode; controls on the dark theme need visible borders.
+- **Feedback** (`FeedbackPrompt` on Discover, rules in `src/lib/feedback.ts`): asked only after the 3rd finished meal ("I made it!"); one bottom sheet with a 5-face rating and an optional note box that opens ready to type; thanks shows at once and the sheet closes itself while `sendFeedback` saves to the Supabase `feedback` table (migration 0006, service role only) in the background. "Not now" waits 3 more meals; after sending it never asks again. Replaces the old visit-based star prompt.
 - **Honest persuasion:** scarcity and countdowns must be real (the founding spots count comes from Supabase and the end date is fixed); no made-up statistics, any figure needs a source.
 
 

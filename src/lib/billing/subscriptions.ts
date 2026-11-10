@@ -50,3 +50,38 @@ export async function saveSubscription(update: SubscriptionUpdate, fetchImpl: ty
   if (!res.ok) throw new Error(`Supabase returned ${res.status}: ${await res.text()}`);
   return true;
 }
+
+export interface SubscriptionRow {
+  status: SubscriptionStatus;
+  current_period_end: string | null;
+}
+
+/** Premium if any row is active, trialing or in grace, or cancelled but still paid up. */
+export function entitledFrom(rows: SubscriptionRow[], now = Date.now()): boolean {
+  return rows.some((r) => {
+    if (!ENTITLED.includes(r.status)) return false;
+    if (r.status !== "canceled") return true;
+    return r.current_period_end ? Date.parse(r.current_period_end) > now : false;
+  });
+}
+
+/**
+ * Does this account have a paid subscription on any channel (Whop, Stripe, App Store, Google Play)?
+ * Webhooks keep the `subscriptions` table current; this reads it. Null when Supabase isn't
+ * configured or can't be reached, so the caller can fall back instead of breaking the page.
+ */
+export async function hasActiveSubscription(userId: string, fetchImpl: typeof fetch = fetch): Promise<boolean | null> {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL?.replace(/\/$/, "");
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!url || !key || !/^[0-9a-f-]{36}$/i.test(userId)) return null;
+  try {
+    const res = await fetchImpl(`${url}/rest/v1/subscriptions?user_id=eq.${userId}&select=status,current_period_end`, {
+      headers: { apikey: key, Authorization: `Bearer ${key}` },
+      next: { revalidate: 30 },
+    } as RequestInit);
+    if (!res.ok) return null;
+    return entitledFrom((await res.json()) as SubscriptionRow[]);
+  } catch {
+    return null;
+  }
+}
