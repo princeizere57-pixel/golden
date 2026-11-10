@@ -16,7 +16,6 @@ const ICON: Record<Feature, (size: number) => ReactNode> = {
   fixMyMistake: (s) => <LifebuoyIcon size={s} />,
   pantry: (s) => <FridgeIcon size={s} />,
   modules: (s) => <FlameIcon size={s} />,
-  recipeWriter: (s) => <HatIcon size={s} />,
 };
 
 export const unlockHref = (feature: Feature) => `/checkout?plan=${planFor(feature)}`;

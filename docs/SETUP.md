@@ -86,3 +86,13 @@ How it works: the app shows Google Play's prices and purchase sheet (`PlayBillin
 3. Paste every variable from `.env.local` into **Settings → Environment Variables**.
 4. Deploy, then add the live URL to Supabase (step 1.4), Google (step 1.7.3) and Whop (steps 3.3–3.4).
 5. The recipe library cache isn't committed: add a build step or run `npm run data:mealdb` locally and let pages fall back to the live TheMealDB API (both work).
+
+## Build the phone apps (Android and iPhone)
+
+The apps load the live site, so most changes reach them without a new build. Rebuild when the
+icons, splash screen, app settings (`capacitor.config.ts`) or native code change.
+
+1. `npm install`, then `npx cap sync` (copies the settings and the offline page into `android/` and `ios/`; those copies are not in git).
+2. **Android** (any computer with Android Studio): `npx cap open android`, then Build → Generate Signed App Bundle (`.aab`) and upload it to a Play Console testing track. From a terminal with the Android SDK installed: `cd android && ./gradlew bundleRelease` (signing set up in `android/app/build.gradle`).
+3. **iPhone** (a Mac with Xcode): `npx cap open ios`, choose your team under Signing & Capabilities, then Product → Archive and upload to App Store Connect / TestFlight.
+4. After installing, check: the black claw icon and splash, the loader on page changes, and that checkout shows Google Play on Android and no payment option on iPhone (never Whop).

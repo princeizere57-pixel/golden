@@ -6,7 +6,6 @@ import { CookView } from "@/components/cook-view";
 import { UnlockButton } from "@/components/plan-lock";
 import { SkillSteps } from "@/components/skill-steps";
 import { SourcePhoto } from "@/components/source-photo";
-import { GENERATED_SOURCE } from "@/lib/ai/generated-recipe";
 import { getImport } from "@/lib/import/store";
 import type { Recipe, SkillLevel } from "@/lib/types";
 import { ClawLoader } from "@/components/claw-loader";
@@ -28,10 +27,8 @@ function Missing() {
 }
 
 function Credit({ recipe }: { recipe: Recipe }) {
-  if (!recipe.source) return null;
-  if (recipe.source.name === GENERATED_SOURCE) {
-    return <p className="mt-3 text-sm text-muted">Written for you by Golden AI from general cooking know-how. Check the ingredients for allergies and taste as you go.</p>;
-  }
+  // Imports always link to the original; anything without a source link has nothing to credit.
+  if (!recipe.source?.url) return null;
   return (
     <p className="mt-3 text-sm">
       Original recipe{recipe.chef !== recipe.source.name && <> by <strong>{recipe.chef}</strong></>} on{" "}
@@ -48,7 +45,7 @@ export function MyRecipe({ slug, skill, canCook }: { slug: string; skill: SkillL
     <main className="mx-auto grid gap-10 px-4 py-10 pb-24">
       <aside>
         <SourcePhoto recipe={recipe} className="mb-6 aspect-[4/3]" />
-        <p className="text-sm text-muted">{recipe.source?.name === GENERATED_SOURCE ? "Written for you" : "My imports"} · private</p>
+        <p className="text-sm text-muted">My imports · private</p>
         <h1 className="mt-1 text-3xl font-bold tracking-tight">{recipe.title}</h1>
         <Credit recipe={recipe} />
         {recipe.summary && <p className="mt-3 text-muted">{recipe.summary}</p>}

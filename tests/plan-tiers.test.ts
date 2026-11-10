@@ -8,7 +8,7 @@ const NOW = Date.parse("2026-11-10T12:00:00Z");
 
 describe("what each plan unlocks", () => {
   it("free reads recipes only; Experience cooks one dish; Executive gets everything", () => {
-    const all: Feature[] = ["cookMode", "singleDishPlan", "shoppingList", "community", "premiumRecipes", "multiDish", "fixMyMistake", "pantry", "modules", "recipeWriter"];
+    const all: Feature[] = ["cookMode", "singleDishPlan", "shoppingList", "community", "premiumRecipes", "multiDish", "fixMyMistake", "pantry", "modules"];
     expect(all.filter((f) => can("free", f))).toEqual([]);
     expect(all.filter((f) => can("experience", f))).toEqual(["cookMode", "singleDishPlan", "shoppingList", "community", "premiumRecipes"]);
     expect(all.every((f) => can("executive", f))).toBe(true);

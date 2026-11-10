@@ -125,7 +125,7 @@ These set The Chef's AI apart; keep them original (no third-party mascots, icon 
 - **Tabs:** Discover, For you, Plan a meal (pan on fire), Shopping list, Saved.
 - Setup steps for Supabase, Google, Gemini, Whop, analytics and Vercel: `docs/SETUP.md`.
 - Backend handover (tables, env, server actions, what is still on-device, open items): `docs/BACKEND.md`.
-- Recipes not in the library: `/explore` search offers "Write a recipe" (`generateRecipeAction`, `src/lib/ai/generate-recipe.ts`, Gemini, original wording, saved privately like an import); without `GEMINI_API_KEY` it offers import-from-link. Session and plan cookies are HMAC-signed (`src/lib/signed-cookie.ts`, `SESSION_SECRET`); Premium comes from `subscriptions` rows when signed in (`hasActiveSubscription`).
+- Recipes not in the library: `/explore` search offers importing one from a link (no AI recipe writing). Session and plan cookies are HMAC-signed (`src/lib/signed-cookie.ts`, `SESSION_SECRET`); Premium comes from `subscriptions` rows when signed in (`hasActiveSubscription`).
 
 ## 11. Plan a meal (recipe-first flow)
 

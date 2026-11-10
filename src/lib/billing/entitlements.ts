@@ -8,7 +8,7 @@
 // - The Golden Experience: + hands-free cook mode with timers, Plan a meal for one dish at a time,
 //   the smart shopping list, the community and Premium recipes.
 // - Golden Executive Chef System: everything, + the Multi-Dish Timing Orchestrator (2–4 dishes),
-//   Fix My Mistake, Pantry-to-Plate, the cuisine technique modules and recipes written by Golden AI.
+//   Fix My Mistake, Pantry-to-Plate and the cuisine technique modules.
 //
 // Pure: no cookies or network here, so it is unit-tested.
 
@@ -25,11 +25,10 @@ export type Feature =
   | "multiDish"
   | "fixMyMistake"
   | "pantry"
-  | "modules"
-  | "recipeWriter";
+  | "modules";
 
 const EXPERIENCE: Feature[] = ["cookMode", "singleDishPlan", "shoppingList", "community", "premiumRecipes"];
-const EXECUTIVE: Feature[] = [...EXPERIENCE, "multiDish", "fixMyMistake", "pantry", "modules", "recipeWriter"];
+const EXECUTIVE: Feature[] = [...EXPERIENCE, "multiDish", "fixMyMistake", "pantry", "modules"];
 
 const FEATURES: Record<Tier, readonly Feature[]> = { free: [], experience: EXPERIENCE, executive: EXECUTIVE };
 
@@ -104,5 +103,4 @@ export const LOCKED_COPY: Record<Feature, { title: string; text: string }> = {
   fixMyMistake: { title: "Fix My Mistake", text: "Too salty, split, burnt or too thin? Get the exact rescue for your dish, from a photo or a tap." },
   pantry: { title: "Pantry-to-Plate", text: "Tell Golden what's in your fridge and get a meal that uses it up before it goes off." },
   modules: { title: "Cuisine technique modules", text: "Chinese, Korean and Italian techniques, taught step by step at your level." },
-  recipeWriter: { title: "Golden can write this recipe", text: "On Executive, Golden writes an original recipe for any dish you search for, ready for cook mode." },
 };

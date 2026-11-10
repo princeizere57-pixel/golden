@@ -55,7 +55,7 @@ All documented in `.env.example`. The ones that matter for the backend:
 | `GOOGLE_PLAY_SERVICE_ACCOUNT_JSON`, `GOOGLE_PLAY_PACKAGE_NAME`, `GOOGLE_RTDN_TOKEN` | Android in-app subscriptions (Golden repo). See `docs/SETUP.md` §3b. |
 | `STRIPE_US_*`, `STRIPE_UK_*` | Legacy Stripe path (US/UK entities). Whop is the live web checkout. |
 | `APPLE_BUNDLE_ID` | App Store Server Notifications V2 (no iOS purchase flow in the app yet). |
-| `GEMINI_API_KEY`, `GEMINI_MODEL` | AI rewrites, Fix My Mistake photo diagnosis, and writing recipes for dishes not in the library. Every AI feature has a non-AI fallback. |
+| `GEMINI_API_KEY`, `GEMINI_MODEL` | AI rewrites and Fix My Mistake photo diagnosis. Every AI feature has a non-AI fallback. |
 | `MEALDB_API_KEY` | TheMealDB. Empty = shared test key, **development only**; a public/app-store release needs a supporter key. |
 | `NEXT_PUBLIC_POSTHOG_KEY`, `NEXT_PUBLIC_POSTHOG_HOST` | Analytics (no-op without a key, honours Do Not Track). |
 
@@ -117,7 +117,7 @@ Plans live in `src/lib/billing/offers.ts` (identical in both repos): **Golden Ex
 | `actions/play.ts` | `verifyPlayPurchase` | Golden repo only |
 | `actions/adapt.ts` | `adaptRecipeAction`, `fixMistakeAction` | Gemini rewrite with deterministic fallback |
 | `actions/diagnose.ts` | `diagnoseDish`, `photoDiagnosisAvailable` | Fix My Mistake from a photo |
-| `actions/import.ts` | `importRecipeAction`, `generateRecipeAction` | import one page (SSRF-safe fetch); write an original recipe for a dish not in the library |
+| `actions/import.ts` | `importRecipeAction` | import one page (SSRF-safe fetch)|
 | `actions/community.ts` | `createPost`, `createReply` | |
 | `actions/giveaway.ts` | `enterGiveaway` | |
 | `actions/feedback.ts` | `sendFeedback` | |
@@ -136,7 +136,7 @@ These are the biggest backend jobs: today they're `localStorage`/cookies, so the
 | `bac-shopping` | shopping list | new `shopping_items` |
 | `bac-pantry` | pantry | `pantry_items` (exists) |
 | `bac-progress` | XP, streak, dishes cooked, Mini You avatar, kitchen log | new `progress` + `kitchen_log` |
-| `bac-imports` | imported and AI-written recipes | `imported_recipes` (exists, owner-only RLS) |
+| `bac-imports` | imported recipes | `imported_recipes` (exists, owner-only RLS) |
 | `bac-timers` | running timers | `active_timers` (exists) |
 | `bac-plan-done`, `bac-feedback` | meal-plan progress, feedback asked/sent | small tables or a JSON column on `profiles` |
 
@@ -145,15 +145,15 @@ Suggested order: profiles → progress (the feedback prompt and Today card depen
 ## 9. Recipes and AI
 
 - Catalogue = `src/lib/data/recipes.ts` (4 classics) + `real-time-recipes.ts` (6 originals with step pictures in `public/steps/`) + TheMealDB (live API, cached a day, plus `src/data/mealdb-recipes.json` built at deploy by `npm run data:mealdb`, gitignored).
-- Search (`/explore?q=`): Golden's own recipes first, then TheMealDB. If nothing matches, Golden offers to **write an original recipe** (`generateRecipeAction`, Gemini, strictly validated, saved privately like an import) or to import one page from a link. **Add a per-user daily limit** on recipe writing before turning on a paid Gemini key.
-- Copyright rules (do not relax): imports are user-initiated, private and credited; never copy third-party recipes, photos or text into the repo; AI recipes must be written from general knowledge.
+- Search (`/explore?q=`): Golden's own recipes first, then TheMealDB. If nothing matches, the cook is offered an import from a link (private, like every import).
+- Copyright rules (do not relax): imports are user-initiated, private and credited; never copy third-party recipes, photos or text into the repo.
 
 ## 10. Open items, in priority order
 
 1. Production env: `SESSION_SECRET`, Supabase keys, run migrations 0001–0006 (0006 = `feedback`).
 2. Move on-device data to Supabase (§8), starting with `profiles` and progress.
 3. Whop account linking for static links (§6.1); customer portal link.
-4. Rate limits on Gemini actions (`generateRecipeAction`, `adaptRecipeAction`, `diagnoseDish`) and on `createPost`/`sendFeedback`.
+4. Rate limits on Gemini actions (`adaptRecipeAction`, `diagnoseDish`) and on `createPost`/`sendFeedback`.
 5. Read recipes from Supabase (`recipes`/`recipe_blocks` are already seeded) so content can change without a deploy.
 6. CI: add a GitHub Actions workflow running `npm run typecheck && npm run lint && npm test` on every PR.
 7. Google Play: create the two subscriptions, service account and RTDN (`docs/SETUP.md` §3b), build the Android app in Android Studio and test with a licence tester. The Java plugin hasn't been compiled yet.
