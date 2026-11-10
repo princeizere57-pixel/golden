@@ -9,12 +9,22 @@ import { useEffect, useState } from "react";
 import { saveOnboarding } from "@/app/actions/viewer";
 import { MiniYou } from "@/components/mini-you";
 import { FigurePicker } from "@/components/figure-picker";
+import { FridgeIcon, HatIcon, LensIcon, LifebuoyIcon, StopwatchIcon } from "@/components/icons-3d";
 import { track } from "@/lib/analytics";
 import { LEVEL_PITCH, QUESTIONS, prefsFromAnswers, skillFromAnswers, type Answers } from "@/lib/skill/quiz";
 
 const BUILD_LINES = ["Reading your answers…", "Matching techniques to your level…", "Picking your first recipes…", "Setting up cook mode…"];
 
-type Stage = { kind: "mini" } | { kind: "question"; index: number } | { kind: "building" } | { kind: "result" };
+/** Shown after the questions: everyday cooking problems and the Golden feature that solves each. */
+const PROBLEMS = [
+  { Icon: FridgeIcon, problem: "Food goes off in my fridge", fix: "Pantry-to-Plate turns what you already have into tonight's dinner, so less ends up in the bin." },
+  { Icon: LifebuoyIcon, problem: "My cooking goes wrong", fix: "Fix My Mistake rescues salty, split or burnt dishes with exact amounts to add." },
+  { Icon: HatIcon, problem: "Recipes lose me halfway", fix: "Every step is rewritten for your level, then cook mode shows one step at a time." },
+  { Icon: StopwatchIcon, problem: "Nothing's ready at the same time", fix: "Plan a meal times every dish so they all reach the plate together." },
+  { Icon: LensIcon, problem: "I never know what to make", fix: "Golden picks recipes at your level and adds what's missing to your shopping list." },
+] as const;
+
+type Stage = { kind: "why" } | { kind: "mini" } | { kind: "question"; index: number } | { kind: "building" } | { kind: "result" };
 
 export function OnboardingFlow({ images, userName }: { images: string[]; userName: string }) {
   const router = useRouter();
@@ -23,8 +33,9 @@ export function OnboardingFlow({ images, userName }: { images: string[]; userNam
   const [line, setLine] = useState(0);
   const { skill } = skillFromAnswers(answers);
 
-  const steps = QUESTIONS.length + 3;
-  const position = stage.kind === "mini" ? 0 : stage.kind === "question" ? stage.index + 1 : stage.kind === "building" ? QUESTIONS.length + 1 : QUESTIONS.length + 2;
+  const steps = QUESTIONS.length + 4;
+  const position =
+    stage.kind === "mini" ? 0 : stage.kind === "question" ? stage.index + 1 : stage.kind === "why" ? QUESTIONS.length + 1 : stage.kind === "building" ? QUESTIONS.length + 2 : QUESTIONS.length + 3;
   const progress = ((position + 1) / steps) * 100;
 
   useEffect(() => {
@@ -60,6 +71,37 @@ export function OnboardingFlow({ images, userName }: { images: string[]; userNam
         </Link>
       </div>
 
+      {stage.kind === "why" && (
+        <section className="step-in flex flex-1 flex-col">
+          <h1 className="mt-6 text-center font-display text-[2.1rem]">
+            {userName}, cooking just got <span className="text-accent">easier</span>
+          </h1>
+          <p className="mt-2 text-center text-muted">Here&apos;s what Golden fixes for you.</p>
+          <ul className="mt-6 space-y-3 pb-4">
+            {PROBLEMS.map(({ Icon, problem, fix }) => (
+              <li key={problem} className="flex items-center gap-4 rounded-3xl border border-line bg-bg p-4 shadow-sm">
+                <Icon size={64} className="shrink-0" />
+                <div>
+                  <p className="text-[15px] text-muted">{problem}</p>
+                  <p className="mt-1 text-[17px] font-semibold leading-snug">{fix}</p>
+                </div>
+              </li>
+            ))}
+          </ul>
+          <div className="sticky bottom-0 -mx-5 mt-auto bg-bg/95 px-5 pb-2 pt-3 backdrop-blur">
+            <button
+              onClick={() => {
+                track("onboarding_problems_seen");
+                setStage({ kind: "building" });
+              }}
+              className="min-h-14 w-full rounded-full bg-button text-lg font-semibold text-button-ink"
+            >
+              Build my skill path
+            </button>
+          </div>
+        </section>
+      )}
+
       {stage.kind === "mini" && (
         <section className="step-in flex flex-1 flex-col">
           <h1 className="mt-6 font-display text-[2.1rem]">
@@ -79,7 +121,7 @@ export function OnboardingFlow({ images, userName }: { images: string[]; userNam
           index={stage.index}
           answers={answers}
           onChange={setAnswers}
-          onNext={() => setStage(stage.index + 1 < QUESTIONS.length ? { kind: "question", index: stage.index + 1 } : { kind: "building" })}
+          onNext={() => setStage(stage.index + 1 < QUESTIONS.length ? { kind: "question", index: stage.index + 1 } : { kind: "why" })}
         />
       )}
 

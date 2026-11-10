@@ -1,44 +1,13 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { HatIcon, LifebuoyIcon, PanFireIcon, SteamingDishIcon, TrophyIcon } from "@/components/icons-3d";
+import { LifebuoyIcon, SteamingDishIcon, TrophyIcon } from "@/components/icons-3d";
 import { Brand } from "@/components/site-chrome";
 import { RECIPES } from "@/lib/data/recipes";
 import { TRIAL_HEADLINE_DAYS } from "@/lib/billing/offers";
-import { GIVEAWAY } from "@/lib/giveaway";
 import { libraryRecipes } from "@/lib/library";
 import { thumb } from "@/lib/mealdb/convert";
 
 export const metadata: Metadata = { title: "Welcome" };
-
-/** The problems we solve, and how Golden solves each (money, time, growth). */
-const VALUE = [
-  {
-    Icon: LifebuoyIcon,
-    problem: "Ruined food is wasted money",
-    detail: "An overcooked steak, a split sauce or burnt garlic and dinner goes in the bin.",
-    solution: "Fix My Mistake rescues it in real time, with exact amounts for your pan. Every rescued dinner is money back in your pocket.",
-  },
-  {
-    Icon: PanFireIcon,
-    problem: "Cooking several dishes is overwhelming",
-    detail: "Something is always cold, raw or burning while you watch another pan.",
-    solution: "The timing orchestrator staggers every start, with chimes and phone vibration, so main and sides land hot at the same moment.",
-  },
-  {
-    Icon: HatIcon,
-    problem: "Recipes ignore your skill level",
-    detail: "Too vague for nervous beginners, too slow for confident cooks.",
-    solution: "Every recipe rewrites itself for you: Beginner micro-steps, Intermediate shorthand, Chef technique and science, switchable mid-cook.",
-  },
-];
-
-const COMPARE = [
-  { label: "Recipe structure", them: "Static text, fixed steps", us: "Rewrites for Beginner, Intermediate or Chef" },
-  { label: "When it goes wrong", them: "You're on your own", us: "Fix My Mistake recovery, on the spot" },
-  { label: "Several dishes at once", them: "Guesswork", us: "Orchestrated timeline with alerts" },
-  { label: "Community", them: "Comment sections", us: "Apprentice Meets Master: real feedback" },
-  { label: "Groceries", them: "Buy the full list", us: "Pantry-first: cook what you already have" },
-];
 
 const PILLARS = [
   { Icon: SteamingDishIcon, title: "Your time", text: "Clear micro-steps and parallel timers replace re-reading, guessing and starting over." },
@@ -49,7 +18,6 @@ const PILLARS = [
 export default function WelcomePage() {
   const pics = [...RECIPES, ...libraryRecipes().slice(10, 16)].flatMap((r) => (r.image ? [{ src: thumb(r.image), title: r.title }] : []));
   const [hero, side, ...tiles] = pics;
-  const drawDate = new Date(GIVEAWAY.endsAt).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric", timeZone: "UTC" });
 
   return (
     <main className="relative mx-auto min-h-dvh max-w-lg bg-surface pb-40">
@@ -87,39 +55,7 @@ export default function WelcomePage() {
         </div>
       </div>
 
-      <section className="mt-6 space-y-4 bg-bg px-6 pb-4 pt-10" aria-labelledby="problems">
-        <h2 id="problems" className="font-display text-[1.9rem]">The problems we solve</h2>
-        {VALUE.map(({ Icon, problem, detail, solution }) => (
-          <article key={problem} className="rounded-3xl border border-line p-5">
-            <div className="flex items-center gap-3">
-              <Icon size={40} />
-              <h3 className="text-lg font-semibold leading-tight">{problem}</h3>
-            </div>
-            <p className="mt-2 text-muted">{detail}</p>
-            <p className="mt-3 rounded-2xl bg-accent-soft p-3"><strong>Golden:</strong> {solution}</p>
-          </article>
-        ))}
-      </section>
-
-      <section className="bg-bg px-6 py-8" aria-labelledby="compare">
-        <h2 id="compare" className="font-display text-[1.9rem]">Why Golden, not another recipe app</h2>
-        <div className="mt-4 overflow-hidden rounded-3xl border border-line">
-          <div className="grid grid-cols-[1fr_1fr_1.2fr] bg-surface px-4 py-3 text-xs font-semibold uppercase tracking-wide text-muted">
-            <span />
-            <span>Typical apps</span>
-            <span className="text-ink">Golden</span>
-          </div>
-          {COMPARE.map((row) => (
-            <div key={row.label} className="grid grid-cols-[1fr_1fr_1.2fr] gap-2 border-t border-line px-4 py-3 text-sm">
-              <span className="font-semibold">{row.label}</span>
-              <span className="text-muted">{row.them}</span>
-              <span className="flex gap-1.5"><span aria-hidden className="text-basil">✓</span>{row.us}</span>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      <section className="bg-bg px-6 pb-8" aria-labelledby="pillars">
+      <section className="mt-6 bg-bg px-6 py-8" aria-labelledby="pillars">
         <h2 id="pillars" className="font-display text-[1.9rem]">
           What Golden <span className="text-accent">gives back</span>
         </h2>
@@ -132,13 +68,6 @@ export default function WelcomePage() {
             </div>
           ))}
         </div>
-      </section>
-
-      <section className="mx-6 mb-6 rounded-3xl bg-charcoal p-6 text-white" aria-labelledby="giveaway">
-        <p className="text-sm font-semibold uppercase tracking-wide text-[#facc15]">The Golden Giveaway</p>
-        <h2 id="giveaway" className="mt-1 font-display text-[1.8rem] text-white">Win a free year, and one for the friend who invited you</h2>
-        <p className="mt-2 text-white/80">Free to enter after you sign up. Share your link to give friends a chance, and if one of them wins, you win a year too. Draw on {drawDate}.</p>
-        <Link href="/giveaway" className="mt-3 inline-block text-sm underline">Official rules</Link>
       </section>
 
       <div className="fixed inset-x-0 bottom-0 z-20 mx-auto max-w-[480px] rounded-t-3xl bg-bg px-6 pb-6 pt-4 shadow-[0_-8px_30px_rgba(0,0,0,0.08)]">

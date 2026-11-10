@@ -87,6 +87,14 @@ export default async function Discover({ searchParams }: { searchParams: Promise
         Cooking at <strong className="text-ink">{LEVEL[viewer.skill]}</strong> level. Every recipe is rewritten for you.
       </p>
 
+      <Link href="/pantry" className="mx-4 mt-4 flex items-center gap-3 rounded-3xl bg-charcoal p-4 text-white">
+        <span className="flex-1">
+          <span className="block text-xs font-semibold uppercase tracking-wide text-[#facc15]">Pantry-to-Plate</span>
+          <span className="mt-0.5 block text-lg font-semibold leading-snug">Tell Golden what&apos;s in your fridge. Get dinner in seconds.</span>
+        </span>
+        <span aria-hidden className="text-2xl text-[#facc15]">›</span>
+      </Link>
+
       <nav aria-label="Quick links" className="mt-4 grid grid-cols-2 gap-2.5 px-4">
         {TILES.map((t) => <QuickTile key={t.label} href={`/explore?c=${t.category}`} label={t.label} image={firstImage(t.category)} />)}
       </nav>

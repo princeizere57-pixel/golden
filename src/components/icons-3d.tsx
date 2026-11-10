@@ -182,3 +182,47 @@ export function PanFireIcon({ size = 28, className }: Props) {
     </svg>
   );
 }
+
+/** Onboarding, food waste: a two-door fridge with a carrot peeking from the open door. */
+export function FridgeIcon({ size = 28, className }: Props) {
+  return (
+    <svg viewBox="0 0 32 32" width={size} height={size} className={className} aria-hidden>
+      <defs>
+        <linearGradient id="fridge-body" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stopColor="#f1f3f5" /><stop offset="0.6" stopColor="#dee2e6" /><stop offset="1" stopColor="#adb5bd" /></linearGradient>
+        <linearGradient id="fridge-carrot" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stopColor="#ffa94d" /><stop offset="1" stopColor="#e8590c" /></linearGradient>
+      </defs>
+      <Shadow rx={9} />
+      <rect x="8" y="2.5" width="15" height="26" rx="2.6" fill="url(#fridge-body)" />
+      <path d="M8 11.5h15" stroke="#868e96" strokeWidth="0.9" />
+      <rect x="19.6" y="5.5" width="1.6" height="4" rx="0.8" fill="#495057" />
+      <rect x="19.6" y="14" width="1.6" height="6" rx="0.8" fill="#495057" />
+      <path d="M10 4.5v5" stroke="#fff" strokeWidth="1.4" strokeLinecap="round" />
+      <path d="M22.5 22l6.4-5.2-1.6-1.6z" fill="url(#fridge-carrot)" />
+      <path d="M27.6 15.6l1.4-2.2M28.3 16.2l2.2-.9" stroke="#40c057" strokeWidth="1.4" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+/** Onboarding, timing: a stopwatch with a gold crown button. */
+export function StopwatchIcon({ size = 28, className }: Props) {
+  return (
+    <svg viewBox="0 0 32 32" width={size} height={size} className={className} aria-hidden>
+      <defs>
+        <linearGradient id="sw-case" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stopColor="#ffe066" /><stop offset="1" stopColor="#e67700" /></linearGradient>
+        <radialGradient id="sw-face" cx="0.38" cy="0.32" r="0.8"><stop offset="0" stopColor="#fff" /><stop offset="1" stopColor="#e9ecef" /></radialGradient>
+      </defs>
+      <Shadow />
+      <rect x="13.6" y="2" width="4.8" height="3" rx="1" fill="url(#sw-case)" />
+      <rect x="22.4" y="5.4" width="3.2" height="2.4" rx="1" transform="rotate(40 24 6.6)" fill="#f59f00" />
+      <circle cx="16" cy="17" r="11" fill="url(#sw-case)" />
+      <circle cx="16" cy="17" r="8.6" fill="url(#sw-face)" />
+      {[0, 90, 180, 270].map((a) => (
+        <rect key={a} x="15.4" y="9.4" width="1.2" height="2" rx="0.6" fill="#495057" transform={`rotate(${a} 16 17)`} />
+      ))}
+      <path d="M16 17V11.6" stroke="#212529" strokeWidth="1.6" strokeLinecap="round" />
+      <path d="M16 17l3.6 2.4" stroke="#e03131" strokeWidth="1.3" strokeLinecap="round" />
+      <circle cx="16" cy="17" r="1.2" fill="#212529" />
+      <path d="M9.4 12.4a8 8 0 0 1 3.4-3" stroke="#fff" strokeWidth="1.4" strokeLinecap="round" fill="none" />
+    </svg>
+  );
+}
