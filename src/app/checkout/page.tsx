@@ -26,7 +26,7 @@ export default async function CheckoutPage() {
 
   return (
     <CheckoutPanel
-      user={{ name: user.name, email: user.email }}
+      user={{ id: user.id, name: user.name, email: user.email }}
       level={LEVEL[viewer.skill]}
       premium={viewer.plan === "premium"}
       offers={OFFERS.map((o) => ({

@@ -149,3 +149,11 @@ These set The Chef's AI apart; keep them original (no third-party mascots, icon 
 - **Feedback on every tap:** buttons and links press in slightly (`globals.css`, off under reduced motion). Visible focus ring everywhere.
 - **Focus while cooking:** no upsell in the header in cook mode; controls on the dark theme need visible borders.
 - **Honest persuasion:** scarcity and countdowns must be real (the founding spots count comes from Supabase and the end date is fixed); no made-up statistics, any figure needs a source.
+
+
+## 14. Google Play Billing (Android app only; the web keeps Whop)
+
+- Inside the Android app (`Capacitor.getPlatform() === "android"` and the `PlayBilling` plugin present), checkout shows `PlayCheckout` instead of Whop: Google Play's own prices, Google's purchase sheet, "Restore purchases". Google Play is the merchant of record; never show Whop or other payment links inside the Android app.
+- Native: `android/app/src/main/java/com/golden/cooking/PlayBillingPlugin.java` (Billing Library 7, `getProducts` / `purchase` / `getPurchases`), registered in `MainActivity`. JS bridge: `src/lib/native/play-billing.ts`.
+- Products (`src/lib/billing/play-products.ts`): `golden_executive` and `golden_experience`, base plan `yearly`, 3-day free-trial offer. Keep them in step with `offers.ts`.
+- Server (`src/app/actions/play.ts`, `src/lib/billing/google-play-api.ts`): Premium only after the Google Play Developer API confirms the subscription (right product, `obfuscatedAccountId` = the Golden user id, not pending); then save to `subscriptions` (`provider = 'google_play'`), acknowledge, set the plan cookie. RTDN (`/api/billing/google/rtdn`) re-reads the subscription from Google before saving. Env: `GOOGLE_PLAY_SERVICE_ACCOUNT_JSON`, `GOOGLE_PLAY_PACKAGE_NAME`, `GOOGLE_RTDN_TOKEN`. Setup: `docs/SETUP.md` §3b.
