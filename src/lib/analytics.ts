@@ -9,6 +9,7 @@ const ID_KEY = "bac-analytics-id";
 export type AnalyticsEvent =
   | "$pageview"
   | "signin_started"
+  | "onboarding_problems_seen"
   | "mini_you_created"
   | "onboarding_completed"
   | "checkout_started"

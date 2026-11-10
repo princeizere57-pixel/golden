@@ -118,6 +118,7 @@ These set The Chef's AI apart; keep them original (no third-party mascots, icon 
 
 - **Name:** Golden (large wordmark via `<Brand className="text-…">`); "Gold" uses `.text-gold` (metallic gradient), "en" stays ink.
 - **Gate:** `src/middleware.ts` + `src/lib/journey.ts`. Until the journey is done, `/` itself serves the welcome page (rewrite, address stays the bare site URL) and every page except `/welcome`, `/signin`, `/auth/*`, `/onboarding`, `/checkout`, `/api/*` redirects to `/welcome` until the `bac-journey` cookie is set, which `markJourneyDone()` only does for a signed-in user with a level (checkout: trial started or "Not now"). Sign out clears it.
+- **After the questions:** onboarding shows a "what Golden fixes" screen before the skill-path step (`PROBLEMS` in `onboarding-flow.tsx`): everyday problem → the Golden feature that solves it, with 3D icons (`FridgeIcon`, `StopwatchIcon` added). No made-up user statistics. The welcome page no longer has its own problems section.
 - **Mini You:** drawn SVG chef, girl or boy (`FigurePicker` in onboarding and `/you`). The girl has voluminous curls, lashes, a rosy grin and gold earrings. No photos, camera or AI image generation.
 - **Email sign-in:** Supabase magic link (`sendMagicLink`) returning to `/auth/callback`.
 - **Analytics:** `src/lib/analytics.ts` (PostHog capture API, no-op without `NEXT_PUBLIC_POSTHOG_KEY`, honours Do Not Track) + `PageViews`.

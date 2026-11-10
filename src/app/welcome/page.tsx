@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { HatIcon, LifebuoyIcon, PanFireIcon, SteamingDishIcon, TrophyIcon } from "@/components/icons-3d";
+import { LifebuoyIcon, SteamingDishIcon, TrophyIcon } from "@/components/icons-3d";
 import { Brand } from "@/components/site-chrome";
 import { RECIPES } from "@/lib/data/recipes";
 import { TRIAL_HEADLINE_DAYS } from "@/lib/billing/offers";
@@ -9,28 +9,6 @@ import { libraryRecipes } from "@/lib/library";
 import { thumb } from "@/lib/mealdb/convert";
 
 export const metadata: Metadata = { title: "Welcome" };
-
-/** The problems we solve, and how Golden solves each (money, time, growth). */
-const VALUE = [
-  {
-    Icon: LifebuoyIcon,
-    problem: "Ruined food is wasted money",
-    detail: "An overcooked steak, a split sauce or burnt garlic and dinner goes in the bin.",
-    solution: "Fix My Mistake rescues it in real time, with exact amounts for your pan. Every rescued dinner is money back in your pocket.",
-  },
-  {
-    Icon: PanFireIcon,
-    problem: "Cooking several dishes is overwhelming",
-    detail: "Something is always cold, raw or burning while you watch another pan.",
-    solution: "The timing orchestrator staggers every start, with chimes and phone vibration, so main and sides land hot at the same moment.",
-  },
-  {
-    Icon: HatIcon,
-    problem: "Recipes ignore your skill level",
-    detail: "Too vague for nervous beginners, too slow for confident cooks.",
-    solution: "Every recipe rewrites itself for you: Beginner micro-steps, Intermediate shorthand, Chef technique and science, switchable mid-cook.",
-  },
-];
 
 const COMPARE = [
   { label: "Recipe structure", them: "Static text, fixed steps", us: "Rewrites for Beginner, Intermediate or Chef" },
@@ -87,21 +65,7 @@ export default function WelcomePage() {
         </div>
       </div>
 
-      <section className="mt-6 space-y-4 bg-bg px-6 pb-4 pt-10" aria-labelledby="problems">
-        <h2 id="problems" className="font-display text-[1.9rem]">The problems we solve</h2>
-        {VALUE.map(({ Icon, problem, detail, solution }) => (
-          <article key={problem} className="rounded-3xl border border-line p-5">
-            <div className="flex items-center gap-3">
-              <Icon size={40} />
-              <h3 className="text-lg font-semibold leading-tight">{problem}</h3>
-            </div>
-            <p className="mt-2 text-muted">{detail}</p>
-            <p className="mt-3 rounded-2xl bg-accent-soft p-3"><strong>Golden:</strong> {solution}</p>
-          </article>
-        ))}
-      </section>
-
-      <section className="bg-bg px-6 py-8" aria-labelledby="compare">
+      <section className="mt-6 bg-bg px-6 py-8" aria-labelledby="compare">
         <h2 id="compare" className="font-display text-[1.9rem]">Why Golden, not another recipe app</h2>
         <div className="mt-4 overflow-hidden rounded-3xl border border-line">
           <div className="grid grid-cols-[1fr_1fr_1.2fr] bg-surface px-4 py-3 text-xs font-semibold uppercase tracking-wide text-muted">
