@@ -249,8 +249,8 @@ html {
   }
 }
 
-/* Golden's claw: the loading mark (src/components/claw-loader.tsx). The gold claw image is the
-   base; a soft band of sunlight, clipped to the claw's own shape, sweeps diagonally from the top of
+/* Golden's claw: the loading mark (src/components/claw-loader.tsx). The black claw on the white
+   page is the base; a soft band of sunlight, clipped to the claw's own shape, sweeps diagonally from the top of
    the strokes to their bottom ends. */
 .claw-mark {
   position: relative;
@@ -264,7 +264,7 @@ html {
   inset: 0;
   -webkit-mask: url("/brand/claw.png") center / contain no-repeat;
   mask: url("/brand/claw.png") center / contain no-repeat;
-  background: linear-gradient(135deg, transparent 38%, rgba(255, 251, 225, 0.25) 44%, rgba(255, 255, 245, 0.95) 50%, rgba(255, 251, 225, 0.25) 56%, transparent 62%) 0 0 / 200% 200% no-repeat;
+  background: linear-gradient(135deg, transparent 38%, rgba(255, 214, 102, 0.3) 44%, rgba(255, 244, 200, 0.95) 50%, rgba(255, 214, 102, 0.3) 56%, transparent 62%) 0 0 / 200% 200% no-repeat;
   background-position: 100% 100%;
   opacity: 0;
 }
@@ -296,7 +296,7 @@ html {
 }
 @keyframes claw-glow {
   0%, 100% { filter: drop-shadow(0 0 0 rgba(250, 204, 21, 0)); }
-  50% { filter: drop-shadow(0 0 14px rgba(250, 204, 21, 0.45)); }
+  50% { filter: drop-shadow(0 0 12px rgba(250, 204, 21, 0.35)); }
 }
 @keyframes claw-in {
   from { opacity: 0; }

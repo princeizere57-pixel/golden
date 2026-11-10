@@ -1,4 +1,4 @@
-// Golden's claw mark as the loading signal: centred on the screen while a page or the internet
+// Golden's claw mark (black on white) as the loading signal: centred on the screen while a page or the internet
 // reloads, with a band of sunlight sweeping diagonally down along the three strokes. The same mark
 // is the favicon and the app icon (public/brand/claw.png), so the brand reads the same everywhere.
 // Static (no sweep) under prefers-reduced-motion. Styles: .claw-* in globals.css.
