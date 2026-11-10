@@ -1,6 +1,6 @@
 // Writes subscription state to Supabase through PostgREST with the service-role key. Server-only.
 
-import { bestTier, parseTier, type Tier } from "@/lib/billing/entitlements";
+import { accessFor, bestTier, parseTier, type Access, type Tier } from "@/lib/billing/entitlements";
 import type { OfferId } from "@/lib/billing/offers";
 import type { Channel } from "@/lib/billing/routing";
 import type { BillingEntity } from "@/lib/types";
@@ -76,10 +76,20 @@ const rowLive = (r: SubscriptionRow, now: number) => {
   return r.current_period_end ? Date.parse(r.current_period_end) > now : false;
 };
 
-/** The best plan among rows that are active, trialing or in grace, or cancelled but still paid up. */
-export function tierFrom(rows: SubscriptionRow[], now = Date.now()): Tier {
-  return bestTier(rows.filter((r) => rowLive(r, now)).map((r) => parseTier(r.offer ?? "executive")));
+/**
+ * Access from live rows (active, trialing or in grace, or cancelled but still paid up): the best
+ * plan chosen, and everything unlocked while any of them is still in its free days.
+ */
+export function accessFrom(rows: SubscriptionRow[], now = Date.now()): Access {
+  const live = rows.filter((r) => rowLive(r, now));
+  const plan = bestTier(live.map((r) => parseTier(r.offer ?? "executive")));
+  const trialRow = live.find((r) => r.status === "trialing");
+  const ends = trialRow?.current_period_end ? Date.parse(trialRow.current_period_end) : undefined;
+  return accessFor(plan, Boolean(trialRow), ends);
 }
+
+/** What the app unlocks right now (see accessFrom). */
+export const tierFrom = (rows: SubscriptionRow[], now = Date.now()): Tier => accessFrom(rows, now).tier;
 
 /** Premium (any paid plan) from the same rows. */
 export const entitledFrom = (rows: SubscriptionRow[], now = Date.now()): boolean => tierFrom(rows, now) !== "free";
@@ -89,7 +99,7 @@ export const entitledFrom = (rows: SubscriptionRow[], now = Date.now()): boolean
  * Webhooks keep the `subscriptions` table current; this reads it. Null when Supabase isn't
  * configured or can't be reached, so the caller can fall back instead of breaking the page.
  */
-export async function activeTier(userId: string, fetchImpl: typeof fetch = fetch): Promise<Tier | null> {
+export async function activeAccess(userId: string, fetchImpl: typeof fetch = fetch): Promise<Access | null> {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL?.replace(/\/$/, "");
   const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
   if (!url || !key || !/^[0-9a-f-]{36}$/i.test(userId)) return null;
@@ -99,13 +109,18 @@ export async function activeTier(userId: string, fetchImpl: typeof fetch = fetch
       next: { revalidate: 30 },
     } as RequestInit);
     if (!res.ok) return null;
-    return tierFrom((await res.json()) as SubscriptionRow[]);
+    return accessFrom((await res.json()) as SubscriptionRow[]);
   } catch {
     return null;
   }
 }
 
-/** Does this account have a paid subscription? (See activeTier.) */
+/** The plan this account can use right now, or null when Supabase can't say (see activeAccess). */
+export async function activeTier(userId: string, fetchImpl: typeof fetch = fetch): Promise<Tier | null> {
+  return (await activeAccess(userId, fetchImpl))?.tier ?? null;
+}
+
+/** Does this account have a paid subscription? (See activeAccess.) */
 export async function hasActiveSubscription(userId: string, fetchImpl: typeof fetch = fetch): Promise<boolean | null> {
   const tier = await activeTier(userId, fetchImpl);
   return tier === null ? null : tier !== "free";

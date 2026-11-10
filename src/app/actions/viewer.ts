@@ -4,7 +4,8 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { getUser } from "@/lib/auth";
 import { JOURNEY_COOKIE } from "@/lib/journey";
-import { parseTier, type Tier } from "@/lib/billing/entitlements";
+import { parseTier, planCookieValue, type Tier } from "@/lib/billing/entitlements";
+import { ATTRACTION } from "@/lib/billing/offers";
 import { signValue } from "@/lib/signed-cookie";
 import { PLAN_COOKIE, PREFS_COOKIE, SKILL_COOKIE, parseSkill } from "@/lib/viewer";
 
@@ -51,7 +52,9 @@ export async function finishJourney() {
 export async function setDemoPlan(plan: Tier | "premium") {
   if (process.env.STRIPE_US_SECRET_KEY || process.env.STRIPE_UK_SECRET_KEY) throw new Error("Demo plans are disabled when Stripe is configured");
   const tier = parseTier(plan);
-  (await cookies()).set(PLAN_COOKIE, signValue(tier), { maxAge: YEAR, sameSite: "lax", path: "/", httpOnly: true });
+  // Demo trial: everything unlocked for the free days, then the chosen plan.
+  const trialEnds = tier === "free" ? undefined : Date.now() + ATTRACTION.days * 86_400_000;
+  (await cookies()).set(PLAN_COOKIE, signValue(planCookieValue(tier, trialEnds)), { maxAge: YEAR, sameSite: "lax", path: "/", httpOnly: true });
   await markJourneyDone();
   redirect(tier === "free" ? "/account" : "/?trial=started");
 }

@@ -44,7 +44,7 @@ export function NoMatches({ query, canWrite }: { query: string; canWrite: boolea
       {!canWrite ? (
         <Link href={unlockHref("recipeWriter")} className="mt-4 flex min-h-14 w-full flex-col items-center justify-center rounded-full bg-button font-semibold leading-tight text-button-ink">
           Write a recipe for &ldquo;{query}&rdquo;
-          <span className="text-xs font-medium">Part of Executive · 3 days free</span>
+          <span className="text-xs font-medium">Part of Executive · 5 days free</span>
         </Link>
       ) : !unavailable && (
         <button onClick={write} disabled={pending} className="mt-4 min-h-14 w-full rounded-full bg-button text-lg font-semibold text-button-ink disabled:opacity-70">

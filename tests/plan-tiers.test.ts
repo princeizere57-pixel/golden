@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
-import { bestTier, can, parseTier, planFor, type Feature } from "@/lib/billing/entitlements";
+import { accessFor, accessFromCookie, bestTier, can, parseTier, planCookieValue, planFor, type Feature } from "@/lib/billing/entitlements";
 import { OFFERS } from "@/lib/billing/offers";
-import { tierFrom } from "@/lib/billing/subscriptions";
+import { accessFrom, tierFrom } from "@/lib/billing/subscriptions";
 import { shellFromUserAgent, storeFor } from "@/lib/native/user-agent";
 
 const NOW = Date.parse("2026-11-10T12:00:00Z");
@@ -32,7 +32,7 @@ describe("what each plan unlocks", () => {
   });
 
   it("takes the plan from live subscription rows", () => {
-    expect(tierFrom([{ status: "trialing", current_period_end: null, offer: "experience" }], NOW)).toBe("experience");
+    expect(tierFrom([{ status: "active", current_period_end: null, offer: "experience" }], NOW)).toBe("experience");
     expect(tierFrom([{ status: "active", current_period_end: null }], NOW)).toBe("executive"); // row from before migration 0007
     expect(tierFrom([{ status: "active", current_period_end: null, offer: null }], NOW)).toBe("executive");
     expect(
@@ -45,6 +45,30 @@ describe("what each plan unlocks", () => {
       ),
     ).toBe("experience");
     expect(tierFrom([{ status: "canceled", current_period_end: "2026-11-01T00:00:00Z", offer: "executive" }], NOW)).toBe("free");
+  });
+});
+
+describe("the 5 free days unlock everything, then the chosen plan", () => {
+  it("unlocks every feature while trialing, whichever plan was chosen", () => {
+    const trial = accessFrom([{ status: "trialing", current_period_end: "2026-11-15T12:00:00Z", offer: "experience" }], NOW);
+    expect(trial).toEqual({ tier: "executive", plan: "experience", trial: true, trialEndsAt: Date.parse("2026-11-15T12:00:00Z") });
+    expect(can(trial.tier, "fixMyMistake")).toBe(true);
+    // After the trial the subscription is active: exactly the plan they chose.
+    expect(accessFrom([{ status: "active", current_period_end: "2027-11-15T12:00:00Z", offer: "experience" }], NOW)).toEqual({ tier: "experience", plan: "experience", trial: false });
+  });
+
+  it("free stays free; a trial with no plan unlocks nothing", () => {
+    expect(accessFor("free", true)).toEqual({ tier: "free", plan: "free", trial: false });
+  });
+
+  it("demo and Play cookies carry the trial end and expire on their own", () => {
+    const ends = NOW + 5 * 86_400_000;
+    const value = planCookieValue("experience", ends);
+    expect(value).toBe(`experience~${ends}`);
+    expect(accessFromCookie(value, NOW).tier).toBe("executive");
+    expect(accessFromCookie(value, ends + 1)).toMatchObject({ tier: "experience", trial: false });
+    expect(accessFromCookie("premium", NOW).tier).toBe("executive"); // older cookies
+    expect(accessFromCookie("experience~nonsense", NOW).tier).toBe("experience");
   });
 });
 

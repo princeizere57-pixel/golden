@@ -66,7 +66,7 @@ export function UnlockButton({ feature, label }: { feature: Feature; label: stri
   return (
     <Link href={unlockHref(feature)} className="mt-6 flex min-h-14 flex-col items-center justify-center rounded-full bg-button font-semibold leading-tight text-button-ink">
       {label}
-      <span className="text-xs font-medium">Part of {SHORT_NAME[planFor(feature)]} · 3 days free</span>
+      <span className="text-xs font-medium">Part of {SHORT_NAME[planFor(feature)]} · 5 days free</span>
     </Link>
   );
 }

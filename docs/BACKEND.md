@@ -90,7 +90,7 @@ Run the migrations in order (`supabase/migrations/0001…0006`), or paste `supab
 
 ## 6. Payments and Premium
 
-Plans live in `src/lib/billing/offers.ts` (identical in both repos): **Golden Executive Chef System** $100/yr founding price (regular $500), **The Golden Experience** $50/yr, both after a free 3-day trial (the "3-Day Zero-Waste Challenge"). Founding spots: `src/lib/billing/launch.ts` (counts paid `orders`), end date `NEXT_PUBLIC_LAUNCH_ENDS_AT`.
+Plans live in `src/lib/billing/offers.ts` (identical in both repos): **Golden Executive Chef System** $100/yr founding price (regular $500), **The Golden Experience** $50/yr, both after a free 5-day trial (the "5-Day Zero-Waste Challenge") during which every feature is unlocked, whichever plan was chosen (`accessFor` in `src/lib/billing/entitlements.ts`; Whop and Google Play report it as `trialing`). Founding spots: `src/lib/billing/launch.ts` (counts paid `orders`), end date `NEXT_PUBLIC_LAUNCH_ENDS_AT`.
 
 | Channel | Start | Confirm | Webhook / notifications |
 |---|---|---|---|

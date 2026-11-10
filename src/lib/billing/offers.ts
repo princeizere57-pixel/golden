@@ -1,7 +1,8 @@
 // Golden's offers: one source of truth for the landing page, checkout, Whop metadata and the webhook.
 //
 // The money model (Grand Slam Offer):
-// - Attraction offer: the free 3-Day Zero-Waste Cooking Challenge (the trial on both plans).
+// - Attraction offer: the free 5-Day Zero-Waste Cooking Challenge (the trial on both plans). Every
+//   feature is unlocked during it, whichever plan was chosen; the chosen plan is charged after.
 // - Decoy offer: The Golden Experience, $50/year.
 // - Grand Slam offer: the Golden Executive Chef System, $100/year founding price (regular $500/year)
 //   for the first FOUNDING_SPOTS members during the launch window, backed by the
@@ -44,9 +45,9 @@ export const GUARANTEE = {
 };
 
 export const ATTRACTION = {
-  name: "3-Day Zero-Waste Cooking Challenge",
+  name: "5-Day Zero-Waste Cooking Challenge",
   price: 0,
-  days: 3,
+  days: 5,
 };
 
 export const EXECUTIVE_FEATURES = [
@@ -92,7 +93,7 @@ export const OFFERS: Offer[] = [
 export const offerById = (id: string): Offer | undefined => OFFERS.find((o) => o.id === id);
 export const DEFAULT_OFFER: OfferId = "executive";
 
-/** Shortest free trial across offers, for headlines like "3 days free". */
+/** Shortest free trial across offers, for headlines like "5 days free". */
 export const TRIAL_HEADLINE_DAYS = Math.min(...OFFERS.map((o) => o.trialDays));
 
 export const money = (n: number) => `$${n % 1 ? n.toFixed(2) : n}`;

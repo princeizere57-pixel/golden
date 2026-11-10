@@ -22,7 +22,11 @@ export default async function AccountPage({ searchParams }: { searchParams: Prom
       <dl className="mt-8 divide-y divide-line rounded-3xl border border-line bg-surface">
         {user && <Row label={user.provider === "google" ? "Signed in with Google" : "Signed in (demo)"} value={`${user.name} · ${user.email}`} action={null} />}
         <Row label="Skill level" value={SKILL_LABEL[viewer.skill]} action={<Link className="underline" href="/onboarding">Retake quiz</Link>} />
-        <Row label="Plan" value={TIER_NAME[viewer.tier]} action={viewer.tier !== "executive" ? <Link className="underline" href={viewer.tier === "free" ? "/checkout" : "/checkout?plan=executive"}>{viewer.tier === "free" ? "Choose a plan" : "Upgrade"}</Link> : null} />
+        <Row
+          label={viewer.access.trial ? "Plan · free days running" : "Plan"}
+          value={viewer.access.trial ? `Every feature unlocked${viewer.access.trialEndsAt ? ` until ${new Date(viewer.access.trialEndsAt).toLocaleDateString("en-US", { month: "short", day: "numeric" })}` : ""}, then ${TIER_NAME[viewer.access.plan]}` : TIER_NAME[viewer.access.plan]}
+          action={viewer.access.plan !== "executive" ? <Link className="underline" href={viewer.access.plan === "free" ? "/checkout" : "/checkout?plan=executive"}>{viewer.access.plan === "free" ? "Choose a plan" : "Upgrade"}</Link> : null}
+        />
       </dl>
       {viewer.plan === "premium" && (
         <section className="mt-8">

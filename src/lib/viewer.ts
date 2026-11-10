@@ -4,8 +4,8 @@
 import "server-only";
 import { cookies } from "next/headers";
 import { getUser } from "@/lib/auth";
-import { parseTier, type Tier } from "@/lib/billing/entitlements";
-import { activeTier } from "@/lib/billing/subscriptions";
+import { accessFromCookie, type Access, type Tier } from "@/lib/billing/entitlements";
+import { activeAccess } from "@/lib/billing/subscriptions";
 import { verifyValue } from "@/lib/signed-cookie";
 import { SKILL_LEVELS, type SkillLevel, type Viewer } from "@/lib/types";
 
@@ -26,14 +26,16 @@ export interface Prefs {
 
 const DEFAULT_PREFS: Prefs = { serves: 2, weeknightMinutes: 30, goals: [] };
 
-export async function getViewer(): Promise<Viewer & { tier: Tier; onboarded: boolean; prefs: Prefs }> {
+export async function getViewer(): Promise<Viewer & { tier: Tier; access: Access; onboarded: boolean; prefs: Prefs }> {
   const jar = await cookies();
   // The plan: for real accounts the `subscriptions` table decides (the payment webhooks keep it
   // current, so cancellations, expiries and upgrades count). The signed plan cookie is only the
   // answer when Supabase isn't available: demo mode, or a database outage.
-  const cookieTier = parseTier(verifyValue(jar.get(PLAN_COOKIE)?.value));
+  // During the free days everything is unlocked; afterwards the chosen plan decides.
+  const cookieAccess = accessFromCookie(verifyValue(jar.get(PLAN_COOKIE)?.value));
   const user = await getUser();
-  const tier = (user ? await activeTier(user.id) : null) ?? cookieTier;
+  const access = (user ? await activeAccess(user.id) : null) ?? cookieAccess;
+  const tier = access.tier;
   let prefs = DEFAULT_PREFS;
   try {
     prefs = { ...DEFAULT_PREFS, ...JSON.parse(jar.get(PREFS_COOKIE)?.value ?? "{}") };
@@ -42,6 +44,7 @@ export async function getViewer(): Promise<Viewer & { tier: Tier; onboarded: boo
     skill: parseSkill(jar.get(SKILL_COOKIE)?.value),
     plan: tier === "free" ? "free" : "premium",
     tier,
+    access,
     onboarded: jar.has(SKILL_COOKIE),
     prefs,
   };

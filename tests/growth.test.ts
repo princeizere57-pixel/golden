@@ -4,18 +4,18 @@ import { covers, isStaple, pantryMatch, parseFridge, rankMeals } from "@/lib/pan
 
 describe("offers", () => {
   it("follows the Grand Slam money model", () => {
-    expect(offerById("executive")).toMatchObject({ name: "Golden Executive Chef System", price: 100, regularPrice: 500, planType: "renewal", billingPeriodDays: 365, trialDays: 3, planEnv: "WHOP_PLAN_EXECUTIVE" });
-    expect(offerById("experience")).toMatchObject({ name: "The Golden Experience", price: 50, billingPeriodDays: 365, trialDays: 3, planEnv: "WHOP_PLAN_EXPERIENCE" });
+    expect(offerById("executive")).toMatchObject({ name: "Golden Executive Chef System", price: 100, regularPrice: 500, planType: "renewal", billingPeriodDays: 365, trialDays: 5, planEnv: "WHOP_PLAN_EXECUTIVE" });
+    expect(offerById("experience")).toMatchObject({ name: "The Golden Experience", price: 50, billingPeriodDays: 365, trialDays: 5, planEnv: "WHOP_PLAN_EXPERIENCE" });
     expect(OFFERS.map((o) => o.id)).toEqual(["executive", "experience"]);
     expect(offerById("year")).toBeUndefined();
     expect(percentOff(offerById("executive")!)).toBe(80);
   });
 
   it("describes prices for buyers", () => {
-    expect(priceLine(offerById("executive")!)).toBe("3 days free, then $100/year");
-    expect(priceLine(offerById("experience")!)).toBe("3 days free, then $50/year");
+    expect(priceLine(offerById("executive")!)).toBe("5 days free, then $100/year");
+    expect(priceLine(offerById("experience")!)).toBe("5 days free, then $50/year");
     expect(perMonth(offerById("executive")!)).toBe("$8.33");
-    expect(TRIAL_HEADLINE_DAYS).toBe(3);
+    expect(TRIAL_HEADLINE_DAYS).toBe(5);
   });
 
   it("makes unique, recognisable order IDs", () => {

@@ -9,6 +9,7 @@ import { getUser } from "@/lib/auth";
 import { acknowledgePlaySubscription, getPlaySubscription, judgePlaySubscription, playApiConfigured } from "@/lib/billing/google-play-api";
 import { offerForPlayProduct } from "@/lib/billing/play-products";
 import { ENTITLED, saveSubscription } from "@/lib/billing/subscriptions";
+import { planCookieValue } from "@/lib/billing/entitlements";
 import { signValue } from "@/lib/signed-cookie";
 import { PLAN_COOKIE } from "@/lib/viewer";
 
@@ -40,7 +41,7 @@ export async function verifyPlayPurchase(productId: string, purchaseToken: strin
   if (verdict.needsAck) await acknowledgePlaySubscription(productId, purchaseToken).catch((e) => console.error("[play] acknowledge failed", e));
 
   const jar = await cookies();
-  jar.set(PLAN_COOKIE, signValue(verdict.entitled ? offer : "free"), { maxAge: YEAR, sameSite: "lax", path: "/", httpOnly: true });
+  jar.set(PLAN_COOKIE, signValue(verdict.entitled ? planCookieValue(offer, verdict.status === "trialing" && verdict.expiry ? Date.parse(verdict.expiry) : undefined) : "free"), { maxAge: YEAR, sameSite: "lax", path: "/", httpOnly: true });
   if (verdict.entitled) await markJourneyDone();
   return { ok: true, premium: verdict.entitled };
 }

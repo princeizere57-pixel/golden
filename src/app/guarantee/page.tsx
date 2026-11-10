@@ -30,7 +30,7 @@ export default function GuaranteePage() {
       <h2 className="mt-6 text-xl font-semibold">What you keep</h2>
       <p className="mt-2">Any guides, frameworks and cheat sheets you downloaded are yours to keep.</p>
 
-      <p className="mt-8 text-sm text-muted">One refund per customer. The free 3-day challenge is never charged, so it doesn&apos;t need a refund: cancel before it ends.</p>
+      <p className="mt-8 text-sm text-muted">One refund per customer. The free 5-day challenge is never charged, so it doesn&apos;t need a refund: cancel before it ends.</p>
     </main>
   );
 }

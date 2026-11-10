@@ -6,6 +6,7 @@ import {
   judgePlaySubscription,
   playExpiry,
   playStateToStatus,
+  playStatus,
   resetPlayTokenCache,
   serviceAccountJwt,
   type PlaySubscription,
@@ -59,7 +60,7 @@ describe("Play subscription state", () => {
   });
 
   it("grants an active purchase to its owner and asks for an acknowledgement", () => {
-    expect(judgePlaySubscription(sub("SUBSCRIPTION_STATE_ACTIVE"), { userId: "user-1", productId: "golden_executive" }, ENTITLED)).toEqual({
+    expect(judgePlaySubscription(sub("SUBSCRIPTION_STATE_ACTIVE"), { userId: "user-1", productId: "golden_executive" }, ENTITLED, Date.parse("2026-11-10T10:00:00Z"))).toEqual({
       ok: true, status: "active", entitled: true, needsAck: true, expiry: "2027-11-10T10:00:00Z",
     });
     expect(judgePlaySubscription(sub("SUBSCRIPTION_STATE_EXPIRED", { acknowledgementState: "ACKNOWLEDGEMENT_STATE_ACKNOWLEDGED" }), { userId: "user-1", productId: "golden_executive" }, ENTITLED)).toMatchObject({ ok: true, entitled: false, needsAck: false });
@@ -69,6 +70,15 @@ describe("Play subscription state", () => {
     expect(judgePlaySubscription(sub("SUBSCRIPTION_STATE_ACTIVE"), { userId: "user-2", productId: "golden_executive" }, ENTITLED).ok).toBe(false);
     expect(judgePlaySubscription(sub("SUBSCRIPTION_STATE_ACTIVE"), { userId: "user-1", productId: "golden_experience" }, ENTITLED).ok).toBe(false);
     expect(judgePlaySubscription(sub("SUBSCRIPTION_STATE_PENDING"), { userId: "user-1", productId: "golden_executive" }, ENTITLED).ok).toBe(false);
+  });
+
+  it("treats an active subscription that ends within the free days as the 5-day trial", () => {
+    const now = Date.parse("2026-11-10T10:00:00Z");
+    const inTrial = sub("SUBSCRIPTION_STATE_ACTIVE", { lineItems: [{ productId: "golden_executive", expiryTime: "2026-11-15T10:00:00Z" }] });
+    expect(playStatus(inTrial, now)).toBe("trialing");
+    expect(judgePlaySubscription(inTrial, { userId: "user-1", productId: "golden_executive" }, ENTITLED, now)).toMatchObject({ ok: true, status: "trialing", entitled: true });
+    expect(playStatus(sub("SUBSCRIPTION_STATE_ACTIVE"), now)).toBe("active"); // paid year
+    expect(playStatus(sub("SUBSCRIPTION_STATE_CANCELED", { lineItems: [{ productId: "golden_executive", expiryTime: "2026-11-15T10:00:00Z" }] }), now)).toBe("canceled");
   });
 
   it("uses the latest expiry", () => {

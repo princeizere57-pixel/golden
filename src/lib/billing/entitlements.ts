@@ -1,6 +1,8 @@
 // What each plan unlocks. One table, used by every page, server action and the account screen,
 // so the app always matches what the buyer saw on checkout (src/lib/billing/offers.ts).
 //
+// - Free trial (the 5-Day Zero-Waste Challenge): every feature below, whichever plan was chosen,
+//   so people feel the full value before paying. Afterwards the chosen plan decides.
 // - Free (no plan, or the trial not started): browse, read every free recipe at your level, save
 //   recipes, import a recipe from a link.
 // - The Golden Experience: + hands-free cook mode with timers, Plan a meal for one dish at a time,
@@ -48,6 +50,38 @@ export const TIER_NAME: Record<Tier, string> = {
   experience: "The Golden Experience",
   executive: "Golden Executive Chef System",
 };
+
+/**
+ * What someone can use, given the plan they chose and whether their free days are running:
+ * everything during the trial, then exactly their plan.
+ */
+export interface Access {
+  /** What the app unlocks right now. */
+  tier: Tier;
+  /** The plan they chose (charged when the trial ends). */
+  plan: Tier;
+  /** Free days running: everything is unlocked. */
+  trial: boolean;
+  /** When the free days end (ms since epoch), when known. */
+  trialEndsAt?: number;
+}
+
+export const accessFor = (plan: Tier, trial: boolean, trialEndsAt?: number): Access => ({
+  tier: trial && plan !== "free" ? "executive" : plan,
+  plan,
+  trial: trial && plan !== "free",
+  ...(trial && trialEndsAt ? { trialEndsAt } : {}),
+});
+
+/** The signed plan cookie: "experience", or "experience~<trial end ms>" while the free days run. */
+export const planCookieValue = (plan: Tier, trialEndsAt?: number) => (trialEndsAt && plan !== "free" ? `${plan}~${Math.round(trialEndsAt)}` : plan);
+
+export function accessFromCookie(value: string | null | undefined, now = Date.now()): Access {
+  const [p, end] = String(value ?? "").split("~");
+  const plan = parseTier(p);
+  const ends = Number(end);
+  return accessFor(plan, Number.isFinite(ends) && ends > now, ends);
+}
 
 /** Reads a plan cookie or column value. "premium" (older cookies and rows) means Executive. */
 export function parseTier(value: unknown): Tier {

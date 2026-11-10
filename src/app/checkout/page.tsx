@@ -25,7 +25,7 @@ export default async function CheckoutPage({ searchParams }: { searchParams: Pro
   if (!viewer.onboarded) redirect("/onboarding");
   const [launch, store, { plan }] = await Promise.all([launchState(), requestStore(), searchParams]);
   // Experience members only see the upgrade; a locked screen's ?plan= preselects its plan.
-  const offers = viewer.tier === "experience" ? OFFERS.filter((o) => o.id === "executive") : OFFERS;
+  const offers = viewer.access.plan === "experience" ? OFFERS.filter((o) => o.id === "executive") : OFFERS;
   const preselect = offerById(plan ?? "") && offers.some((o) => o.id === plan) ? plan! : offers.some((o) => o.id === DEFAULT_OFFER) ? DEFAULT_OFFER : offers[0].id;
   const web = store === "web";
 
@@ -33,7 +33,7 @@ export default async function CheckoutPage({ searchParams }: { searchParams: Pro
     <CheckoutPanel
       user={{ id: user.id, name: user.name, email: user.email }}
       level={LEVEL[viewer.skill]}
-      tier={viewer.tier}
+      tier={viewer.access.plan}
       store={store}
       offers={offers.map((o) => ({
         id: o.id,

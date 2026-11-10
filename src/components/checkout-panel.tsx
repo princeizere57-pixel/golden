@@ -135,7 +135,8 @@ export function CheckoutPanel({ user, level, tier, store: serverStore, offers, d
         </p>
       )}
       <fieldset className="mt-4 space-y-3" disabled={Boolean(session)}>
-        <legend className="mb-1 text-lg font-semibold">Start your free 3-Day Zero-Waste Challenge, then</legend>
+        <legend className="mb-1 text-lg font-semibold">Start your free {ATTRACTION.name}, then</legend>
+        <p className="-mt-1 mb-2 text-sm text-muted">For {ATTRACTION.days} days you get every feature, whichever plan you pick. Your plan starts after that.</p>
         {offers.filter((o) => o.kind === "core").map((o) => <OfferCard key={o.id} offer={o} checked={chosen === o.id} onChange={() => setChosen(o.id)} />)}
         {offers.some((o) => o.kind === "upsell") && (
           <>

@@ -8,6 +8,7 @@
 
 import { createSign } from "node:crypto";
 import type { SubscriptionStatus } from "@/lib/billing/subscriptions";
+import { ATTRACTION } from "@/lib/billing/offers";
 
 const SCOPE = "https://www.googleapis.com/auth/androidpublisher";
 const API = "https://androidpublisher.googleapis.com/androidpublisher/v3/applications";
@@ -123,6 +124,18 @@ export function playStateToStatus(state: string): SubscriptionStatus | null {
 export const playExpiry = (sub: PlaySubscription) =>
   sub.lineItems?.map((l) => l.expiryTime).filter((t): t is string => Boolean(t)).sort().at(-1);
 
+/**
+ * Golden's status for a Play subscription. Google reports the free trial as ACTIVE; while the
+ * expiry is within the free days (the trial's end, not a year away) it's our "trialing", so the
+ * app unlocks everything until the first charge.
+ */
+export function playStatus(sub: PlaySubscription, now = Date.now()): SubscriptionStatus | null {
+  const status = playStateToStatus(sub.subscriptionState);
+  const expiry = playExpiry(sub);
+  if (status === "active" && expiry && Date.parse(expiry) - now <= (ATTRACTION.days + 1) * 86_400_000) return "trialing";
+  return status;
+}
+
 export type PlayVerdict =
   | { ok: true; status: SubscriptionStatus; entitled: boolean; needsAck: boolean; expiry?: string }
   | { ok: false; reason: string };
@@ -131,11 +144,11 @@ export type PlayVerdict =
  * Decides what a Play subscription means for this Golden user. Refuses purchases for another
  * product or made under another account, and anything still pending.
  */
-export function judgePlaySubscription(sub: PlaySubscription, expect: { userId: string; productId: string }, entitled: SubscriptionStatus[]): PlayVerdict {
+export function judgePlaySubscription(sub: PlaySubscription, expect: { userId: string; productId: string }, entitled: SubscriptionStatus[], now = Date.now()): PlayVerdict {
   if (!sub.lineItems?.some((l) => l.productId === expect.productId)) return { ok: false, reason: "That purchase is for a different plan." };
   const owner = sub.externalAccountIdentifiers?.obfuscatedExternalAccountId;
   if (owner && owner !== expect.userId) return { ok: false, reason: "That purchase belongs to a different Golden account." };
-  const status = playStateToStatus(sub.subscriptionState);
+  const status = playStatus(sub, now);
   if (!status) return { ok: false, reason: "Google Play is still processing the payment. Try again in a minute." };
   return {
     ok: true,

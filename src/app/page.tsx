@@ -7,7 +7,7 @@ import { PantryRail } from "@/components/pantry";
 import { recipeHref } from "@/lib/links";
 import { FeedbackPrompt } from "@/components/feedback-prompt";
 import { TodayCard } from "@/components/today-card";
-import { can } from "@/lib/billing/entitlements";
+import { TIER_NAME, can } from "@/lib/billing/entitlements";
 import { TRIAL_HEADLINE_DAYS, offerById } from "@/lib/billing/offers";
 import { RECIPES } from "@/lib/data/recipes";
 import { byCategory, dishOfTheDay, forLevel, libraryRecipes } from "@/lib/library";
@@ -99,6 +99,12 @@ export default async function Discover({ searchParams }: { searchParams: Promise
       <p className="mt-3 px-4 text-sm text-muted">
         Cooking at <strong className="text-ink">{LEVEL[viewer.skill]}</strong> level. Every recipe is rewritten for you.
       </p>
+      {viewer.access.trial && (
+        <p className="mx-4 mt-3 rounded-2xl bg-accent-soft px-4 py-3 text-sm">
+          <strong>Your free days are running:</strong> every feature is unlocked
+          {viewer.access.trialEndsAt ? ` until ${new Date(viewer.access.trialEndsAt).toLocaleDateString("en-US", { month: "short", day: "numeric" })}` : ""}. Then {TIER_NAME[viewer.access.plan]} starts.
+        </p>
+      )}
 
       <Link href={can(viewer.tier, "pantry") ? "/pantry" : "/checkout?plan=executive"} className="mx-4 mt-4 flex items-center gap-3 rounded-3xl bg-accent-soft p-4">
         <FridgeIcon size={44} className="shrink-0" />

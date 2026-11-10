@@ -74,12 +74,12 @@ REA (`rea-agents`) was used to study Mob's public website (mob.co.uk): its route
 
 ## 5. Monetisation and payment architecture (`src/lib/billing/`)
 
-- **Pricing (both repos, `src/lib/billing/offers.ts`, keep identical; golden-v1 is the source):** **Golden Executive Chef System $100/year** founding price (regular $500/year, 80% off for the first 5,000 members until `LAUNCH_ENDS_AT`, `launch.ts`) and **The Golden Experience $50/year**, both after the free **3-Day Zero-Waste Challenge** (Whop plans `WHOP_PLAN_EXECUTIVE`, `WHOP_PLAN_EXPERIENCE`; empty = created inline with `WHOP_API_KEY`). Executive is backed by the 10 Perfect Dishes guarantee (`/guarantee`). GBP prices are set separately (not converted on the fly).
+- **Pricing (both repos, `src/lib/billing/offers.ts`, keep identical; golden-v1 is the source):** **Golden Executive Chef System $100/year** founding price (regular $500/year, 80% off for the first 5,000 members until `LAUNCH_ENDS_AT`, `launch.ts`) and **The Golden Experience $50/year**, both after the free **5-Day Zero-Waste Challenge** (every feature unlocked during it, whichever plan was chosen; the chosen plan is charged after) (Whop plans `WHOP_PLAN_EXECUTIVE`, `WHOP_PLAN_EXPERIENCE`; empty = created inline with `WHOP_API_KEY`). Executive is backed by the 10 Perfect Dishes guarantee (`/guarantee`). GBP prices are set separately (not converted on the fly).
 - **Entity routing (US / UK):**
   - **US entity** (Stripe US / App Store): USD cards, Apple Pay, Google Pay. Stripe standard web pricing 2.9% + $0.30.
   - **UK entity** (UK Ltd / Stripe UK): GBP, domestic cards and Open Banking. UK domestic card pricing 1.5% + £0.20.
   - Customers are routed by **billing country**: GB → UK entity, everyone else → US entity. Each entity must be properly registered, collect tax where required and serve the customers routed to it. Fee figures are estimates for planning, not quotes.
-- **Funnel:** 3-day free challenge that auto-renews into the chosen yearly plan. App Store / Google Play small-business programmes (15% commission) apply to in-app purchases.
+- **Funnel:** 5-day free challenge that auto-renews into the chosen yearly plan. App Store / Google Play small-business programmes (15% commission) apply to in-app purchases.
 - **Webhooks:** Stripe (signature verified), App Store Server Notifications V2 (signed JWS, chain verified to the Apple root) and Google Play RTDN. All update `subscriptions` in Supabase.
 
 ## 6. Rules for working in this repo
@@ -158,7 +158,7 @@ These set The Chef's AI apart; keep them original (no third-party mascots, icon 
 
 - Inside the Android app (`Capacitor.getPlatform() === "android"` and the `PlayBilling` plugin present), checkout shows `PlayCheckout` instead of Whop: Google Play's own prices, Google's purchase sheet, "Restore purchases". Google Play is the merchant of record; never show Whop or other payment links inside the Android app.
 - Native: `android/app/src/main/java/com/golden/cooking/PlayBillingPlugin.java` (Billing Library 7, `getProducts` / `purchase` / `getPurchases`), registered in `MainActivity`. JS bridge: `src/lib/native/play-billing.ts`.
-- Products (`src/lib/billing/play-products.ts`): `golden_executive` and `golden_experience`, base plan `yearly`, 3-day free-trial offer. Keep them in step with `offers.ts`.
+- Products (`src/lib/billing/play-products.ts`): `golden_executive` and `golden_experience`, base plan `yearly`, 5-day free-trial offer. Keep them in step with `offers.ts`.
 - Server (`src/app/actions/play.ts`, `src/lib/billing/google-play-api.ts`): Premium only after the Google Play Developer API confirms the subscription (right product, `obfuscatedAccountId` = the Golden user id, not pending); then save to `subscriptions` (`provider = 'google_play'`), acknowledge, set the plan cookie. RTDN (`/api/billing/google/rtdn`) re-reads the subscription from Google before saving. Env: `GOOGLE_PLAY_SERVICE_ACCOUNT_JSON`, `GOOGLE_PLAY_PACKAGE_NAME`, `GOOGLE_RTDN_TOKEN`. Setup: `docs/SETUP.md` §3b.
 
 ## 15. Audience and message (both repos)
