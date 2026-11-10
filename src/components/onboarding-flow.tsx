@@ -17,11 +17,11 @@ const BUILD_LINES = ["Reading your answers…", "Matching techniques to your lev
 
 /** Shown after the questions: everyday cooking problems and the Golden feature that solves each. */
 const PROBLEMS = [
-  { Icon: FridgeIcon, problem: "Food goes off in my fridge", fix: "Pantry-to-Plate turns what you already have into tonight's dinner, so less ends up in the bin." },
-  { Icon: LifebuoyIcon, problem: "My cooking goes wrong", fix: "Fix My Mistake rescues salty, split or burnt dishes with exact amounts to add." },
-  { Icon: HatIcon, problem: "Recipes lose me halfway", fix: "Every step is rewritten for your level, then cook mode shows one step at a time." },
-  { Icon: StopwatchIcon, problem: "Nothing's ready at the same time", fix: "Plan a meal times every dish so they all reach the plate together." },
-  { Icon: LensIcon, problem: "I never know what to make", fix: "Golden picks recipes at your level and adds what's missing to your shopping list." },
+  { Icon: FridgeIcon, problem: "I throw away food I paid for", fix: "Pantry-to-Plate turns what's already in your fridge into tonight's dinner, so it gets eaten, not binned." },
+  { Icon: LifebuoyIcon, problem: "I ruin expensive ingredients", fix: "Fix My Mistake saves the salty sauce or the overcooked steak in seconds, with the exact amounts to add." },
+  { Icon: StopwatchIcon, problem: "Two dishes at once stresses me out", fix: "Plan a meal times every dish so they all land hot together. One task at a time, no juggling." },
+  { Icon: HatIcon, problem: "Recipes lose me halfway", fix: "Every step is rewritten for your level, so you get it right the first time and waste nothing." },
+  { Icon: LensIcon, problem: "I never know what to make", fix: "Golden picks tonight's dinner for you and only lists what you're missing." },
 ] as const;
 
 type Stage = { kind: "why" } | { kind: "mini" } | { kind: "question"; index: number } | { kind: "building" } | { kind: "result" };
@@ -36,7 +36,8 @@ export function OnboardingFlow({ images, userName }: { images: string[]; userNam
   const steps = QUESTIONS.length + 4;
   const position =
     stage.kind === "mini" ? 0 : stage.kind === "question" ? stage.index + 1 : stage.kind === "why" ? QUESTIONS.length + 1 : stage.kind === "building" ? QUESTIONS.length + 2 : QUESTIONS.length + 3;
-  const progress = ((position + 1) / steps) * 100;
+  // Goal gradient: signing up already counts as a step, so the bar never starts empty.
+  const progress = ((position + 2) / (steps + 1)) * 100;
 
   useEffect(() => {
     if (stage.kind !== "building") return;
@@ -74,9 +75,9 @@ export function OnboardingFlow({ images, userName }: { images: string[]; userNam
       {stage.kind === "why" && (
         <section className="step-in flex flex-1 flex-col">
           <h1 className="mt-6 text-center font-display text-[2.1rem]">
-            {userName}, cooking just got <span className="text-accent">easier</span>
+            {userName}, stop paying for <span className="text-accent">wasted dinners</span>
           </h1>
-          <p className="mt-2 text-center text-muted">Here&apos;s what Golden fixes for you.</p>
+          <p className="mt-2 text-center text-muted">Here&apos;s what Golden fixes for you, starting tonight.</p>
           <ul className="mt-6 space-y-3 pb-4">
             {PROBLEMS.map(({ Icon, problem, fix }) => (
               <li key={problem} className="flex items-center gap-4 rounded-3xl border border-line bg-bg p-4 shadow-sm">

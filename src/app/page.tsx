@@ -103,7 +103,7 @@ export default async function Discover({ searchParams }: { searchParams: Promise
         <FridgeIcon size={44} className="shrink-0" />
         <span className="flex-1">
           <span className="block text-xs font-semibold uppercase tracking-wide text-muted">Pantry-to-Plate</span>
-          <span className="mt-0.5 block font-semibold leading-snug">What&apos;s in your fridge? Get dinner from it in seconds.</span>
+          <span className="mt-0.5 block font-semibold leading-snug">Use it before you lose it: turn what&apos;s in your fridge into dinner.</span>
         </span>
         <span aria-hidden className="text-2xl text-accent">›</span>
       </Link>

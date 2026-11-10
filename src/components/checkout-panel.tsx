@@ -10,6 +10,8 @@ import { startCheckout, type StartCheckout } from "@/app/actions/checkout";
 import { enterGiveaway, type EntryResult } from "@/app/actions/giveaway";
 import { finishJourney, setDemoPlan } from "@/app/actions/viewer";
 import { MiniYou } from "@/components/mini-you";
+import { TrialTimeline } from "@/components/trial-timeline";
+import { ATTRACTION } from "@/lib/billing/offers";
 import { PlayCheckout } from "@/components/play-checkout";
 import { playBillingAvailable } from "@/lib/native/play-billing";
 import { track } from "@/lib/analytics";
@@ -132,6 +134,12 @@ export function CheckoutPanel({ user, level, premium, offers, defaultOffer, laun
           <span><strong>Buy now, pay later</strong><span className="block text-sm text-muted">Klarna, Afterpay/Clearpay, Affirm, Sezzle, Zip or instalments where available</span></span>
         </label>
       )}
+
+      {/* Transparency: exactly what happens and when, before anyone pays */}
+      <section className="mt-6 rounded-3xl border border-line p-5" aria-labelledby="free-days">
+        <h2 id="free-days" className="font-semibold">How your free days work</h2>
+        <div className="mt-4"><TrialTimeline days={ATTRACTION.days} price={offer.priceLine.replace(/^.*then /, "")} /></div>
+      </section>
 
       {/* 4. Payment */}
       {android ? (
