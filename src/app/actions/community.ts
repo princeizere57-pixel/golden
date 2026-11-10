@@ -2,13 +2,15 @@
 
 import { revalidatePath } from "next/cache";
 import { getUser } from "@/lib/auth";
+import { can } from "@/lib/billing/entitlements";
 import { clean, insert } from "@/lib/community";
 import { getViewer } from "@/lib/viewer";
 
 export async function createPost(form: FormData) {
   const user = await getUser();
   if (!user) return;
-  const { skill } = await getViewer();
+  const { skill, tier } = await getViewer();
+  if (!can(tier, "community")) return;
   const dish = clean(form.get("dish"), 80);
   const note = clean(form.get("note"), 500);
   if (dish.length < 2 || note.length < 2) return;
@@ -19,7 +21,8 @@ export async function createPost(form: FormData) {
 export async function createReply(postId: string, form: FormData) {
   const user = await getUser();
   if (!user || !/^[0-9a-f-]{36}$/.test(postId)) return;
-  const { skill } = await getViewer();
+  const { skill, tier } = await getViewer();
+  if (!can(tier, "community")) return;
   const body = clean(form.get("body"), 500);
   if (body.length < 2) return;
   await insert("community_replies", { post_id: postId, user_id: user.id, name: user.name.split(" ")[0], level: skill, body });

@@ -49,7 +49,7 @@ async function fulfillPayment(payment: WhopPayment) {
   await markOrderPaid(orderId, payment.id);
   // One-time offers have no membership renewals to follow, so grant access from the payment.
   if (offer?.planType === "one_time" && userId) {
-    await saveSubscription({ provider: "whop", externalId: payment.id, status: "active", userId, whopUserId: payment.user_id ?? undefined });
+    await saveSubscription({ provider: "whop", externalId: payment.id, status: "active", userId, whopUserId: payment.user_id ?? undefined, offer: offer.id });
   }
 }
 
@@ -57,6 +57,7 @@ async function syncMembership(membership: WhopMembership) {
   const status = whopStatus(membership);
   if (!status) return;
   const appUser = membership.metadata?.golden_user_id ?? membership.metadata?.app_user_id;
+  const offer = offerById(String(membership.metadata?.offer ?? ""));
   await saveSubscription({
     provider: "whop",
     externalId: membership.id,
@@ -64,6 +65,7 @@ async function syncMembership(membership: WhopMembership) {
     userId: typeof appUser === "string" ? appUser : undefined,
     whopUserId: membership.user_id ?? undefined,
     currentPeriodEnd: membership.current_period_end ?? undefined,
+    offer: offer?.id,
   });
 }
 

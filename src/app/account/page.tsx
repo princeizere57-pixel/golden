@@ -3,6 +3,7 @@ import Link from "next/link";
 import { signOut } from "@/app/actions/auth";
 import { setDemoPlan } from "@/app/actions/viewer";
 import { getUser } from "@/lib/auth";
+import { TIER_NAME } from "@/lib/billing/entitlements";
 import { getViewer } from "@/lib/viewer";
 
 export const metadata: Metadata = { title: "Account" };
@@ -21,7 +22,7 @@ export default async function AccountPage({ searchParams }: { searchParams: Prom
       <dl className="mt-8 divide-y divide-line rounded-3xl border border-line bg-surface">
         {user && <Row label={user.provider === "google" ? "Signed in with Google" : "Signed in (demo)"} value={`${user.name} · ${user.email}`} action={null} />}
         <Row label="Skill level" value={SKILL_LABEL[viewer.skill]} action={<Link className="underline" href="/onboarding">Retake quiz</Link>} />
-        <Row label="Plan" value={viewer.plan === "premium" ? "Premium" : "Free"} action={viewer.plan === "free" ? <Link className="underline" href="/checkout">Upgrade</Link> : null} />
+        <Row label="Plan" value={TIER_NAME[viewer.tier]} action={viewer.tier !== "executive" ? <Link className="underline" href={viewer.tier === "free" ? "/checkout" : "/checkout?plan=executive"}>{viewer.tier === "free" ? "Choose a plan" : "Upgrade"}</Link> : null} />
       </dl>
       {viewer.plan === "premium" && (
         <section className="mt-8">

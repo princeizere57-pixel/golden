@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { CookView } from "@/components/cook-view";
+import { UnlockButton } from "@/components/plan-lock";
 import { SkillSteps } from "@/components/skill-steps";
 import { SourcePhoto } from "@/components/source-photo";
 import { GENERATED_SOURCE } from "@/lib/ai/generated-recipe";
@@ -38,7 +39,7 @@ function Credit({ recipe }: { recipe: Recipe }) {
   );
 }
 
-export function MyRecipe({ slug, skill }: { slug: string; skill: SkillLevel }) {
+export function MyRecipe({ slug, skill, canCook }: { slug: string; skill: SkillLevel; canCook: boolean }) {
   const recipe = useImport(slug);
   if (recipe === undefined) return <main className="mx-auto px-4 py-10 text-muted">Loading…</main>;
   if (!recipe) return <Missing />;
@@ -54,7 +55,11 @@ export function MyRecipe({ slug, skill }: { slug: string; skill: SkillLevel }) {
         <ul className="mt-2 divide-y divide-line">
           {recipe.ingredients.map((i) => <li key={i.id} className="py-2 text-sm">{i.raw ?? i.name}</li>)}
         </ul>
-        <Link href={`/my/${recipe.slug}/cook`} className="mt-6 flex min-h-14 items-center justify-center rounded-full bg-button font-semibold text-button-ink">Start cook mode</Link>
+        {canCook ? (
+          <Link href={`/my/${recipe.slug}/cook`} className="mt-6 flex min-h-14 items-center justify-center rounded-full bg-button font-semibold text-button-ink">Start cook mode</Link>
+        ) : (
+          <UnlockButton feature="cookMode" label="Unlock cook mode" />
+        )}
       </aside>
       <section aria-label="Method">
         <SkillSteps recipe={recipe} initialSkill={skill} />
@@ -64,9 +69,9 @@ export function MyRecipe({ slug, skill }: { slug: string; skill: SkillLevel }) {
   );
 }
 
-export function MyRecipeCook({ slug, skill }: { slug: string; skill: SkillLevel }) {
+export function MyRecipeCook({ slug, skill, canFix }: { slug: string; skill: SkillLevel; canFix: boolean }) {
   const recipe = useImport(slug);
   if (recipe === undefined) return <main className="cook-mode min-h-screen" />;
   if (!recipe) return <Missing />;
-  return <CookView recipe={recipe} initialSkill={skill} exitHref={`/my/${recipe.slug}`} />;
+  return <CookView recipe={recipe} initialSkill={skill} canFix={canFix} exitHref={`/my/${recipe.slug}`} />;
 }

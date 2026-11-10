@@ -7,6 +7,7 @@ import { PantryRail } from "@/components/pantry";
 import { recipeHref } from "@/lib/links";
 import { FeedbackPrompt } from "@/components/feedback-prompt";
 import { TodayCard } from "@/components/today-card";
+import { can } from "@/lib/billing/entitlements";
 import { TRIAL_HEADLINE_DAYS, offerById } from "@/lib/billing/offers";
 import { RECIPES } from "@/lib/data/recipes";
 import { byCategory, dishOfTheDay, forLevel, libraryRecipes } from "@/lib/library";
@@ -99,10 +100,13 @@ export default async function Discover({ searchParams }: { searchParams: Promise
         Cooking at <strong className="text-ink">{LEVEL[viewer.skill]}</strong> level. Every recipe is rewritten for you.
       </p>
 
-      <Link href="/pantry" className="mx-4 mt-4 flex items-center gap-3 rounded-3xl bg-accent-soft p-4">
+      <Link href={can(viewer.tier, "pantry") ? "/pantry" : "/checkout?plan=executive"} className="mx-4 mt-4 flex items-center gap-3 rounded-3xl bg-accent-soft p-4">
         <FridgeIcon size={44} className="shrink-0" />
         <span className="flex-1">
-          <span className="block text-xs font-semibold uppercase tracking-wide text-muted">Pantry-to-Plate</span>
+          <span className="block text-xs font-semibold uppercase tracking-wide text-muted">
+            Pantry-to-Plate
+            {!can(viewer.tier, "pantry") && <span className="ml-2 rounded-full bg-button px-2 py-0.5 text-[10px] font-bold text-button-ink">Executive</span>}
+          </span>
           <span className="mt-0.5 block font-semibold leading-snug">Use it before you lose it: turn what&apos;s in your fridge into dinner.</span>
         </span>
         <span aria-hidden className="text-2xl text-accent">›</span>
@@ -126,7 +130,7 @@ export default async function Discover({ searchParams }: { searchParams: Promise
         {RECIPES.filter((r) => r.realTime).map((r) => <PhotoCard key={r.slug} recipe={r} />)}
       </Rail>
 
-      <PantryRail recipes={library.slice(0, 200).map((r) => ({ slug: r.slug, href: recipeHref(r), title: r.title, image: r.image ? thumb(r.image) : undefined, ingredients: r.ingredients.map((i) => i.name) }))} />
+      {can(viewer.tier, "pantry") && <PantryRail recipes={library.slice(0, 200).map((r) => ({ slug: r.slug, href: recipeHref(r), title: r.title, image: r.image ? thumb(r.image) : undefined, ingredients: r.ingredients.map((i) => i.name) }))} />}
 
       {picks.length > 0 && <Rail heading="Right at your level" href="/for-you">{picks.map((r) => <PhotoCard key={r.slug} recipe={r} />)}</Rail>}
 
@@ -146,7 +150,15 @@ export default async function Discover({ searchParams }: { searchParams: Promise
         <p className="mt-10 px-4 text-sm text-muted">Run <code>npm run data:mealdb</code> to fill Discover with hundreds of recipes.</p>
       )}
 
-      {viewer.plan === "free" && (
+      {viewer.tier === "experience" && (
+        <section className="mx-4 mt-12 rounded-3xl bg-accent-soft p-7">
+          <h2 className="font-display text-2xl">Cook the whole dinner at once</h2>
+          <p className="mt-2 max-w-xl text-muted">Executive times up to 4 dishes to finish hot together, rescues mistakes from a photo, turns your fridge into dinner and writes a recipe for any dish you search.</p>
+          <Link href="/checkout?plan=executive" className="mt-4 inline-flex min-h-12 items-center rounded-full border-2 border-ink px-6 font-semibold">See Executive</Link>
+        </section>
+      )}
+
+      {viewer.tier === "free" && (
         <section className="mx-4 mt-12 rounded-3xl bg-accent-soft p-7">
           <h2 className="font-display text-2xl">Cook anything, at your level</h2>
           <p className="mt-2 max-w-xl text-muted">Every recipe rewritten for you, hands-free cook mode and Fix My Mistake. {TRIAL_HEADLINE_DAYS}-day Zero-Waste Challenge free, then the Executive Chef System at a ${offerById("executive")!.price} a year founding price (80% off).</p>

@@ -1,6 +1,9 @@
 import type { Metadata } from "next";
 import { createPost, createReply } from "@/app/actions/community";
 import { HatIcon, LifebuoyIcon } from "@/components/icons-3d";
+import { LockedPage } from "@/components/plan-lock";
+import { can } from "@/lib/billing/entitlements";
+import { getViewer } from "@/lib/viewer";
 import { listPosts } from "@/lib/community";
 import type { SkillLevel } from "@/lib/types";
 
@@ -20,6 +23,8 @@ const ago = (iso: string) => {
 };
 
 export default async function CommunityPage() {
+  const { tier } = await getViewer();
+  if (!can(tier, "community")) return <LockedPage feature="community" heading="Apprentice Meets Master" back={{ href: "/for-you", label: "Back to For you" }} />;
   const posts = await listPosts();
 
   return (

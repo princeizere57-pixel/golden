@@ -1,5 +1,7 @@
 // Writes subscription state to Supabase through PostgREST with the service-role key. Server-only.
 
+import { bestTier, parseTier, type Tier } from "@/lib/billing/entitlements";
+import type { OfferId } from "@/lib/billing/offers";
 import type { Channel } from "@/lib/billing/routing";
 import type { BillingEntity } from "@/lib/types";
 
@@ -15,6 +17,8 @@ export interface SubscriptionUpdate {
   whopUserId?: string;
   entity?: BillingEntity;
   currentPeriodEnd?: string;
+  /** Which plan was bought (migration 0007). Rows without one count as Executive. */
+  offer?: OfferId;
 }
 
 /** Statuses that unlock premium. */
@@ -35,18 +39,26 @@ export async function saveSubscription(update: SubscriptionUpdate, fetchImpl: ty
     whop_user_id: update.whopUserId,
     entity: update.entity,
     current_period_end: update.currentPeriodEnd,
+    offer: update.offer,
     updated_at: new Date().toISOString(),
   };
-  const res = await fetchImpl(`${url}/rest/v1/subscriptions?on_conflict=provider,external_id`, {
-    method: "POST",
-    headers: {
-      apikey: key,
-      Authorization: `Bearer ${key}`,
-      "Content-Type": "application/json",
-      Prefer: "resolution=merge-duplicates,return=minimal",
-    },
-    body: JSON.stringify(Object.fromEntries(Object.entries(row).filter(([, v]) => v !== undefined))),
-  });
+  const post = (body: Record<string, unknown>) =>
+    fetchImpl(`${url}/rest/v1/subscriptions?on_conflict=provider,external_id`, {
+      method: "POST",
+      headers: {
+        apikey: key,
+        Authorization: `Bearer ${key}`,
+        "Content-Type": "application/json",
+        Prefer: "resolution=merge-duplicates,return=minimal",
+      },
+      body: JSON.stringify(Object.fromEntries(Object.entries(body).filter(([, v]) => v !== undefined))),
+    });
+  let res = await post(row);
+  // Before migration 0007 there is no `offer` column: save the rest rather than lose the payment.
+  if (!res.ok && row.offer && /offer/.test(await res.clone().text())) {
+    console.warn("[billing] subscriptions.offer missing: run supabase/migrations/0007_plan_tiers.sql");
+    res = await post({ ...row, offer: undefined });
+  }
   if (!res.ok) throw new Error(`Supabase returned ${res.status}: ${await res.text()}`);
   return true;
 }
@@ -54,34 +66,47 @@ export async function saveSubscription(update: SubscriptionUpdate, fetchImpl: ty
 export interface SubscriptionRow {
   status: SubscriptionStatus;
   current_period_end: string | null;
+  /** Missing before migration 0007, or null on older rows: counts as Executive. */
+  offer?: string | null;
 }
 
-/** Premium if any row is active, trialing or in grace, or cancelled but still paid up. */
-export function entitledFrom(rows: SubscriptionRow[], now = Date.now()): boolean {
-  return rows.some((r) => {
-    if (!ENTITLED.includes(r.status)) return false;
-    if (r.status !== "canceled") return true;
-    return r.current_period_end ? Date.parse(r.current_period_end) > now : false;
-  });
+const rowLive = (r: SubscriptionRow, now: number) => {
+  if (!ENTITLED.includes(r.status)) return false;
+  if (r.status !== "canceled") return true;
+  return r.current_period_end ? Date.parse(r.current_period_end) > now : false;
+};
+
+/** The best plan among rows that are active, trialing or in grace, or cancelled but still paid up. */
+export function tierFrom(rows: SubscriptionRow[], now = Date.now()): Tier {
+  return bestTier(rows.filter((r) => rowLive(r, now)).map((r) => parseTier(r.offer ?? "executive")));
 }
+
+/** Premium (any paid plan) from the same rows. */
+export const entitledFrom = (rows: SubscriptionRow[], now = Date.now()): boolean => tierFrom(rows, now) !== "free";
 
 /**
- * Does this account have a paid subscription on any channel (Whop, Stripe, App Store, Google Play)?
+ * The plan this account pays for on any channel (Whop, Stripe, App Store, Google Play).
  * Webhooks keep the `subscriptions` table current; this reads it. Null when Supabase isn't
  * configured or can't be reached, so the caller can fall back instead of breaking the page.
  */
-export async function hasActiveSubscription(userId: string, fetchImpl: typeof fetch = fetch): Promise<boolean | null> {
+export async function activeTier(userId: string, fetchImpl: typeof fetch = fetch): Promise<Tier | null> {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL?.replace(/\/$/, "");
   const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
   if (!url || !key || !/^[0-9a-f-]{36}$/i.test(userId)) return null;
   try {
-    const res = await fetchImpl(`${url}/rest/v1/subscriptions?user_id=eq.${userId}&select=status,current_period_end`, {
+    const res = await fetchImpl(`${url}/rest/v1/subscriptions?user_id=eq.${userId}&select=*`, {
       headers: { apikey: key, Authorization: `Bearer ${key}` },
       next: { revalidate: 30 },
     } as RequestInit);
     if (!res.ok) return null;
-    return entitledFrom((await res.json()) as SubscriptionRow[]);
+    return tierFrom((await res.json()) as SubscriptionRow[]);
   } catch {
     return null;
   }
+}
+
+/** Does this account have a paid subscription? (See activeTier.) */
+export async function hasActiveSubscription(userId: string, fetchImpl: typeof fetch = fetch): Promise<boolean | null> {
+  const tier = await activeTier(userId, fetchImpl);
+  return tier === null ? null : tier !== "free";
 }

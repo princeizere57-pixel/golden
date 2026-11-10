@@ -30,7 +30,7 @@ describe("Premium from paid subscriptions", () => {
       return new Response(JSON.stringify([{ status: "active", current_period_end: null }]));
     }) as typeof fetch;
     expect(await hasActiveSubscription(USER, ok)).toBe(true);
-    expect(asked).toBe(`https://x.supabase.co/rest/v1/subscriptions?user_id=eq.${USER}&select=status,current_period_end`);
+    expect(asked).toBe(`https://x.supabase.co/rest/v1/subscriptions?user_id=eq.${USER}&select=*`);
     expect(await hasActiveSubscription(USER, (async () => new Response("[]")) as typeof fetch)).toBe(false);
     expect(await hasActiveSubscription(USER, (async () => new Response("down", { status: 500 })) as typeof fetch)).toBeNull();
     expect(await hasActiveSubscription("demo-123", ok)).toBeNull(); // demo accounts aren't in the database

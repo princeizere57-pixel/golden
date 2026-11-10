@@ -10,6 +10,7 @@ import { recipeHref } from "@/lib/links";
 import { mergeResults } from "@/lib/search";
 import { difficulty, rankForSkill } from "@/lib/skill/difficulty";
 import { SKILL_LEVELS, type Recipe, type SkillLevel } from "@/lib/types";
+import { can } from "@/lib/billing/entitlements";
 import { getViewer } from "@/lib/viewer";
 
 export const metadata: Metadata = { title: "Explore recipes" };
@@ -80,7 +81,7 @@ export default async function ExplorePage({ searchParams }: { searchParams: Prom
 
       {recipes.length === 0 ? (
         query ? (
-          <NoMatches query={query} />
+          <NoMatches query={query} canWrite={can(viewer.tier, "recipeWriter")} />
         ) : (
           <p className="mt-8 text-muted">{categories.length ? "No recipes found. Try another search." : "Couldn't reach the recipe library. Check your connection and try again."}</p>
         )

@@ -13,7 +13,10 @@ import { MiniYou } from "@/components/mini-you";
 import { TrialTimeline } from "@/components/trial-timeline";
 import { ATTRACTION } from "@/lib/billing/offers";
 import { PlayCheckout } from "@/components/play-checkout";
-import { playBillingAvailable } from "@/lib/native/play-billing";
+import { Capacitor } from "@capacitor/core";
+import { TIER_NAME, type Tier } from "@/lib/billing/entitlements";
+import type { OfferId } from "@/lib/billing/offers";
+import type { Store } from "@/lib/native/user-agent";
 import { track } from "@/lib/analytics";
 
 const WhopEmbed = dynamic(() => import("@/components/whop-embed").then((m) => m.WhopEmbed), { ssr: false });
@@ -35,7 +38,10 @@ export interface OfferView {
 interface Props {
   user: { id: string; name: string; email: string };
   level: string;
-  premium: boolean;
+  /** The plan they already have: Executive sees "you're all set", Experience sees the upgrade. */
+  tier: Tier;
+  /** How this screen may take payment (server's guess from the app's user agent). */
+  store: Store;
   offers: OfferView[];
   defaultOffer: string;
   launch: { left: number; spots: number; endsOn: string; open: boolean };
@@ -44,7 +50,7 @@ interface Props {
   benefits: string[];
 }
 
-export function CheckoutPanel({ user, level, premium, offers, defaultOffer, launch, payLaterReady, drawDate, benefits }: Props) {
+export function CheckoutPanel({ user, level, tier, store: serverStore, offers, defaultOffer, launch, payLaterReady, drawDate, benefits }: Props) {
   const [chosen, setChosen] = useState(defaultOffer);
   const [payLater, setPayLater] = useState(false);
   const [session, setSession] = useState<Extract<StartCheckout, { ok: true }> | null>(null);
@@ -53,16 +59,23 @@ export function CheckoutPanel({ user, level, premium, offers, defaultOffer, laun
   const [pending, startTransition] = useTransition();
   const offer = offers.find((o) => o.id === chosen)!;
   const firstName = user.name.split(" ")[0];
-  // Inside the Android app, Google Play is the merchant of record; on the web, Whop.
-  const [android, setAndroid] = useState(false);
-  useEffect(() => setAndroid(playBillingAvailable()), []);
+  // Inside the Android app Google Play is the merchant of record, and inside the iPhone app Apple
+  // would be: web payment (Whop) is never shown in either. The server already decided from the
+  // user agent; the native bridge confirms it (older app builds), and until then no payment
+  // button renders, so Whop can't flash up inside an app.
+  const [store, setStore] = useState<Store | null>(serverStore === "web" ? null : serverStore);
+  useEffect(() => {
+    if (Capacitor.isNativePlatform()) setStore(Capacitor.getPlatform() === "android" ? "google_play" : "none");
+    else setStore(serverStore);
+  }, [serverStore]);
+  const android = store === "google_play";
 
-  if (premium) {
+  if (tier === "executive") {
     return (
       <main className="mx-auto flex min-h-dvh max-w-lg flex-col items-center justify-center px-6 text-center">
         <MiniYou size={150} mood="proud" />
-        <h1 className="mt-4 font-display text-[2rem]">You&apos;re on <span className="text-accent">Premium</span></h1>
-        <p className="mt-2 text-muted">Everything is unlocked for {user.email}.</p>
+        <h1 className="mt-4 font-display text-[2rem]">You&apos;re on <span className="text-accent">Executive</span></h1>
+        <p className="mt-2 text-muted">{TIER_NAME.executive}: everything is unlocked for {user.email}.</p>
         <form action={finishJourney} className="mt-8 w-full">
           <button className="min-h-14 w-full rounded-full bg-button text-lg font-semibold text-button-ink">Back to my recipes</button>
         </form>
@@ -102,6 +115,9 @@ export function CheckoutPanel({ user, level, premium, offers, defaultOffer, laun
           {firstName}, your <span className="text-accent">{level}</span> path is ready
         </h1>
       </div>
+      {tier === "experience" && (
+        <p className="mt-3 rounded-2xl bg-accent-soft p-3 text-sm">You&apos;re on <strong>{TIER_NAME.experience}</strong>. Upgrade to cook several dishes at once, rescue mistakes and cook from your fridge.</p>
+      )}
       <p className="mt-3 text-muted">Every dinner you rescue from the bin is money back in your pocket. Here&apos;s what you unlock:</p>
       <ul className="mt-3 space-y-2">
         {benefits.map((b) => (
@@ -128,7 +144,7 @@ export function CheckoutPanel({ user, level, premium, offers, defaultOffer, laun
         )}
       </fieldset>
 
-      {payLaterReady && !session && !android && (
+      {payLaterReady && !session && store === "web" && (
         <label className="mt-4 flex min-h-12 cursor-pointer items-center gap-3 rounded-2xl border border-line px-4">
           <input type="checkbox" checked={payLater} onChange={(e) => setPayLater(e.target.checked)} className="h-5 w-5 accent-[var(--accent)]" />
           <span><strong>Buy now, pay later</strong><span className="block text-sm text-muted">Klarna, Afterpay/Clearpay, Affirm, Sezzle, Zip or instalments where available</span></span>
@@ -141,9 +157,16 @@ export function CheckoutPanel({ user, level, premium, offers, defaultOffer, laun
         <div className="mt-4"><TrialTimeline days={ATTRACTION.days} price={offer.priceLine.replace(/^.*then /, "")} /></div>
       </section>
 
-      {/* 4. Payment */}
-      {android ? (
+      {/* 4. Payment: Google Play in the Android app, nothing in the iPhone app (yet), Whop on the web */}
+      {store === null ? (
+        <p className="mt-6 py-4 text-center text-muted" role="status">Loading payment…</p>
+      ) : android ? (
         <PlayCheckout offerId={chosen} offerName={offer.name} userId={user.id} />
+      ) : store === "none" ? (
+        <section className="mt-6 rounded-3xl bg-surface p-5 text-center" aria-label="Payment">
+          <p className="font-semibold">Subscriptions aren&apos;t available in the iPhone app yet.</p>
+          <p className="mt-1 text-sm text-muted">Already subscribed? Sign in with the same account and everything you&apos;ve unlocked is here.</p>
+        </section>
       ) : (
       <section className="mt-6" aria-label="Payment">
         {session ? (
@@ -156,7 +179,7 @@ export function CheckoutPanel({ user, level, premium, offers, defaultOffer, laun
             {pending ? "Preparing secure checkout…" : `Continue: ${offer.priceLine}`}
           </button>
         ) : offer.planType === "renewal" ? (
-          <form action={setDemoPlan.bind(null, "premium")}>
+          <form action={setDemoPlan.bind(null, chosen as OfferId)}>
             <button className="min-h-14 w-full rounded-full bg-button text-lg font-semibold text-button-ink">Start my free trial (demo)</button>
             <p className="mt-2 text-center text-xs text-muted">Demo mode: add your Whop plan IDs to take real payments.</p>
           </form>

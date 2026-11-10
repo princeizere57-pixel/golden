@@ -9,8 +9,10 @@ import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { generateRecipeAction } from "@/app/actions/import";
 import { saveImport } from "@/lib/import/store";
+import { unlockHref } from "@/components/plan-lock";
 
-export function NoMatches({ query }: { query: string }) {
+/** `canWrite`: recipe writing is part of Executive; other plans see it with the plan that unlocks it. */
+export function NoMatches({ query, canWrite }: { query: string; canWrite: boolean }) {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const [unavailable, setUnavailable] = useState(false);
@@ -38,7 +40,12 @@ export function NoMatches({ query }: { query: string }) {
     <section className="mt-8 rounded-3xl bg-surface p-6" aria-live="polite">
       <h2 className="text-xl font-bold">No &ldquo;{query}&rdquo; in the library yet</h2>
       <p className="mt-1 text-muted">Golden can write you an original recipe for it, ready for cook mode at your level, in about 15 seconds.</p>
-      {!unavailable && (
+      {!canWrite ? (
+        <Link href={unlockHref("recipeWriter")} className="mt-4 flex min-h-14 w-full flex-col items-center justify-center rounded-full bg-button font-semibold leading-tight text-button-ink">
+          Write a recipe for &ldquo;{query}&rdquo;
+          <span className="text-xs font-medium">Part of Executive · 3 days free</span>
+        </Link>
+      ) : !unavailable && (
         <button onClick={write} disabled={pending} className="mt-4 min-h-14 w-full rounded-full bg-button text-lg font-semibold text-button-ink disabled:opacity-70">
           {pending ? "Writing your recipe…" : `Write a recipe for “${query}”`}
         </button>

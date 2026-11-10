@@ -11,11 +11,13 @@ const config: CapacitorConfig = {
     url: "https://golden-two-pi.vercel.app",
     cleartext: false,
     errorPath: "index.html",
-    // Sign-in and checkout pages that may open inside the app.
-    allowNavigation: ["*.supabase.co", "accounts.google.com", "*.whop.com", "whop.com"],
+    // Sign-in pages that may open inside the app. No web payment pages: inside the store apps,
+    // subscriptions go through Google Play Billing (Android) and Apple in-app purchase (iPhone).
+    allowNavigation: ["*.supabase.co", "accounts.google.com"],
   },
-  ios: { contentInset: "always" },
-  android: { allowMixedContent: false },
+  // The server reads these to hide web payment inside the apps (src/lib/native/user-agent.ts).
+  ios: { contentInset: "always", appendUserAgent: "GoldenApp/ios" },
+  android: { allowMixedContent: false, appendUserAgent: "GoldenApp/android" },
 };
 
 export default config;
