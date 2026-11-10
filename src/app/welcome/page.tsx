@@ -11,8 +11,8 @@ export const metadata: Metadata = { title: "Welcome" };
 /** What bad dinners cost, said about the person reading, and what Golden changes. */
 const GIVES_BACK = [
   { Icon: FridgeIcon, title: "Your money", text: "Stop binning food you paid for. Golden turns what's in your fridge into dinner and rescues the expensive cut before it's ruined." },
-  { Icon: StopwatchIcon, title: "Your well-being", text: "No 7 PM \"what's for dinner?\". One pick for tonight, written for your level, ready in about 30 minutes." },
-  { Icon: LifebuoyIcon, title: "Your people", text: "Every dish lands hot together, so you sit down with everyone instead of rescuing pans." },
+  { Icon: StopwatchIcon, title: "Your time", text: "No 7 PM \"what's for dinner?\". One pick for tonight, written for your level, ready in about 30 minutes." },
+  { Icon: LifebuoyIcon, title: "Your meals", text: "Every dish comes out right and lands hot together, instead of cold, overcooked or in the bin." },
 ];
 
 export default function WelcomePage() {
