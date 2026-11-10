@@ -3,6 +3,7 @@
 
 import Link from "next/link";
 import { ShareButton } from "@/components/recipe-actions";
+import { TimeTile } from "@/components/time-tile";
 import { formatDuration, recipeHref, totalMinutes } from "@/lib/links";
 import { thumb } from "@/lib/mealdb/convert";
 import { difficulty } from "@/lib/skill/difficulty";
@@ -36,7 +37,7 @@ export function PhotoCard({ recipe, badge, wide = false }: { recipe: Recipe; bad
           // eslint-disable-next-line @next/next/no-img-element -- TheMealDB CDN photo, 350 px
           <img src={img(recipe)} alt="" width={350} height={350} loading="lazy" className="aspect-square w-full object-cover transition-transform duration-500 group-hover:scale-105" />
         ) : (
-          <span className="block aspect-square w-full bg-charcoal" />
+          <TimeTile time={formatDuration(totalMinutes(recipe))} />
         )}
         {badge && <span className="absolute left-3 top-3 rounded-full bg-bg px-3 py-1 text-xs font-bold tracking-wide">{badge}</span>}
         <span className={`absolute bottom-3 left-3 rounded-full px-2.5 py-1 text-xs font-semibold text-white ${LEVEL_BADGE[d.label]}`}>{d.label}</span>

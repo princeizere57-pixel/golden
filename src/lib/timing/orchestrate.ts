@@ -2,7 +2,7 @@
 // with only one *active* (hands-on) task at a time; *passive* tasks (simmering, roasting,
 // resting) run in parallel while the cook does something else.
 
-import type { Attention } from "@/lib/types";
+import type { Attention, Recipe } from "@/lib/types";
 
 export interface Task {
   id: string;
@@ -67,3 +67,24 @@ export function orchestrate(dishes: Task[][]): Schedule {
 
 const total = (dish: Task[]) => dish.reduce((sum, t) => sum + t.minutes, 0);
 const round = (n: number) => Math.round(n * 100) / 100;
+
+/**
+ * A recipe's steps as timeline tasks. Real-time steps done `during` a passive step are folded
+ * into it ("Pasta cooks. Meanwhile: make the chilli oil"), so they don't push the finish later.
+ */
+export function recipeTasks(recipe: { slug: string; title: string; blocks: Recipe["blocks"] }): Task[] {
+  const meanwhile = new Map<string, string[]>();
+  for (const b of recipe.blocks) if (b.during) meanwhile.set(b.during, [...(meanwhile.get(b.during) ?? []), b.text]);
+  return recipe.blocks
+    .filter((b) => !b.during || !recipe.blocks.some((x) => x.id === b.during))
+    .map((b) => {
+      const extra = meanwhile.get(b.id);
+      return {
+        id: `${recipe.slug}:${b.id}`,
+        dish: recipe.title,
+        label: extra ? `${b.text} Meanwhile: ${extra.join(" ")}` : b.text,
+        minutes: b.minutes,
+        attention: b.attention,
+      };
+    });
+}

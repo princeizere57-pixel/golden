@@ -35,6 +35,13 @@ export function SkillSlider({ value, onChange }: { value: SkillLevel; onChange: 
   );
 }
 
+/** A step's transparent picture, or nothing. Decorative: the step text says the same thing. */
+export function StepPicture({ src, className = "" }: { src?: string; className?: string }) {
+  if (!src) return null;
+  // eslint-disable-next-line @next/next/no-img-element -- small transparent WebP from public/steps
+  return <img src={src} alt="" loading="lazy" width={512} height={512} className={`object-contain drop-shadow-[0_6px_10px_rgba(0,0,0,0.18)] ${className}`} />;
+}
+
 export function SkillSteps({ recipe, initialSkill }: { recipe: Recipe; initialSkill: SkillLevel }) {
   const [adapted, setAdapted] = useState<AdaptedRecipe>(() => adaptRecipe(recipe, initialSkill));
   const [pending, startTransition] = useTransition();
@@ -56,7 +63,8 @@ export function SkillSteps({ recipe, initialSkill }: { recipe: Recipe; initialSk
       </p>
       <ol className="mt-4 space-y-4">
         {adapted.steps.map((step, i) => (
-          <li key={step.blockId} className="rounded-2xl border border-line bg-surface p-5">
+          <li key={step.blockId} className="flow-root rounded-2xl border border-line bg-surface p-5">
+            <StepPicture src={recipe.blocks.find((b) => b.id === step.blockId)?.picture} className="float-right -mr-1 -mt-1 ml-3 h-24 w-24 sm:h-32 sm:w-32" />
             <div className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-muted">
               <span>Step {i + 1}</span>
               <span>· {KIND[step.kind]}</span>

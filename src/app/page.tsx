@@ -109,6 +109,10 @@ export default async function Discover({ searchParams }: { searchParams: Promise
         {RECIPES.map((r) => <PhotoCard key={r.slug} recipe={r} badge="NEW" />)}
       </Rail>
 
+      <Rail heading="Real-time cooking: prep while it cooks">
+        {RECIPES.filter((r) => r.realTime).map((r) => <PhotoCard key={r.slug} recipe={r} />)}
+      </Rail>
+
       <PantryRail recipes={library.slice(0, 200).map((r) => ({ slug: r.slug, href: recipeHref(r), title: r.title, image: r.image ? thumb(r.image) : undefined, ingredients: r.ingredients.map((i) => i.name) }))} />
 
       {picks.length > 0 && <Rail heading="Right at your level" href="/for-you">{picks.map((r) => <PhotoCard key={r.slug} recipe={r} />)}</Rail>}

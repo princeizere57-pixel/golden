@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useStore } from "@/components/recipe-actions";
+import { TimeTile } from "@/components/time-tile";
 import { MAX_DISHES, planHref } from "@/lib/links";
 import { keepOnly, listPlanDone, markPlanDone, unmarkPlanDone } from "@/lib/plan-progress";
 
@@ -37,7 +38,7 @@ export function DishPicker({ options }: { options: DishOption[] }) {
                     // eslint-disable-next-line @next/next/no-img-element -- recipe photo, 350 px
                     <img src={o.image} alt="" loading="lazy" className="aspect-square w-full object-cover" />
                   ) : (
-                    <span className="block aspect-square w-full bg-charcoal" />
+                    <TimeTile time={o.minutes} />
                   )}
                   <span className={`absolute right-2 top-2 flex h-8 w-8 items-center justify-center rounded-full border-2 font-bold ${on ? "border-accent bg-accent text-white" : "border-white bg-black/30 text-white"}`}>
                     {on ? picked.indexOf(o.slug) + 1 : ""}
@@ -95,7 +96,7 @@ export function DishCards({ dishes, active }: { dishes: DishOption[]; active: st
                   // eslint-disable-next-line @next/next/no-img-element -- recipe photo
                   <img src={d.image} alt="" className="h-16 w-16 shrink-0 rounded-xl object-cover" />
                 ) : (
-                  <span className="h-16 w-16 shrink-0 rounded-xl bg-surface" />
+                  <TimeTile time={d.minutes} compact />
                 )}
                 <span className="min-w-0 flex-1">
                   <span className="block truncate font-semibold">{d.title}</span>

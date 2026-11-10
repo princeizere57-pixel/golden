@@ -203,8 +203,8 @@ export function FridgeIcon({ size = 28, className }: Props) {
   );
 }
 
-/** Onboarding, timing: a stopwatch with a gold crown button. */
-export function StopwatchIcon({ size = 28, className }: Props) {
+/** Onboarding, timing: a stopwatch with a gold crown button. `ticking` sweeps the red hand. */
+export function StopwatchIcon({ size = 28, className, ticking = false }: Props & { ticking?: boolean }) {
   return (
     <svg viewBox="0 0 32 32" width={size} height={size} className={className} aria-hidden>
       <defs>
@@ -220,7 +220,7 @@ export function StopwatchIcon({ size = 28, className }: Props) {
         <rect key={a} x="15.4" y="9.4" width="1.2" height="2" rx="0.6" fill="#495057" transform={`rotate(${a} 16 17)`} />
       ))}
       <path d="M16 17V11.6" stroke="#212529" strokeWidth="1.6" strokeLinecap="round" />
-      <path d="M16 17l3.6 2.4" stroke="#e03131" strokeWidth="1.3" strokeLinecap="round" />
+      <path d="M16 17l3.6 2.4" stroke="#e03131" strokeWidth="1.3" strokeLinecap="round" className={ticking ? "tick" : undefined} />
       <circle cx="16" cy="17" r="1.2" fill="#212529" />
       <path d="M9.4 12.4a8 8 0 0 1 3.4-3" stroke="#fff" strokeWidth="1.4" strokeLinecap="round" fill="none" />
     </svg>

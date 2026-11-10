@@ -3,6 +3,7 @@
 // Parallel countdown timers that survive navigation and reloads. Each timer stores its end
 // time, so the countdown stays correct even if the tab was asleep.
 
+import { StopwatchIcon } from "@/components/icons-3d";
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 
 export interface Timer {
@@ -118,6 +119,7 @@ export function TimerTray() {
             role={left <= 0 ? "alert" : undefined}
             className={`flex items-center gap-3 rounded-2xl border border-line px-4 py-2 shadow-lg ${left <= 0 ? "bg-accent text-accent-ink" : "bg-surface"}`}
           >
+            <StopwatchIcon size={32} ticking={left > 0} className="shrink-0" />
             <span className="text-sm font-medium">{t.label}</span>
             <span className="font-mono text-lg tabular-nums" aria-live="off">{left <= 0 ? "Done" : formatClock(left)}</span>
             <button onClick={() => cancel(t.id)} className="min-h-11 min-w-11 rounded-full text-sm underline" aria-label={`Dismiss ${t.label} timer`}>

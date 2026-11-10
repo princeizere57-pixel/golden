@@ -2,8 +2,10 @@
 // `recipes` / `recipe_blocks` tables (see supabase/migrations); this keeps the app usable offline.
 
 import type { Recipe, Segment } from "@/lib/types";
+import { REAL_TIME_RECIPES } from "./real-time-recipes";
+import { STEP_PICTURES } from "./step-pictures";
 
-export const RECIPES: Recipe[] = [
+const CLASSICS: Recipe[] = [
   {
     slug: "garlic-butter-pasta",
     // Photo of a similar dish from TheMealDB (350 px variant), credited on the card and page.
@@ -250,6 +252,15 @@ export const RECIPES: Recipe[] = [
     ],
   },
 ];
+
+/** Attaches each step's transparent picture, when one exists. */
+const withPictures = (r: Recipe): Recipe => {
+  const have = STEP_PICTURES[r.slug];
+  if (!have) return r;
+  return { ...r, blocks: r.blocks.map((b) => (have.includes(b.id) ? { ...b, picture: `/steps/${r.slug}/${b.id}.webp` } : b)) };
+};
+
+export const RECIPES: Recipe[] = [...CLASSICS, ...REAL_TIME_RECIPES].map(withPictures);
 
 export function getRecipe(slug: string): Recipe | undefined {
   return RECIPES.find((r) => r.slug === slug);
