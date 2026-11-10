@@ -1,8 +1,16 @@
-// Golden's offers: one source of truth for the checkout page, Whop metadata and the webhook.
-// Prices and trials match the plans configured in Whop (WHOP_PLAN_YEAR, WHOP_PLAN_MONTH):
-// keep the two in sync when either changes.
+// Golden's offers: one source of truth for the landing page, checkout, Whop metadata and the webhook.
+//
+// The money model (Grand Slam Offer):
+// - Attraction offer: the free 3-Day Zero-Waste Cooking Challenge (the trial on both plans).
+// - Decoy offer: The Golden Experience, $50/year.
+// - Grand Slam offer: the Golden Executive Chef System, $100/year founding price (regular $500/year)
+//   for the first FOUNDING_SPOTS members during the launch window, backed by the
+//   "10 Perfect Dishes" money-back guarantee.
+//
+// Whop plans: set WHOP_PLAN_EXECUTIVE / WHOP_PLAN_EXPERIENCE to plans with these exact prices, or
+// leave them empty and Golden creates the plan inline from these numbers (needs WHOP_API_KEY).
 
-export type OfferId = "year" | "month";
+export type OfferId = "executive" | "experience";
 
 export interface Offer {
   id: OfferId;
@@ -12,6 +20,8 @@ export interface Offer {
   planType: "renewal" | "one_time";
   /** USD; charged after the trial for renewals. */
   price: number;
+  /** USD regular price after the founding window, shown struck through. */
+  regularPrice?: number;
   billingPeriodDays?: number;
   trialDays: number;
   /** Env var holding the Whop plan ID (plan_…) created in the dashboard. */
@@ -19,55 +29,81 @@ export interface Offer {
   kind: "core" | "upsell";
   badge?: string;
   includes: string[];
+  /** What this plan leaves out (shown on the decoy so the comparison is honest). */
+  excludes?: string[];
 }
 
-const CORE_FEATURES = [
-  "Every recipe rewritten for your level (Beginner → Intermediate → Chef)",
-  "Fix My Mistake: rescue sauces, steaks and seasoning in real time",
-  "Multi-dish timing so everything finishes hot together",
-  "Hands-free cook mode with timers, chimes and vibration",
-  "Pantry-first recipes and smart shopping lists",
+/** The founding launch: limited spots and a fixed end date (override with LAUNCH_ENDS_AT). */
+export const FOUNDING_SPOTS = 5000;
+export const LAUNCH_ENDS_AT = process.env.NEXT_PUBLIC_LAUNCH_ENDS_AT || "2026-11-22T23:59:59Z";
+
+export const GUARANTEE = {
+  name: "10 Perfect Dishes Money-Back Guarantee",
+  dishes: 10,
+  days: 60,
+};
+
+export const ATTRACTION = {
+  name: "3-Day Zero-Waste Cooking Challenge",
+  price: 0,
+  days: 3,
+};
+
+export const EXECUTIVE_FEATURES = [
+  "Multi-Dish Timing Orchestrator: every dish finishes hot at the same minute",
+  "'Fix My Mistake' AI Doctor: rescue a dish from a photo or a few words",
+  "Pantry-to-Plate Matcher: cook what's already in your fridge",
+  "Chinese, Korean and Italian technique modules",
+  "Skill-Adaptation Engine: every recipe rewritten for your level",
+  "Hands-free cook mode, smart shopping list and the community",
+  "The 10 Perfect Dishes money-back guarantee",
 ];
 
 export const OFFERS: Offer[] = [
   {
-    id: "year",
-    name: "Golden Year",
-    tagline: "Just $3.76 a month, billed once a year",
+    id: "executive",
+    name: "Golden Executive Chef System",
+    tagline: "Founding price, 80% off. Just $8.33 a month, billed yearly",
     planType: "renewal",
-    price: 45.09,
+    price: 100,
+    regularPrice: 500,
     billingPeriodDays: 365,
-    trialDays: 3,
-    planEnv: "WHOP_PLAN_YEAR",
+    trialDays: ATTRACTION.days,
+    planEnv: "WHOP_PLAN_EXECUTIVE",
     kind: "core",
-    badge: "Best value",
-    includes: CORE_FEATURES,
+    badge: "80% off · Founding price",
+    includes: EXECUTIVE_FEATURES,
   },
   {
-    id: "month",
-    name: "Golden Monthly",
-    tagline: "Try the full kitchen coach, cancel any time",
+    id: "experience",
+    name: "The Golden Experience",
+    tagline: "Skill-adapted recipes and cook mode, one dish at a time",
     planType: "renewal",
-    price: 7.99,
-    billingPeriodDays: 30,
-    trialDays: 3,
-    planEnv: "WHOP_PLAN_MONTH",
+    price: 50,
+    billingPeriodDays: 365,
+    trialDays: ATTRACTION.days,
+    planEnv: "WHOP_PLAN_EXPERIENCE",
     kind: "core",
-    includes: CORE_FEATURES,
+    includes: ["Skill-Adaptation Engine: every recipe rewritten for your level", "Hands-free cook mode with timers", "Smart shopping list and the community"],
+    excludes: ["Multi-Dish Timing Orchestrator", "'Fix My Mistake' AI Doctor", "Pantry-to-Plate Matcher", "Cuisine technique modules", "Money-back guarantee"],
   },
 ];
 
 export const offerById = (id: string): Offer | undefined => OFFERS.find((o) => o.id === id);
+export const DEFAULT_OFFER: OfferId = "executive";
 
 /** Shortest free trial across offers, for headlines like "3 days free". */
 export const TRIAL_HEADLINE_DAYS = Math.min(...OFFERS.map((o) => o.trialDays));
-export const LOWEST_PRICE = Math.min(...OFFERS.map((o) => o.price));
+
+export const money = (n: number) => `$${n % 1 ? n.toFixed(2) : n}`;
+/** Monthly equivalent: yearly plans divide by 12 ($100/year → $8.33). */
+export const perMonth = (o: Offer) => money(Math.round((o.billingPeriodDays === 365 ? o.price / 12 : o.price) * 100) / 100);
+export const percentOff = (o: Offer) => (o.regularPrice ? Math.round((1 - o.price / o.regularPrice) * 100) : 0);
 
 export function priceLine(o: Offer): string {
-  const money = `$${o.price % 1 ? o.price.toFixed(2) : o.price}`;
-  if (o.planType === "one_time") return `${money} once`;
+  if (o.planType === "one_time") return `${money(o.price)} once`;
   const per = o.billingPeriodDays === 365 ? "year" : "month";
-  return o.trialDays ? `${o.trialDays} days free, then ${money}/${per}` : `${money}/${per}`;
+  return o.trialDays ? `${o.trialDays} days free, then ${money(o.price)}/${per}` : `${money(o.price)}/${per}`;
 }
 
 /** Order IDs we attach to every Whop checkout (and see again in webhooks). */

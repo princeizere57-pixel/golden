@@ -74,12 +74,12 @@ REA (`rea-agents`) was used to study Mob's public website (mob.co.uk): its route
 
 ## 5. Monetisation and payment architecture (`src/lib/billing/`)
 
-- **Pricing (both repos, `src/lib/billing/offers.ts`, keep identical):** **Golden Year $45.09/year** (best value, $3.76/month) and **Golden Monthly $7.99/month**, both with **3 days free** (Whop plans `WHOP_PLAN_YEAR`, `WHOP_PLAN_MONTH`). golden-v1's landing page shows the same two plans (no founding-price discount). GBP prices are set separately (not converted on the fly).
+- **Pricing (both repos, `src/lib/billing/offers.ts`, keep identical; golden-v1 is the source):** **Golden Executive Chef System $100/year** founding price (regular $500/year, 80% off for the first 5,000 members until `LAUNCH_ENDS_AT`, `launch.ts`) and **The Golden Experience $50/year**, both after the free **3-Day Zero-Waste Challenge** (Whop plans `WHOP_PLAN_EXECUTIVE`, `WHOP_PLAN_EXPERIENCE`; empty = created inline with `WHOP_API_KEY`). Executive is backed by the 10 Perfect Dishes guarantee (`/guarantee`). GBP prices are set separately (not converted on the fly).
 - **Entity routing (US / UK):**
   - **US entity** (Stripe US / App Store): USD cards, Apple Pay, Google Pay. Stripe standard web pricing 2.9% + $0.30.
   - **UK entity** (UK Ltd / Stripe UK): GBP, domestic cards and Open Banking. UK domestic card pricing 1.5% + £0.20.
   - Customers are routed by **billing country**: GB → UK entity, everyone else → US entity. Each entity must be properly registered, collect tax where required and serve the customers routed to it. Fee figures are estimates for planning, not quotes.
-- **Funnel:** 3-day free trial that auto-renews into the chosen plan. App Store / Google Play small-business programmes (15% commission) apply to in-app purchases.
+- **Funnel:** 3-day free challenge that auto-renews into the chosen yearly plan. App Store / Google Play small-business programmes (15% commission) apply to in-app purchases.
 - **Webhooks:** Stripe (signature verified), App Store Server Notifications V2 (signed JWS, chain verified to the Apple root) and Google Play RTDN. All update `subscriptions` in Supabase.
 
 ## 6. Rules for working in this repo
@@ -148,4 +148,4 @@ These set The Chef's AI apart; keep them original (no third-party mascots, icon 
 - **Decision first, extras after:** checkout shows level benefits → plan choice → payment, then the giveaway.
 - **Feedback on every tap:** buttons and links press in slightly (`globals.css`, off under reduced motion). Visible focus ring everywhere.
 - **Focus while cooking:** no upsell in the header in cook mode; controls on the dark theme need visible borders.
-- **Honest persuasion:** no fake scarcity, countdowns or made-up statistics; any figure needs a source.
+- **Honest persuasion:** scarcity and countdowns must be real (the founding spots count comes from Supabase and the end date is fixed); no made-up statistics, any figure needs a source.

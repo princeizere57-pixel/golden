@@ -1,18 +1,20 @@
 import { describe, expect, it } from "vitest";
-import { OFFERS, TRIAL_HEADLINE_DAYS, newOrderId, offerById, priceLine } from "@/lib/billing/offers";
-import { covers, isStaple, pantryMatch } from "@/lib/pantry";
+import { OFFERS, TRIAL_HEADLINE_DAYS, newOrderId, offerById, perMonth, percentOff, priceLine } from "@/lib/billing/offers";
+import { covers, isStaple, pantryMatch, parseFridge, rankMeals } from "@/lib/pantry";
 
 describe("offers", () => {
-  it("matches the plans configured in Whop", () => {
-    expect(offerById("year")).toMatchObject({ name: "Golden Year", price: 45.09, planType: "renewal", billingPeriodDays: 365, trialDays: 3, planEnv: "WHOP_PLAN_YEAR" });
-    expect(offerById("month")).toMatchObject({ price: 7.99, planType: "renewal", billingPeriodDays: 30, trialDays: 3, planEnv: "WHOP_PLAN_MONTH" });
-    expect(OFFERS.map((o) => o.id)).toEqual(["year", "month"]);
-    expect(offerById("lifetime")).toBeUndefined();
+  it("follows the Grand Slam money model", () => {
+    expect(offerById("executive")).toMatchObject({ name: "Golden Executive Chef System", price: 100, regularPrice: 500, planType: "renewal", billingPeriodDays: 365, trialDays: 3, planEnv: "WHOP_PLAN_EXECUTIVE" });
+    expect(offerById("experience")).toMatchObject({ name: "The Golden Experience", price: 50, billingPeriodDays: 365, trialDays: 3, planEnv: "WHOP_PLAN_EXPERIENCE" });
+    expect(OFFERS.map((o) => o.id)).toEqual(["executive", "experience"]);
+    expect(offerById("year")).toBeUndefined();
+    expect(percentOff(offerById("executive")!)).toBe(80);
   });
 
   it("describes prices for buyers", () => {
-    expect(priceLine(offerById("year")!)).toBe("3 days free, then $45.09/year");
-    expect(priceLine(offerById("month")!)).toBe("3 days free, then $7.99/month");
+    expect(priceLine(offerById("executive")!)).toBe("3 days free, then $100/year");
+    expect(priceLine(offerById("experience")!)).toBe("3 days free, then $50/year");
+    expect(perMonth(offerById("executive")!)).toBe("$8.33");
     expect(TRIAL_HEADLINE_DAYS).toBe(3);
   });
 
@@ -38,4 +40,33 @@ describe("pantry", () => {
     expect(m.ratio).toBeCloseTo(2 / 3);
     expect(pantryMatch(["Salt"], []).ratio).toBe(0);
   });
+});
+
+describe("pantry-to-plate matcher", () => {
+  it("reads what people type about their fridge", () => {
+    expect(parseFridge("2 eggs, half an onion and some rice\nspinach, eggs")).toEqual(["eggs", "onion", "rice", "spinach"]);
+    expect(parseFridge("leftover chicken + 1 tin of tomatoes; garlic")).toEqual(["chicken", "tomatoes", "garlic"]);
+    expect(parseFridge("  ,, and ")).toEqual([]);
+  });
+
+  it("ranks meals by how much the fridge covers, instant meals first", () => {
+    const recipes = [
+      { slug: "omelette", ingredients: ["Eggs", "Spinach", "Salt", "Butter"] },
+      { slug: "fried-rice", ingredients: ["Rice", "Eggs", "Onion", "Soy Sauce"] },
+      { slug: "curry", ingredients: ["Chicken", "Coconut Milk", "Curry Paste", "Rice"] },
+    ];
+    const ranked = rankMeals(recipes, parseFridge("eggs, spinach, rice, onion"));
+    expect(ranked.map((m) => m.recipe.slug)).toEqual(["omelette", "fried-rice"]);
+    expect(ranked[0].instant).toBe(true);
+    expect(ranked[1]).toMatchObject({ instant: false, match: { missing: ["Soy Sauce"] } });
+    expect(rankMeals(recipes, [])).toEqual([]);
+  });
+});
+
+it("prefers meals that use up more of the fridge over tiny exact matches", () => {
+  const recipes = [
+    { slug: "plain-rice", ingredients: ["Rice", "Salt"] },
+    { slug: "stir-fry", ingredients: ["Eggs", "Rice", "Onion", "Chicken", "Tomatoes"] },
+  ];
+  expect(rankMeals(recipes, parseFridge("eggs, rice, onion, chicken, spinach")).map((m) => m.recipe.slug)).toEqual(["stir-fry", "plain-rice"]);
 });
