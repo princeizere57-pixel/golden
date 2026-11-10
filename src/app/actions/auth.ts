@@ -5,12 +5,13 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { USER_COOKIE, sendMagicLink, supabaseConfigured, verifySupabaseToken, type User } from "@/lib/auth";
 import { JOURNEY_COOKIE } from "@/lib/journey";
+import { signValue } from "@/lib/signed-cookie";
 import { PLAN_COOKIE, PREFS_COOKIE, SKILL_COOKIE } from "@/lib/viewer";
 
 const MONTH = 60 * 60 * 24 * 30;
 
 async function remember(user: User) {
-  (await cookies()).set(USER_COOKIE, JSON.stringify(user), { maxAge: MONTH, sameSite: "lax", path: "/", httpOnly: true, secure: process.env.NODE_ENV === "production" });
+  (await cookies()).set(USER_COOKIE, signValue(JSON.stringify(user)), { maxAge: MONTH, sameSite: "lax", path: "/", httpOnly: true, secure: process.env.NODE_ENV === "production" });
 }
 
 /** Called by /auth/callback with the token Supabase returned after Google sign-in. */

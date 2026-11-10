@@ -35,11 +35,11 @@ Everything below goes into a file named `.env.local` in the project folder (copy
 
 ## 3. Whop: payments (embedded checkout)
 
-The checkout page shows Whop's payment form inside Golden (Whop Elements). Offers and prices live in `src/lib/billing/offers.ts`: Golden Yearly ($45/year, 7-day trial), Golden Monthly ($7.99/month, 7-day trial), Golden for Life ($99 once) and Gift a Year ($45 once).
+The checkout page shows Whop's payment form inside Golden (Whop Elements). Offers and prices live in `src/lib/billing/offers.ts` (identical in Golden and golden-v1): the **Golden Executive Chef System** ($100/year founding price, regular $500/year) and **The Golden Experience** ($50/year), both after the free 3-Day Zero-Waste Challenge (a 3-day trial).
 
 **Option A: plans you create in Whop (simplest)**
 1. In Whop, create one plan per offer with the same price, type and trial.
-2. Copy each plan ID (`plan_…`) into `.env.local`: `WHOP_PLAN_YEAR`, `WHOP_PLAN_MONTH`, `WHOP_PLAN_LIFETIME`, `WHOP_PLAN_GIFT`.
+2. Copy each plan ID (`plan_…`) into `.env.local`: `WHOP_PLAN_EXECUTIVE` ($100/year founding price) and `WHOP_PLAN_EXPERIENCE` ($50/year), both with a 3-day free trial.
 
 **Option B: let Golden create them (also enables Buy now, pay later)**
 1. Whop dashboard → Developer → API keys: create a key → `WHOP_API_KEY`.
@@ -51,7 +51,7 @@ The checkout page shows Whop's payment form inside Golden (Whop Elements). Offer
 - After payment Whop returns buyers to `/checkout/return` with `payment` and `status`.
 
 ### Older link-based setup
-1. In your Whop dashboard create a **product** (e.g. "The Chef's Golden Premium") with two **plans**: $45/year and $7.99/month, each with a **7-day free trial**.
+1. In your Whop dashboard create a **product** (e.g. "The Chef's Golden Premium") with two **plans**: $100/year (Executive Chef System) and $50/year (The Golden Experience), each with a **3-day free trial**.
 2. Copy each plan's **checkout link** →
    ```
    WHOP_CHECKOUT_URL_YEAR=https://whop.com/...

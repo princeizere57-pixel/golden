@@ -4,6 +4,7 @@
 
 import "server-only";
 import { cookies } from "next/headers";
+import { verifyValue } from "@/lib/signed-cookie";
 
 export const USER_COOKIE = "bac-user";
 
@@ -20,7 +21,8 @@ export const supabaseConfigured = () => Boolean(supabaseUrl() && process.env.NEX
 
 export async function getUser(): Promise<User | null> {
   try {
-    const value = JSON.parse((await cookies()).get(USER_COOKIE)?.value ?? "null");
+    // Signed by the server when you sign in; an edited cookie verifies to null.
+    const value = JSON.parse(verifyValue((await cookies()).get(USER_COOKIE)?.value) ?? "null");
     return value && typeof value.id === "string" && typeof value.email === "string" ? (value as User) : null;
   } catch {
     return null;
