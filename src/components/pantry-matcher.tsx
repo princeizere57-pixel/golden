@@ -100,7 +100,7 @@ function MealList({ title, note, meals }: { title: string; note: string; meals: 
     <section className="mt-8" aria-label={title}>
       <h2 className="text-xl font-semibold">{title}</h2>
       <p className="text-sm text-muted">{note}</p>
-      <ul className="mt-3 grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
+      <ul className="mt-3 grid grid-cols-2 gap-4">
         {meals.map(({ recipe: r, match: m }) => (
           <li key={r.slug}>
             <Link href={r.href} className="block">

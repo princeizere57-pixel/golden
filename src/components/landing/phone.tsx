@@ -39,7 +39,7 @@ function StatusBar() {
 export function Phone({ screen, tilt = "right", className = "", priority = false }: { screen: Screen; tilt?: "left" | "right" | "none"; className?: string; priority?: boolean }) {
   const rotate = tilt === "right" ? "rotate-[8deg]" : tilt === "left" ? "-rotate-[8deg]" : "";
   return (
-    <div className={`relative mx-auto w-[260px] sm:w-[290px] ${rotate} ${className}`}>
+    <div className={`relative mx-auto w-[260px] ${rotate} ${className}`}>
       {/* Side buttons */}
       <span aria-hidden className="absolute -left-[3px] top-[18%] h-[6%] w-[3px] rounded-l bg-[#2c2c2e]" />
       <span aria-hidden className="absolute -left-[3px] top-[27%] h-[10%] w-[3px] rounded-l bg-[#2c2c2e]" />

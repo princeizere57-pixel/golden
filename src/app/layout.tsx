@@ -17,7 +17,9 @@ export const metadata: Metadata = {
   description: "Recipes and techniques adapted to your skill level, a hands-free cook mode, and fixes for when things go wrong.",
 };
 
-export const viewport: Viewport = { themeColor: "#ffffff" };
+// A phone app: device width, and drawn under the notch and home indicator (pages pad with
+// env(safe-area-inset-*)), the same in the browser and in the Android and iPhone apps.
+export const viewport: Viewport = { width: "device-width", initialScale: 1, viewportFit: "cover", themeColor: "#ffffff" };
 
 export default async function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   // Before the first-run sequence is done, "/" shows the welcome page, which has no chrome.

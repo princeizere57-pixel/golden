@@ -220,7 +220,8 @@ body {
   transform-box: fill-box;
 }
 
-/* Phone-first frame: the whole app is one 480 px column; wider screens see it centred on a soft backdrop. */
+/* Mobile app layout everywhere: one phone-width column (max 480 px), the same in the browser and
+   the Android and iPhone apps; on a computer it sits centred on a soft backdrop, like a phone. */
 html {
   background: #ece8e1;
 }
@@ -233,6 +234,8 @@ html {
   background: var(--bg);
   box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.04), 0 10px 40px rgba(0, 0, 0, 0.08);
   overflow-x: clip;
+  /* Clear the status bar / notch when installed to the home screen (0 elsewhere). */
+  padding-top: env(safe-area-inset-top);
 }
 @media (max-width: 480px) {
   html {

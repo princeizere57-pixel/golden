@@ -64,7 +64,7 @@ export function SkillSteps({ recipe, initialSkill }: { recipe: Recipe; initialSk
       <ol className="mt-4 space-y-4">
         {adapted.steps.map((step, i) => (
           <li key={step.blockId} className="flow-root rounded-2xl border border-line bg-surface p-5">
-            <StepPicture src={recipe.blocks.find((b) => b.id === step.blockId)?.picture} className="float-right -mr-1 -mt-1 ml-3 h-24 w-24 sm:h-32 sm:w-32" />
+            <StepPicture src={recipe.blocks.find((b) => b.id === step.blockId)?.picture} className="float-right -mr-1 -mt-1 ml-3 h-24 w-24" />
             <div className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-muted">
               <span>Step {i + 1}</span>
               <span>· {KIND[step.kind]}</span>
