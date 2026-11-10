@@ -1,15 +1,16 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { CollectionCard, DishOfTheDay, PhotoCard, QuickTile, Rail, SearchBar } from "@/components/discover";
+import { FridgeIcon } from "@/components/icons-3d";
 import { MiniYou } from "@/components/mini-you";
 import { PantryRail } from "@/components/pantry";
 import { recipeHref } from "@/lib/links";
 import { ReviewPrompt } from "@/components/recipe-actions";
-import { XpChip } from "@/components/xp-chip";
-import { LOWEST_PRICE, TRIAL_HEADLINE_DAYS } from "@/lib/billing/offers";
+import { TodayCard } from "@/components/today-card";
+import { TRIAL_HEADLINE_DAYS, offerById } from "@/lib/billing/offers";
 import { RECIPES } from "@/lib/data/recipes";
 import { byCategory, dishOfTheDay, forLevel, libraryRecipes } from "@/lib/library";
-import { totalMinutes } from "@/lib/links";
+import { formatDuration, planHref, totalMinutes } from "@/lib/links";
 import { thumb } from "@/lib/mealdb/convert";
 import { difficulty } from "@/lib/skill/difficulty";
 import type { Recipe } from "@/lib/types";
@@ -57,6 +58,16 @@ export default async function Discover({ searchParams }: { searchParams: Promise
   const picks = forLevel(library, viewer.skill).filter((r) => difficulty(r).level === viewer.skill).slice(0, 10);
   const stretch = library.filter((r) => difficulty(r).level === (viewer.skill === "beginner" ? "intermediate" : "chef")).slice(0, 10);
   const today = dishOfTheDay(viewer.skill);
+  // Tonight's pick for the Today card: a real-time recipe, a different one each day.
+  const realTime = RECIPES.filter((r) => r.realTime);
+  const pickRecipe = realTime[Math.floor(Date.now() / 86_400_000) % Math.max(1, realTime.length)];
+  const pick = pickRecipe && {
+    title: pickRecipe.title,
+    minutes: formatDuration(totalMinutes(pickRecipe)),
+    cookHref: `${recipeHref(pickRecipe)}/cook`,
+    planHref: planHref([pickRecipe.slug], pickRecipe.slug),
+    image: pickRecipe.image ? thumb(pickRecipe.image) : undefined,
+  };
   const firstImage = (category: string) => {
     const r = byCategory(category).find((x) => x.image);
     return r?.image ? thumb(r.image) : undefined;
@@ -67,7 +78,6 @@ export default async function Discover({ searchParams }: { searchParams: Promise
       <div className="flex items-center justify-between px-4 pt-6">
         <h1 className="font-display text-[2.3rem]">Discover</h1>
         <div className="flex gap-2">
-          <XpChip />
           <Link href="/you" aria-label="Mini You and your progress" className="h-12 w-12 overflow-hidden rounded-full bg-button">
             <MiniYou headOnly size={48} />
           </Link>
@@ -83,16 +93,19 @@ export default async function Discover({ searchParams }: { searchParams: Promise
 
       {trial === "started" && <p role="status" className="mx-4 mt-2 rounded-2xl bg-basil p-4 text-white">Your free trial has started. Happy cooking!</p>}
 
-      <p className="mt-2 px-4 text-sm text-muted">
+      <TodayCard name={user.name.split(" ")[0] || "chef"} pick={pick} />
+
+      <p className="mt-3 px-4 text-sm text-muted">
         Cooking at <strong className="text-ink">{LEVEL[viewer.skill]}</strong> level. Every recipe is rewritten for you.
       </p>
 
-      <Link href="/pantry" className="mx-4 mt-4 flex items-center gap-3 rounded-3xl bg-charcoal p-4 text-white">
+      <Link href="/pantry" className="mx-4 mt-4 flex items-center gap-3 rounded-3xl bg-accent-soft p-4">
+        <FridgeIcon size={44} className="shrink-0" />
         <span className="flex-1">
-          <span className="block text-xs font-semibold uppercase tracking-wide text-[#facc15]">Pantry-to-Plate</span>
-          <span className="mt-0.5 block text-lg font-semibold leading-snug">Tell Golden what&apos;s in your fridge. Get dinner in seconds.</span>
+          <span className="block text-xs font-semibold uppercase tracking-wide text-muted">Pantry-to-Plate</span>
+          <span className="mt-0.5 block font-semibold leading-snug">Use it before you lose it: turn what&apos;s in your fridge into dinner.</span>
         </span>
-        <span aria-hidden className="text-2xl text-[#facc15]">›</span>
+        <span aria-hidden className="text-2xl text-accent">›</span>
       </Link>
 
       <nav aria-label="Quick links" className="mt-4 grid grid-cols-2 gap-2.5 px-4">
@@ -136,7 +149,7 @@ export default async function Discover({ searchParams }: { searchParams: Promise
       {viewer.plan === "free" && (
         <section className="mx-4 mt-12 rounded-3xl bg-accent-soft p-7">
           <h2 className="font-display text-2xl">Cook anything, at your level</h2>
-          <p className="mt-2 max-w-xl text-muted">Every recipe rewritten for you, hands-free cook mode and Fix My Mistake. {TRIAL_HEADLINE_DAYS} days free, then $45.09 a year or ${LOWEST_PRICE} a month.</p>
+          <p className="mt-2 max-w-xl text-muted">Every recipe rewritten for you, hands-free cook mode and Fix My Mistake. {TRIAL_HEADLINE_DAYS}-day Zero-Waste Challenge free, then the Executive Chef System at a ${offerById("executive")!.price} a year founding price (80% off).</p>
           <Link href="/checkout" className="mt-4 inline-flex min-h-12 items-center rounded-full bg-button px-6 font-semibold text-button-ink">Start free trial</Link>
         </section>
       )}

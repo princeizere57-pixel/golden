@@ -62,6 +62,19 @@ The checkout page shows Whop's payment form inside Golden (Whop Elements). Offer
 5. Webhooks need a public address: deploy first (step 5), or use a tunnel while testing.
 6. Ask buyers to use the same email at Whop as in the app; memberships are saved with Whop's user ID for matching.
 
+## 3b. Google Play Billing (Android app)
+
+Inside the Android app Google Play is the merchant of record; the website keeps using Whop.
+
+1. **Play Console → Monetize → Subscriptions:** create two subscriptions with exactly these IDs, each with an auto-renewing yearly base plan `yearly` and a 3-day free-trial offer on it:
+   - `golden_executive`: $100/year (Golden Executive Chef System)
+   - `golden_experience`: $50/year (The Golden Experience)
+2. **Service account:** in Google Cloud create a service account and a JSON key. In the Play Console → Users and permissions, invite its email with *View financial data* and *Manage orders and subscriptions*. Put the whole JSON (one line) in `GOOGLE_PLAY_SERVICE_ACCOUNT_JSON` on Vercel (mark it sensitive).
+3. **Notifications (RTDN):** create a Pub/Sub topic, grant `google-play-developer-notifications@system.gserviceaccount.com` *Publisher* on it, and add a push subscription to `https://<your-site>/api/billing/google/rtdn?token=<GOOGLE_RTDN_TOKEN>`. Set the topic in Play Console → Monetization setup and send a test notification.
+4. **App:** `npm run build`, `npx cap sync android`, then build a release in Android Studio and upload it to an internal testing track. Add license testers (Play Console → Setup → License testing) to buy without being charged.
+
+How it works: the app shows Google Play's prices and purchase sheet (`PlayBillingPlugin.java`), sends the purchase token to `verifyPlayPurchase`, which checks it with the Google Play Developer API (right product, same Golden account, not pending), saves it to `subscriptions`, acknowledges it and unlocks Premium. RTDN updates renewals, cancellations and expiries the same way.
+
 ## 4. Analytics
 - **PostHog** (built in): create a project at https://posthog.com and set `NEXT_PUBLIC_POSTHOG_KEY` (and `NEXT_PUBLIC_POSTHOG_HOST` if you chose the EU region: `https://eu.i.posthog.com`). The app sends page views plus these events: `signin_started`, `mini_you_created`, `onboarding_completed`, `checkout_started`, `trial_started`, `dish_cooked`, `mistake_fixed`. In PostHog, build a **Funnel**: `$pageview` on `/welcome` → `signin_started` → `onboarding_completed` → `checkout_started` to see where people drop off.
 - **Vercel Web Analytics + Speed Insights**: switch them on in the Vercel project's Analytics tab after deploying (page views and real-user performance, no code needed beyond Vercel's toggle and package).

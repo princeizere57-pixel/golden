@@ -130,7 +130,7 @@ export function CookView({ recipe, initialSkill, exitHref = `/recipes/${recipe.s
         </article>
 
         <div className="grid grid-cols-2 gap-4">
-          <button onClick={() => go(-1)} disabled={index === 0} className="min-h-16 rounded-2xl border border-line text-xl font-bold disabled:opacity-40">Back</button>
+          <button onClick={() => go(-1)} disabled={index === 0} className="min-h-16 rounded-2xl border-2 border-white/40 text-xl font-bold text-white disabled:border-white/15 disabled:text-white/30">Back</button>
           {last ? (
             <button onClick={finish} className="min-h-16 rounded-2xl bg-accent text-xl font-bold text-accent-ink">I made it!</button>
           ) : (

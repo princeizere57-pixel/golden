@@ -63,6 +63,18 @@ body {
   outline-offset: 2px;
 }
 
+/* Tap feedback: buttons and links press in slightly, so every tap visibly registers. */
+@media (prefers-reduced-motion: no-preference) {
+  button:not(:disabled),
+  a[href] {
+    transition: transform 120ms ease, background-color 150ms ease, border-color 150ms ease, opacity 150ms ease;
+  }
+  button:not(:disabled):active,
+  a[href]:active {
+    transform: scale(0.97);
+  }
+}
+
 /* Cook mode: high contrast regardless of the page theme. */
 .cook-mode {
   --bg: #000000;
@@ -158,6 +170,17 @@ body {
   animation: tick 60s steps(60) infinite;
 }
 
+/* Headline ticker: two identical runs slide left forever, so the loop is seamless. */
+@keyframes ticker {
+  to { transform: translateX(-50%); }
+}
+.ticker-track {
+  animation: ticker 24s linear infinite;
+}
+.ticker-track:hover {
+  animation-play-state: paused;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -165,6 +188,17 @@ body {
     animation-duration: 0.01ms !important;
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
+  }
+  /* The ticker stands still and wraps instead of jittering. */
+  .ticker-track {
+    animation: none !important;
+    width: auto;
+    flex-wrap: wrap;
+    justify-content: center;
+    white-space: normal;
+  }
+  .ticker-track > :last-child {
+    display: none;
   }
 }
 

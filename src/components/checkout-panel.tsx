@@ -5,11 +5,15 @@
 
 import dynamic from "next/dynamic";
 import Link from "next/link";
-import { useState, useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
 import { startCheckout, type StartCheckout } from "@/app/actions/checkout";
 import { enterGiveaway, type EntryResult } from "@/app/actions/giveaway";
 import { finishJourney, setDemoPlan } from "@/app/actions/viewer";
 import { MiniYou } from "@/components/mini-you";
+import { TrialTimeline } from "@/components/trial-timeline";
+import { ATTRACTION } from "@/lib/billing/offers";
+import { PlayCheckout } from "@/components/play-checkout";
+import { playBillingAvailable } from "@/lib/native/play-billing";
 import { track } from "@/lib/analytics";
 
 const WhopEmbed = dynamic(() => import("@/components/whop-embed").then((m) => m.WhopEmbed), { ssr: false });
@@ -19,25 +23,29 @@ export interface OfferView {
   name: string;
   tagline: string;
   priceLine: string;
+  regularPrice?: string;
   kind: "core" | "upsell";
   badge?: string;
   includes: string[];
+  excludes: string[];
   embedReady: boolean;
   planType: "renewal" | "one_time";
 }
 
 interface Props {
-  user: { name: string; email: string };
+  user: { id: string; name: string; email: string };
   level: string;
   premium: boolean;
   offers: OfferView[];
+  defaultOffer: string;
+  launch: { left: number; spots: number; endsOn: string; open: boolean };
   payLaterReady: boolean;
   drawDate: string;
   benefits: string[];
 }
 
-export function CheckoutPanel({ user, level, premium, offers, payLaterReady, drawDate, benefits }: Props) {
-  const [chosen, setChosen] = useState("year");
+export function CheckoutPanel({ user, level, premium, offers, defaultOffer, launch, payLaterReady, drawDate, benefits }: Props) {
+  const [chosen, setChosen] = useState(defaultOffer);
   const [payLater, setPayLater] = useState(false);
   const [session, setSession] = useState<Extract<StartCheckout, { ok: true }> | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -45,6 +53,9 @@ export function CheckoutPanel({ user, level, premium, offers, payLaterReady, dra
   const [pending, startTransition] = useTransition();
   const offer = offers.find((o) => o.id === chosen)!;
   const firstName = user.name.split(" ")[0];
+  // Inside the Android app, Google Play is the merchant of record; on the web, Whop.
+  const [android, setAndroid] = useState(false);
+  useEffect(() => setAndroid(playBillingAvailable()), []);
 
   if (premium) {
     return (
@@ -99,6 +110,67 @@ export function CheckoutPanel({ user, level, premium, offers, payLaterReady, dra
       </ul>
 
       {/* 2. Attraction offer */}
+
+      {/* 3. Plans and upgrades */}
+      {launch.open && (
+        <p className="mt-7 rounded-2xl border-2 border-button bg-[#fef9c3] p-3 text-center text-sm font-semibold">
+          Founding price: 80% off the Executive Chef System. {launch.left.toLocaleString("en-US")} of {launch.spots.toLocaleString("en-US")} spots left, ends {launch.endsOn}.
+        </p>
+      )}
+      <fieldset className="mt-4 space-y-3" disabled={Boolean(session)}>
+        <legend className="mb-1 text-lg font-semibold">Start your free 3-Day Zero-Waste Challenge, then</legend>
+        {offers.filter((o) => o.kind === "core").map((o) => <OfferCard key={o.id} offer={o} checked={chosen === o.id} onChange={() => setChosen(o.id)} />)}
+        {offers.some((o) => o.kind === "upsell") && (
+          <>
+            <p className="pt-3 text-lg font-semibold">Or go further</p>
+            {offers.filter((o) => o.kind === "upsell").map((o) => <OfferCard key={o.id} offer={o} checked={chosen === o.id} onChange={() => setChosen(o.id)} />)}
+          </>
+        )}
+      </fieldset>
+
+      {payLaterReady && !session && !android && (
+        <label className="mt-4 flex min-h-12 cursor-pointer items-center gap-3 rounded-2xl border border-line px-4">
+          <input type="checkbox" checked={payLater} onChange={(e) => setPayLater(e.target.checked)} className="h-5 w-5 accent-[var(--accent)]" />
+          <span><strong>Buy now, pay later</strong><span className="block text-sm text-muted">Klarna, Afterpay/Clearpay, Affirm, Sezzle, Zip or instalments where available</span></span>
+        </label>
+      )}
+
+      {/* Transparency: exactly what happens and when, before anyone pays */}
+      <section className="mt-6 rounded-3xl border border-line p-5" aria-labelledby="free-days">
+        <h2 id="free-days" className="font-semibold">How your free days work</h2>
+        <div className="mt-4"><TrialTimeline days={ATTRACTION.days} price={offer.priceLine.replace(/^.*then /, "")} /></div>
+      </section>
+
+      {/* 4. Payment */}
+      {android ? (
+        <PlayCheckout offerId={chosen} offerName={offer.name} userId={user.id} />
+      ) : (
+      <section className="mt-6" aria-label="Payment">
+        {session ? (
+          <div className="rounded-3xl border border-line p-3">
+            <WhopEmbed plan={session.plan} checkoutConfiguration={session.checkoutConfiguration} metadata={session.metadata} returnUrl={session.returnUrl} offer={chosen} />
+            <button onClick={() => setSession(null)} className="mt-2 min-h-11 w-full text-sm font-medium">Change plan</button>
+          </div>
+        ) : offer.embedReady ? (
+          <button onClick={pay} disabled={pending} className="min-h-14 w-full rounded-full bg-button text-lg font-semibold text-button-ink disabled:opacity-60">
+            {pending ? "Preparing secure checkout…" : `Continue: ${offer.priceLine}`}
+          </button>
+        ) : offer.planType === "renewal" ? (
+          <form action={setDemoPlan.bind(null, "premium")}>
+            <button className="min-h-14 w-full rounded-full bg-button text-lg font-semibold text-button-ink">Start my free trial (demo)</button>
+            <p className="mt-2 text-center text-xs text-muted">Demo mode: add your Whop plan IDs to take real payments.</p>
+          </form>
+        ) : (
+          <p className="rounded-2xl bg-surface p-4 text-sm text-muted">This upgrade goes live once its Whop plan is set up.</p>
+        )}
+        {error && <p role="alert" className="mt-2 text-center text-sm text-tomato">{error}</p>}
+        <p className="mt-3 text-center text-xs text-muted">Secure payment by Whop. Cancel any time before your trial ends and you won&apos;t be charged.</p>
+        {chosen === "executive" && (
+          <p className="mt-2 text-center text-xs text-muted">Backed by the <Link href="/guarantee" className="underline">10 Perfect Dishes Money-Back Guarantee</Link>.</p>
+        )}
+      </section>
+      )}
+
       <section className="mt-7 rounded-3xl bg-charcoal p-5 text-white" aria-labelledby="ga">
         <p className="text-xs font-semibold uppercase tracking-wide text-[#facc15]">Free bonus: The Golden Giveaway</p>
         <h2 id="ga" className="mt-1 text-xl font-bold">Win a free year, and one for the friend who invited you</h2>
@@ -125,48 +197,6 @@ export function CheckoutPanel({ user, level, premium, offers, payLaterReady, dra
         )}
       </section>
 
-      {/* 3. Plans and upgrades */}
-      <fieldset className="mt-7 space-y-3" disabled={Boolean(session)}>
-        <legend className="mb-1 text-lg font-semibold">Choose your plan</legend>
-        {offers.filter((o) => o.kind === "core").map((o) => <OfferCard key={o.id} offer={o} checked={chosen === o.id} onChange={() => setChosen(o.id)} />)}
-        {offers.some((o) => o.kind === "upsell") && (
-          <>
-            <p className="pt-3 text-lg font-semibold">Or go further</p>
-            {offers.filter((o) => o.kind === "upsell").map((o) => <OfferCard key={o.id} offer={o} checked={chosen === o.id} onChange={() => setChosen(o.id)} />)}
-          </>
-        )}
-      </fieldset>
-
-      {payLaterReady && !session && (
-        <label className="mt-4 flex min-h-12 cursor-pointer items-center gap-3 rounded-2xl border border-line px-4">
-          <input type="checkbox" checked={payLater} onChange={(e) => setPayLater(e.target.checked)} className="h-5 w-5 accent-[var(--accent)]" />
-          <span><strong>Buy now, pay later</strong><span className="block text-sm text-muted">Klarna, Afterpay/Clearpay, Affirm, Sezzle, Zip or instalments where available</span></span>
-        </label>
-      )}
-
-      {/* 4. Payment */}
-      <section className="mt-6" aria-label="Payment">
-        {session ? (
-          <div className="rounded-3xl border border-line p-3">
-            <WhopEmbed plan={session.plan} checkoutConfiguration={session.checkoutConfiguration} metadata={session.metadata} returnUrl={session.returnUrl} offer={chosen} />
-            <button onClick={() => setSession(null)} className="mt-2 min-h-11 w-full text-sm font-medium">Change plan</button>
-          </div>
-        ) : offer.embedReady ? (
-          <button onClick={pay} disabled={pending} className="min-h-14 w-full rounded-full bg-button text-lg font-semibold text-button-ink disabled:opacity-60">
-            {pending ? "Preparing secure checkout…" : `Continue: ${offer.priceLine}`}
-          </button>
-        ) : offer.planType === "renewal" ? (
-          <form action={setDemoPlan.bind(null, "premium")}>
-            <button className="min-h-14 w-full rounded-full bg-button text-lg font-semibold text-button-ink">Start my free trial (demo)</button>
-            <p className="mt-2 text-center text-xs text-muted">Demo mode: add your Whop plan IDs to take real payments.</p>
-          </form>
-        ) : (
-          <p className="rounded-2xl bg-surface p-4 text-sm text-muted">This upgrade goes live once its Whop plan is set up.</p>
-        )}
-        {error && <p role="alert" className="mt-2 text-center text-sm text-tomato">{error}</p>}
-        <p className="mt-3 text-center text-xs text-muted">Secure payment by Whop. Cancel any time before your trial ends and you won&apos;t be charged.</p>
-      </section>
-
       <form action={finishJourney}>
         <button className="mt-4 flex min-h-12 w-full items-center justify-center font-medium">Not now, take me to my recipes</button>
       </form>
@@ -187,9 +217,15 @@ function OfferCard({ offer, checked, onChange }: { offer: OfferView; checked: bo
           <span className="block text-sm text-muted">{offer.tagline}</span>
         </span>
       </span>
-      <span className="mt-1 block pl-9 text-sm font-bold">{offer.priceLine}</span>
-      {checked && offer.kind === "upsell" && (
-        <ul className="mt-2 space-y-1 pl-9 text-sm">{offer.includes.map((i) => <li key={i}>✓ {i}</li>)}</ul>
+      <span className="mt-1 block pl-9 text-sm font-bold">
+        {offer.regularPrice && <span className="mr-2 font-normal text-muted line-through">{offer.regularPrice}</span>}
+        {offer.priceLine}
+      </span>
+      {checked && (
+        <ul className="mt-2 space-y-1 pl-9 text-sm">
+          {offer.includes.map((i) => <li key={i}>✓ {i}</li>)}
+          {offer.excludes.map((i) => <li key={i} className="text-muted line-through">✕ {i}</li>)}
+        </ul>
       )}
       {offer.badge && <span className="absolute -top-2.5 right-4 rounded-full bg-button px-2.5 py-0.5 text-xs font-bold text-button-ink">{offer.badge}</span>}
     </label>

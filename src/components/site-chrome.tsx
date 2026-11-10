@@ -38,7 +38,7 @@ export function SiteHeader({ welcomeAtRoot = false }: { welcomeAtRoot?: boolean 
     <header className={`sticky top-0 z-30 border-b border-line bg-bg/90 backdrop-blur ${TAB_PAGES.test(path) ? "hidden" : ""}`}>
       <nav className="mx-auto flex items-center gap-4 px-4 py-3" aria-label="Main">
         <Link href="/"><Brand /></Link>
-        <Link href="/checkout" className="ml-auto rounded-full bg-button px-4 py-2.5 text-sm font-semibold text-button-ink">Try free</Link>
+        {COOK.test(path) ? <span className="ml-auto" /> : <Link href="/checkout" className="ml-auto rounded-full bg-button px-4 py-2.5 text-sm font-semibold text-button-ink">Try free</Link>}
         <Link href="/you" aria-label="Mini You and your progress" className="overflow-hidden rounded-full bg-accent-soft"><MiniYou headOnly size={42} /></Link>
       </nav>
     </header>

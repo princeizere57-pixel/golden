@@ -1,13 +1,15 @@
 "use client";
 
 import Link from "next/link";
+import { EmptyState } from "@/components/empty-state";
+import { NotepadIcon } from "@/components/icons-3d";
 import { useShopping } from "@/components/recipe-actions";
 import { clearDone, clearShopping, toggleShopping, type ShoppingItem } from "@/lib/device-store";
 
 export function ShoppingList() {
   const items = useShopping();
   if (!items.length) {
-    return <p className="mt-4 text-muted">Tap &ldquo;Add to list&rdquo; on any recipe to collect its ingredients here.</p>;
+    return <EmptyState icon={<NotepadIcon size={72} />} title="Your list is empty" text="Tap “Add to list” on a recipe. Golden skips what's already in your pantry, so you only buy what you need." action={{ href: "/plan", label: "Plan a meal" }} />;
   }
   const groups = items.reduce<Record<string, ShoppingItem[]>>((acc, item) => {
     (acc[item.recipeTitle] ??= []).push(item);
