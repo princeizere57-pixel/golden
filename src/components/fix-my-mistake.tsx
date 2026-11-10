@@ -37,7 +37,7 @@ export function FixMyMistake({ slug, dish, defaultVolumeMl }: { slug: string; di
         onClick={() => setOpen((o) => !o)}
         aria-expanded={open}
         aria-controls="fix-panel"
-        className="fixed bottom-4 right-[max(1rem,calc(50%-224px))] z-40 min-h-16 rounded-full bg-accent px-6 text-lg font-bold text-accent-ink shadow-xl"
+        className="fixed bottom-[max(1rem,env(safe-area-inset-bottom))] right-[max(1rem,calc(50%-224px))] z-40 min-h-16 rounded-full bg-accent px-6 text-lg font-bold text-accent-ink shadow-xl"
       >
         {open ? "Close" : "Fix my mistake"}
       </button>

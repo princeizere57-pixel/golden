@@ -20,7 +20,7 @@ export function HeadlineTicker({ tone = "light", className = "" }: { tone?: "lig
   return (
     <div className={`relative overflow-hidden border-y py-4 ${line} ${className}`}>
       <h1 className="sr-only">Cook with Confidence, Waste Nothing and Level Up</h1>
-      <div className="ticker-track flex w-max whitespace-nowrap font-display text-[2.2rem] leading-none sm:text-6xl">
+      <div className="ticker-track flex w-max whitespace-nowrap font-display text-[2.2rem] leading-none">
         {run("a")}
         {run("b")}
       </div>

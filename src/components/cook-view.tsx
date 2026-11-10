@@ -102,7 +102,7 @@ export function CookView({ recipe, initialSkill, canFix, exitHref = `/recipes/${
           </ul>
           {step.notes.length > 0 && <ul className="mt-6 space-y-1 text-lg text-muted">{step.notes.map((n, i) => <li key={i}>{n}</li>)}</ul>}
 
-          <StepPicture key={block.id} src={block.picture} className="step-in mx-auto mt-6 block h-56 w-56 sm:h-64 sm:w-64" />
+          <StepPicture key={block.id} src={block.picture} className="step-in mx-auto mt-6 block h-56 w-56" />
 
           <StepPictures recipe={recipe} index={index} last={last} />
 
