@@ -3,6 +3,7 @@
 
 import type { Recipe, Segment } from "@/lib/types";
 import { REAL_TIME_RECIPES } from "./real-time-recipes";
+import { STEP_PICTURES } from "./step-pictures";
 
 const CLASSICS: Recipe[] = [
   {
@@ -252,7 +253,14 @@ const CLASSICS: Recipe[] = [
   },
 ];
 
-export const RECIPES: Recipe[] = [...CLASSICS, ...REAL_TIME_RECIPES];
+/** Attaches each step's transparent picture, when one exists. */
+const withPictures = (r: Recipe): Recipe => {
+  const have = STEP_PICTURES[r.slug];
+  if (!have) return r;
+  return { ...r, blocks: r.blocks.map((b) => (have.includes(b.id) ? { ...b, picture: `/steps/${r.slug}/${b.id}.webp` } : b)) };
+};
+
+export const RECIPES: Recipe[] = [...CLASSICS, ...REAL_TIME_RECIPES].map(withPictures);
 
 export function getRecipe(slug: string): Recipe | undefined {
   return RECIPES.find((r) => r.slug === slug);

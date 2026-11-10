@@ -42,6 +42,8 @@ interface BlockBase {
    * rice simmers). Such steps add no time to the recipe's total.
    */
   during?: string;
+  /** Transparent picture of how this step should look (public/steps/<slug>/<id>.webp). */
+  picture?: string;
 }
 
 /** OneKit-style atomic blocks. */
