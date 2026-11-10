@@ -44,6 +44,10 @@ export default async function ForYouPage() {
           Your skill path at <strong className="text-ink">{LEVEL[viewer.skill]}</strong> level.{" "}
           <Link href="/onboarding" className="underline">Retake the quiz</Link>
         </p>
+        <Link href="/pantry" className="mt-4 block rounded-2xl bg-accent-soft p-4">
+          <span className="block text-xs font-semibold uppercase tracking-wide text-muted">Pantry-to-Plate</span>
+          <span className="mt-1 block font-semibold leading-snug">Turn your leftovers into dinner</span>
+        </Link>
       </div>
 
       <div className="mt-6 px-4">

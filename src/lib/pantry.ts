@@ -29,3 +29,48 @@ export function pantryMatch(ingredients: string[], pantry: string[]): PantryMatc
   const missing = needed.filter((i) => !have.includes(i));
   return { have, missing, ratio: needed.length ? have.length / needed.length : 0 };
 }
+
+// Words people add when describing leftovers that aren't the ingredient itself.
+const FILLER = new Set([
+  "a", "an", "the", "some", "of", "half", "quarter", "few", "bit", "little", "leftover", "leftovers", "old", "fresh",
+  "cup", "cups", "g", "kg", "ml", "l", "lb", "lbs", "oz", "tin", "tins", "can", "cans", "bag", "bunch", "handful",
+  "piece", "pieces", "slice", "slices", "clove", "cloves", "pack", "packet", "jar", "my", "in", "fridge", "i", "have", "got",
+]);
+
+/**
+ * Turns what someone types ("2 eggs, half an onion and some rice\nspinach") into pantry items:
+ * ["egg", "onion", "rice", "spinach"]. Quantities and filler words are dropped, duplicates removed.
+ */
+export function parseFridge(text: string): string[] {
+  const items = text
+    .toLowerCase()
+    .split(/,|;|\n|\band\b|\bplus\b|\+|&/)
+    .map((part) => normalise(part).split(" ").filter((w) => w && !FILLER.has(w)).join(" "))
+    .filter((p) => p.length > 1);
+  return [...new Set(items)];
+}
+
+export interface RankedMeal<T> {
+  recipe: T;
+  match: PantryMatch;
+  /** Nothing missing apart from staples: cook it right now. */
+  instant: boolean;
+}
+
+/** How well a meal clears the fridge: every item used counts, every item to buy costs more. */
+export const fridgeScore = (m: PantryMatch) => m.have.length - 1.5 * m.missing.length;
+
+/**
+ * Cross-references every recipe with what's in the fridge. Best first: uses the most of what's
+ * there while needing the fewest extra items (less waste, no shop), then the highest share covered.
+ */
+export function rankMeals<T extends { ingredients: string[] }>(recipes: T[], pantry: string[], minRatio = 0.5): RankedMeal<T>[] {
+  if (!pantry.length) return [];
+  return recipes
+    .map((recipe) => {
+      const match = pantryMatch(recipe.ingredients, pantry);
+      return { recipe, match, instant: match.have.length > 0 && match.missing.length === 0 };
+    })
+    .filter((m) => m.match.have.length > 0 && m.match.ratio >= minRatio)
+    .sort((a, b) => fridgeScore(b.match) - fridgeScore(a.match) || b.match.ratio - a.match.ratio);
+}
