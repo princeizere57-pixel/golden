@@ -37,6 +37,11 @@ interface BlockBase {
   science?: string;
   /** Jargon used in the step, with plain definitions. */
   terms?: Record<string, string>;
+  /**
+   * Real-time cooking: id of an earlier passive block this step happens during (chop while the
+   * rice simmers). Such steps add no time to the recipe's total.
+   */
+  during?: string;
 }
 
 /** OneKit-style atomic blocks. */
@@ -82,6 +87,8 @@ export interface Recipe {
   premium: boolean;
   ingredients: Ingredient[];
   blocks: StepBlock[];
+  /** Written in the real-time style: slow parts start first, prep fills the waiting time. */
+  realTime?: boolean;
   /** Set on recipes a user imported for personal use: always credited and linked back. */
   source?: { url: string; name: string };
 }

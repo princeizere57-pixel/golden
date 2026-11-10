@@ -2,8 +2,9 @@
 // `recipes` / `recipe_blocks` tables (see supabase/migrations); this keeps the app usable offline.
 
 import type { Recipe, Segment } from "@/lib/types";
+import { REAL_TIME_RECIPES } from "./real-time-recipes";
 
-export const RECIPES: Recipe[] = [
+const CLASSICS: Recipe[] = [
   {
     slug: "garlic-butter-pasta",
     // Photo of a similar dish from TheMealDB (350 px variant), credited on the card and page.
@@ -250,6 +251,8 @@ export const RECIPES: Recipe[] = [
     ],
   },
 ];
+
+export const RECIPES: Recipe[] = [...CLASSICS, ...REAL_TIME_RECIPES];
 
 export function getRecipe(slug: string): Recipe | undefined {
   return RECIPES.find((r) => r.slug === slug);

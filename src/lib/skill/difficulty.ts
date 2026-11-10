@@ -3,6 +3,7 @@
 
 import type { Recipe, SkillLevel } from "@/lib/types";
 import { SKILL_LEVELS } from "@/lib/types";
+import { elapsedMinutes } from "@/lib/links";
 
 /** Techniques that take practice; each one found adds to the score. */
 const ADVANCED = /\b(emulsif|deglaz|temper|braise|knead|prove|proof|flamb|julienne|caramelis|carameliz|blanch|confit|poach|sous vide|pastry|meringue|roux|reduc|fold in|whip)/gi;
@@ -18,7 +19,7 @@ const LABEL: Record<SkillLevel, Difficulty["label"]> = { beginner: "Easy", inter
 export function difficulty(recipe: Recipe): Difficulty {
   const ingredients = recipe.ingredients.length;
   const steps = recipe.blocks.length;
-  const minutes = recipe.blocks.reduce((sum, b) => sum + b.minutes, 0);
+  const minutes = elapsedMinutes(recipe.blocks);
   const techniques = new Set(recipe.blocks.flatMap((b) => (b.text.match(ADVANCED) ?? []).map((t) => t.toLowerCase()))).size;
   const score =
     (ingredients > 12 ? 2 : ingredients > 8 ? 1 : 0) +

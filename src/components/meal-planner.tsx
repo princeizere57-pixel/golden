@@ -5,7 +5,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { chime } from "@/components/timers";
-import { orchestrate } from "@/lib/timing/orchestrate";
+import { orchestrate, recipeTasks } from "@/lib/timing/orchestrate";
 import type { Recipe } from "@/lib/types";
 
 export function MealPlanner({ recipes }: { recipes: Pick<Recipe, "slug" | "title" | "blocks">[] }) {
@@ -19,7 +19,7 @@ export function MealPlanner({ recipes }: { recipes: Pick<Recipe, "slug" | "title
       orchestrate(
         recipes
           .filter((r) => chosen.includes(r.slug))
-          .map((r) => r.blocks.map((b) => ({ id: `${r.slug}:${b.id}`, dish: r.title, label: b.text, minutes: b.minutes, attention: b.attention }))),
+          .map((r) => recipeTasks(r)),
       ),
     [recipes, chosen],
   );

@@ -1,3 +1,4 @@
+import { elapsedMinutes } from "@/lib/links";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -24,7 +25,7 @@ export default async function RecipePage({ params }: Props) {
   if (!recipe) notFound();
   const viewer = await getViewer();
   const locked = recipe.premium && viewer.plan === "free";
-  const total = recipe.blocks.reduce((s, b) => s + b.minutes, 0);
+  const total = elapsedMinutes(recipe.blocks);
 
   return (
     <main className="mx-auto grid gap-10 px-4 py-10 pb-24">

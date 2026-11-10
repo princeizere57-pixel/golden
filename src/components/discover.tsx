@@ -3,10 +3,14 @@
 
 import Link from "next/link";
 import { ShareButton } from "@/components/recipe-actions";
+import { SteamingDishIcon } from "@/components/icons-3d";
 import { formatDuration, recipeHref, totalMinutes } from "@/lib/links";
 import { thumb } from "@/lib/mealdb/convert";
 import { difficulty } from "@/lib/skill/difficulty";
 import type { Recipe } from "@/lib/types";
+
+/** Background for recipes without a photo, from their colourway. */
+const COLOURWAY_BG: Record<Recipe["colourway"], string> = { tomato: "bg-tomato", basil: "bg-basil", saffron: "bg-saffron", aubergine: "bg-aubergine", charcoal: "bg-charcoal" };
 
 const img = (r: Recipe) => (r.image ? thumb(r.image) : undefined);
 const LEVEL_BADGE = { Easy: "bg-basil", Medium: "bg-saffron", Advanced: "bg-aubergine" };
@@ -36,7 +40,9 @@ export function PhotoCard({ recipe, badge, wide = false }: { recipe: Recipe; bad
           // eslint-disable-next-line @next/next/no-img-element -- TheMealDB CDN photo, 350 px
           <img src={img(recipe)} alt="" width={350} height={350} loading="lazy" className="aspect-square w-full object-cover transition-transform duration-500 group-hover:scale-105" />
         ) : (
-          <span className="block aspect-square w-full bg-charcoal" />
+          <span className={`flex aspect-square w-full items-center justify-center ${COLOURWAY_BG[recipe.colourway]}`}>
+            <SteamingDishIcon size={120} />
+          </span>
         )}
         {badge && <span className="absolute left-3 top-3 rounded-full bg-bg px-3 py-1 text-xs font-bold tracking-wide">{badge}</span>}
         <span className={`absolute bottom-3 left-3 rounded-full px-2.5 py-1 text-xs font-semibold text-white ${LEVEL_BADGE[d.label]}`}>{d.label}</span>
