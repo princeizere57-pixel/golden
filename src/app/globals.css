@@ -63,6 +63,18 @@ body {
   outline-offset: 2px;
 }
 
+/* Tap feedback: buttons and links press in slightly, so every tap visibly registers. */
+@media (prefers-reduced-motion: no-preference) {
+  button:not(:disabled),
+  a[href] {
+    transition: transform 120ms ease, background-color 150ms ease, border-color 150ms ease, opacity 150ms ease;
+  }
+  button:not(:disabled):active,
+  a[href]:active {
+    transform: scale(0.97);
+  }
+}
+
 /* Cook mode: high contrast regardless of the page theme. */
 .cook-mode {
   --bg: #000000;

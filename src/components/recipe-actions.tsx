@@ -7,6 +7,8 @@ import { STORE_EVENT, addToShopping, isSaved, listPantry, listSaved, listShoppin
 import { covers } from "@/lib/pantry";
 import { formatDuration, recipeHref, totalMinutes } from "@/lib/links";
 import { recordActivity } from "@/lib/progress-store";
+import { EmptyState } from "@/components/empty-state";
+import { SackIcon } from "@/components/icons-3d";
 import type { Recipe } from "@/lib/types";
 
 const thumbOf = (image?: string) => (image?.includes("themealdb.com") && !/\/(medium|preview|small|large)$/.test(image) ? `${image}/medium` : image);
@@ -99,7 +101,7 @@ export function ShareButton({ title, path, className = "" }: { title: string; pa
 /** Saved recipes rendered from the device store. */
 export function SavedGrid() {
   const saved = useSaved();
-  if (!saved.length) return <p className="mt-4 text-muted">Tap Save on any recipe and it will appear here.</p>;
+  if (!saved.length) return <EmptyState icon={<SackIcon size={72} />} title="Nothing saved yet" text="Tap Save on any recipe you want to cook later. It will wait for you here." action={{ href: "/", label: "Find something to cook" }} />;
   return (
     <ul className="mt-6 grid grid-cols-2 gap-4">
       {saved.map((r) => (
