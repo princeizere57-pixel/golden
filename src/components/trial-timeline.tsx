@@ -14,8 +14,8 @@ export function TrialTimeline({ days, price, tone = "light", from = new Date() }
   const muted = tone === "dark" ? "text-white/60" : "text-muted";
   const rail = tone === "dark" ? "bg-white/15" : "bg-line";
   const steps = [
-    { when: "Today", what: "Everything unlocked. $0 due.", detail: "Cook your first dinner from what's already in your fridge." },
-    { when: `Day ${Math.max(2, days - 1)}`, what: "Keep cooking, keep saving.", detail: "Rescue a mistake, plan a two-dish dinner, see what you'd have thrown away." },
+    { when: "Today", what: "Everything unlocked. $0 due.", detail: "Cook what you already have (Pantry-to-Plate)." },
+    { when: `Day ${Math.max(2, days - 1)}`, what: "Keep cooking, keep saving.", detail: "Two dishes hot together (Timing Orchestrator). Save a dish (Fix My Mistake)." },
     { when: fmt(end), what: `First charge: ${price}`, detail: `Cancel any time before ${fmt(end)} in two taps and you pay nothing.` },
   ];
   return (
