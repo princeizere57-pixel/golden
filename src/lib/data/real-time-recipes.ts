@@ -8,6 +8,8 @@ import type { Recipe } from "@/lib/types";
 export const REAL_TIME_RECIPES: Recipe[] = [
   {
     slug: "broccoli-chilli-pasta",
+    // Original photo made for Golden (AI-generated with Higgsfield), stored in public/recipes.
+    image: "/recipes/broccoli-chilli-pasta.jpg",
     title: "Broccoli, Garlic & Chilli Pasta",
     summary: "Pasta and broccoli share one pot while a garlicky chilli oil comes together beside it. Dinner in about 20 minutes.",
     chef: "Golden Kitchen",
@@ -102,6 +104,8 @@ export const REAL_TIME_RECIPES: Recipe[] = [
   },
   {
     slug: "chickpea-spinach-curry-rice",
+    // Original photo made for Golden (AI-generated with Higgsfield), stored in public/recipes.
+    image: "/recipes/chickpea-spinach-curry-rice.jpg",
     title: "Chickpea & Spinach Curry with Rice",
     summary: "Rice goes on first and cooks itself while the curry builds. Everything lands at the same moment.",
     chef: "Golden Kitchen",
@@ -199,6 +203,8 @@ export const REAL_TIME_RECIPES: Recipe[] = [
   },
   {
     slug: "sausage-potato-green-bean-traybake",
+    // Original photo made for Golden (AI-generated with Higgsfield), stored in public/recipes.
+    image: "/recipes/sausage-potato-green-bean-traybake.jpg",
     title: "Sausage, Potato & Green Bean Traybake",
     summary: "The potatoes get a head start in a hot tray, then everything finishes together. One tray to wash.",
     chef: "Golden Kitchen",
@@ -286,6 +292,8 @@ export const REAL_TIME_RECIPES: Recipe[] = [
   },
   {
     slug: "salmon-herby-couscous",
+    // Original photo made for Golden (AI-generated with Higgsfield), stored in public/recipes.
+    image: "/recipes/salmon-herby-couscous.jpg",
     title: "Roast Salmon with Herby Couscous",
     summary: "Couscous steeps while the salmon roasts and a lemony yogurt sauce gets stirred together. 20 minutes, two pans.",
     chef: "Golden Kitchen",
@@ -374,6 +382,8 @@ export const REAL_TIME_RECIPES: Recipe[] = [
   },
   {
     slug: "black-bean-quesadillas-salsa",
+    // Original photo made for Golden (AI-generated with Higgsfield), stored in public/recipes.
+    image: "/recipes/black-bean-quesadillas-salsa.jpg",
     title: "Black Bean Quesadillas with Quick Salsa",
     summary: "Each quesadilla crisps in the pan while you build the next one and chop a fresh salsa.",
     chef: "Golden Kitchen",
@@ -452,6 +462,8 @@ export const REAL_TIME_RECIPES: Recipe[] = [
   },
   {
     slug: "apple-cinnamon-porridge",
+    // Original photo made for Golden (AI-generated with Higgsfield), stored in public/recipes.
+    image: "/recipes/apple-cinnamon-porridge.jpg",
     title: "Apple & Cinnamon Porridge",
     summary: "The oats simmer while a pan of buttery apples caramelises next to them. A slow breakfast in 12 minutes.",
     chef: "Golden Kitchen",

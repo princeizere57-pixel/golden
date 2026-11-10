@@ -53,5 +53,6 @@ describe("rankForSkill", () => {
 it("uses TheMealDB's 350 px variant (at least 300 px)", () => {
   expect(thumb("https://x/a.jpg")).toBe("https://x/a.jpg/medium");
   expect(thumb("https://x/a.jpg/preview")).toBe("https://x/a.jpg/medium");
-  for (const r of RECIPES) if (r.image) expect(r.image).toMatch(/\/medium$/);
+  expect(thumb("/recipes/a.jpg")).toBe("/recipes/a.jpg");
+  for (const r of RECIPES) expect(r.image).toMatch(/\/medium$|^\/recipes\/[a-z0-9-]+\.jpg$/);
 });

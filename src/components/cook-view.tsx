@@ -6,7 +6,7 @@
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { FixMyMistake } from "@/components/fix-my-mistake";
-import { FlameIcon, TrophyIcon } from "@/components/icons-3d";
+import { FlameIcon, StopwatchIcon, TrophyIcon } from "@/components/icons-3d";
 import { MiniYou } from "@/components/mini-you";
 import { track } from "@/lib/analytics";
 import { rankFor } from "@/lib/gamify";
@@ -103,12 +103,26 @@ export function CookView({ recipe, initialSkill, exitHref = `/recipes/${recipe.s
 
           <StepPictures recipe={recipe} index={index} last={last} />
 
+          {running && (
+            <div
+              role={running.endsAt <= now ? "alert" : "timer"}
+              aria-label={`${running.label} timer`}
+              className={`step-in mt-8 flex items-center gap-4 rounded-3xl border-2 p-4 ${running.endsAt <= now ? "border-accent bg-accent text-accent-ink" : "border-button bg-bg"}`}
+            >
+              <StopwatchIcon size={88} ticking={running.endsAt > now} className="shrink-0" />
+              <span className="min-w-0">
+                <span className="block text-sm font-semibold uppercase tracking-wide opacity-70">{running.label}</span>
+                <span className="block font-mono text-5xl font-bold tabular-nums" aria-live="off">{running.endsAt > now ? formatClock(running.endsAt - now) : "Done!"}</span>
+              </span>
+            </div>
+          )}
+
           {(step.kind === "timing" || step.attention === "passive") && (
             <button
               onClick={() => start({ id: timerId, label: step.timerLabel ?? `Step ${index + 1}`, recipeSlug: recipe.slug }, step.minutes)}
               className="mt-8 min-h-16 w-full rounded-2xl border-2 border-accent text-xl font-bold"
             >
-              {running ? `Restart timer (${running.endsAt > now ? formatClock(running.endsAt - now) : "done"})` : `Start ${step.minutes} min timer`}
+              {running ? "Restart timer" : `Start ${step.minutes} min timer`}
             </button>
           )}
         </article>
