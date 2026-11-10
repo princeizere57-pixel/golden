@@ -1,8 +1,13 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { chooseSkill } from "@/app/actions/viewer";
+import { NoMatches } from "@/components/no-matches";
 import { categoryRecipes, mealCategories, searchRecipes } from "@/lib/mealdb/client";
-import { MEALDB_PREFIX, thumb } from "@/lib/mealdb/convert";
+import { thumb } from "@/lib/mealdb/convert";
+import { RECIPES } from "@/lib/data/recipes";
+import { libraryRecipes } from "@/lib/library";
+import { recipeHref } from "@/lib/links";
+import { mergeResults } from "@/lib/search";
 import { difficulty, rankForSkill } from "@/lib/skill/difficulty";
 import { SKILL_LEVELS, type Recipe, type SkillLevel } from "@/lib/types";
 import { getViewer } from "@/lib/viewer";
@@ -17,7 +22,9 @@ export default async function ExplorePage({ searchParams }: { searchParams: Prom
   const { q, c } = await searchParams;
   const query = q?.trim().slice(0, 60);
   const category = query ? undefined : (c ?? DEFAULT_CATEGORY);
-  const [viewer, categories, recipes] = await Promise.all([getViewer(), mealCategories(), query ? searchRecipes(query) : categoryRecipes(category!)]);
+  const [viewer, categories, found] = await Promise.all([getViewer(), mealCategories(), query ? searchRecipes(query) : categoryRecipes(category!)]);
+  // Golden's own recipes first (seed, real-time, cached library), then TheMealDB's live results.
+  const recipes = query ? mergeResults([...RECIPES, ...libraryRecipes()], query, found) : found;
 
   const rated = recipes.map((recipe) => ({ recipe, difficulty: difficulty(recipe) }));
   const ranked = rankForSkill(rated, viewer.skill, (r) => r.difficulty.level);
@@ -72,7 +79,11 @@ export default async function ExplorePage({ searchParams }: { searchParams: Prom
       )}
 
       {recipes.length === 0 ? (
-        <p className="mt-8 text-muted">{categories.length ? "No recipes found. Try another search." : "Couldn't reach the recipe library. Check your connection and try again."}</p>
+        query ? (
+          <NoMatches query={query} />
+        ) : (
+          <p className="mt-8 text-muted">{categories.length ? "No recipes found. Try another search." : "Couldn't reach the recipe library. Check your connection and try again."}</p>
+        )
       ) : (
         <>
           <Grid
@@ -100,7 +111,7 @@ function Grid({ heading, items, empty }: { heading: string; items: Array<{ recip
         <ul className="mt-4 grid grid-cols-2 gap-4">
           {items.map(({ recipe, difficulty: d }) => (
             <li key={recipe.slug}>
-              <Link href={`/meals/${recipe.slug.slice(MEALDB_PREFIX.length)}`} className="group block">
+              <Link href={recipeHref(recipe)} className="group block">
                 <span className="relative block">
                   {recipe.image && (
                     // eslint-disable-next-line @next/next/no-img-element -- served by TheMealDB's CDN
