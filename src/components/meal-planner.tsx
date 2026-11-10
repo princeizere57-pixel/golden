@@ -5,6 +5,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { chime } from "@/components/timers";
+import { StopwatchIcon } from "@/components/icons-3d";
 import { orchestrate, recipeTasks } from "@/lib/timing/orchestrate";
 import type { Recipe } from "@/lib/types";
 
@@ -77,18 +78,21 @@ export function MealPlanner({ recipes }: { recipes: Pick<Recipe, "slug" | "title
           <p className="mt-6 text-lg">Everything is ready in <strong>{Math.ceil(schedule.totalMinutes)} minutes</strong>. Only one hands-on task at a time.</p>
 
           {running ? (
-            <div className="sticky top-2 z-10 mt-4 rounded-3xl bg-charcoal p-5 text-white" aria-live="polite">
+            <div className="sticky top-2 z-10 mt-4 rounded-3xl border-2 border-button bg-bg p-5 shadow-lg" aria-live="polite">
               {finished ? (
                 <p className="text-2xl font-bold">Everything&apos;s ready. Serve it hot! 🍽️</p>
               ) : (
                 <>
-                  <p className="font-mono text-4xl tabular-nums">{fmt(elapsedMin)} <span className="text-base text-white/60">/ {fmt(schedule.totalMinutes)}</span></p>
-                  <p className="mt-2 text-sm text-white/70">Now:</p>
+                  <div className="flex items-center gap-4">
+                    <StopwatchIcon size={64} className="shrink-0" />
+                    <p className="font-mono text-4xl tabular-nums">{fmt(elapsedMin)} <span className="text-base text-muted">/ {fmt(schedule.totalMinutes)}</span></p>
+                  </div>
+                  <p className="mt-3 text-sm text-muted">Now:</p>
                   <ul className="mt-1 space-y-1">{current.map((t) => <li key={t.id} className="font-semibold">{t.dish}: {t.label}</li>)}</ul>
-                  {next && <p className="mt-3 text-sm text-white/80">Next in {fmt(next.start - elapsedMin)}: {next.dish}: {next.label}</p>}
+                  {next && <p className="mt-3 text-sm text-muted">Next in {fmt(next.start - elapsedMin)}: {next.dish}: {next.label}</p>}
                 </>
               )}
-              <button onClick={() => setStartedAt(null)} className="mt-4 min-h-11 rounded-full bg-white/15 px-4 text-sm font-semibold">{finished ? "Done" : "Stop"}</button>
+              <button onClick={() => setStartedAt(null)} className="mt-4 min-h-11 rounded-full bg-button px-5 text-sm font-semibold text-button-ink">{finished ? "Done" : "Stop"}</button>
             </div>
           ) : (
             <button onClick={start} className="mt-4 min-h-14 w-full rounded-full bg-button text-lg font-semibold text-button-ink">Start cooking: chimes &amp; vibration on</button>
