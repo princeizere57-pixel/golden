@@ -87,6 +87,7 @@ export function CookView({ recipe, initialSkill, canFix, exitHref = `/recipes/${
           <Link href={exitHref} className="inline-flex min-h-16 items-center underline">Exit cook mode</Link>
           <span className="text-muted">{awake ? "Screen stays on" : "Screen may sleep"}</span>
         </div>
+        <h1 className="text-xl font-semibold leading-tight">{recipe.title}</h1>
         <SkillSlider value={skill} onChange={setSkill} />
 
         <div className="h-2 overflow-hidden rounded-full bg-surface" role="progressbar" aria-valuemin={1} aria-valuemax={steps.length} aria-valuenow={index + 1} aria-label="Progress">

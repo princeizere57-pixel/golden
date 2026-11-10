@@ -2,6 +2,7 @@
 // personalise the feed. A signed-in Supabase profile replaces these in production.
 
 import "server-only";
+import { cache } from "react";
 import { cookies } from "next/headers";
 import { getUser } from "@/lib/auth";
 import { accessFromCookie, type Access, type Tier } from "@/lib/billing/entitlements";
@@ -26,6 +27,9 @@ export interface Prefs {
 
 const DEFAULT_PREFS: Prefs = { serves: 2, weeknightMinutes: 30, goals: [] };
 
+/** One subscription read per request, however many components ask for the viewer. */
+const accessForUser = cache((userId: string) => activeAccess(userId));
+
 export async function getViewer(): Promise<Viewer & { tier: Tier; access: Access; onboarded: boolean; prefs: Prefs }> {
   const jar = await cookies();
   // The plan: for real accounts the `subscriptions` table decides (the payment webhooks keep it
@@ -34,7 +38,7 @@ export async function getViewer(): Promise<Viewer & { tier: Tier; access: Access
   // During the free days everything is unlocked; afterwards the chosen plan decides.
   const cookieAccess = accessFromCookie(verifyValue(jar.get(PLAN_COOKIE)?.value));
   const user = await getUser();
-  const access = (user ? await activeAccess(user.id) : null) ?? cookieAccess;
+  const access = (user ? await accessForUser(user.id) : null) ?? cookieAccess;
   const tier = access.tier;
   let prefs = DEFAULT_PREFS;
   try {
