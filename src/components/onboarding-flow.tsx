@@ -12,6 +12,7 @@ import { FigurePicker } from "@/components/figure-picker";
 import { FridgeIcon, HatIcon, LensIcon, LifebuoyIcon, StopwatchIcon } from "@/components/icons-3d";
 import { track } from "@/lib/analytics";
 import { LEVEL_PITCH, QUESTIONS, prefsFromAnswers, skillFromAnswers, type Answers } from "@/lib/skill/quiz";
+import { ClawMark } from "@/components/claw-loader";
 
 const BUILD_LINES = ["Reading your answers…", "Matching techniques to your level…", "Picking your first recipes…", "Setting up cook mode…"];
 
@@ -128,6 +129,7 @@ export function OnboardingFlow({ images, userName }: { images: string[]; userNam
 
       {stage.kind === "building" && (
         <section className="step-in flex flex-1 flex-col items-center justify-center text-center" aria-live="polite">
+          <ClawMark size={104} className="mb-6" />
           <h1 className="font-display text-[2.1rem]">
             Building a skill path <span className="text-accent">just for you</span>
           </h1>

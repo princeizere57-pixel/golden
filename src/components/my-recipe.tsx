@@ -8,7 +8,6 @@ import { activeMinutes } from "@/lib/skill/adapt";
 import { difficulty } from "@/lib/skill/difficulty";
 import { getImport } from "@/lib/import/store";
 import type { Recipe, SkillLevel } from "@/lib/types";
-import { ClawLoader } from "@/components/claw-loader";
 
 function useImport(slug: string) {
   const [recipe, setRecipe] = useState<Recipe | null | undefined>(undefined);
@@ -39,7 +38,7 @@ function Credit({ recipe }: { recipe: Recipe }) {
 
 export function MyRecipe({ slug, skill, canCook }: { slug: string; skill: SkillLevel; canCook: boolean }) {
   const recipe = useImport(slug);
-  if (recipe === undefined) return <ClawLoader />;
+  if (recipe === undefined) return <main className="mx-auto px-4 py-10 text-muted">Loading…</main>;
   if (!recipe) return <Missing />;
   // Private to this device: no "Plan it" or pairings (Plan a meal can't read on-device imports).
   return (
