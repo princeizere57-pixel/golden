@@ -150,7 +150,7 @@ Suggested order: profiles → progress (the feedback prompt and Today card depen
 
 ## 10. Open items, in priority order
 
-1. Production env: `SESSION_SECRET`, Supabase keys, run migrations 0001–0006 (0006 = `feedback`).
+1. Production env: done for `SESSION_SECRET`, Supabase and Whop; migrations 0001–0007 have been run. Still missing: see "Keys left for launch" below.
 2. Move on-device data to Supabase (§8), starting with `profiles` and progress.
 3. Whop account linking for static links (§6.1); customer portal link.
 4. Rate limits on Gemini actions (`adaptRecipeAction`, `diagnoseDish`) and on `createPost`/`sendFeedback`.
@@ -159,6 +159,21 @@ Suggested order: profiles → progress (the feedback prompt and Today card depen
 7. Google Play: create the two subscriptions, service account and RTDN (`docs/SETUP.md` §3b), build the Android app in Android Studio and test with a licence tester. The Java plugin hasn't been compiled yet.
 8. TheMealDB supporter key before any public or app-store release.
 9. One codebase for both apps (golden + golden-v1), deployed twice.
+
+## Keys left for launch (checked on Vercel, 11 Nov 2026)
+
+Already set in Vercel (production): `SESSION_SECRET`, `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, `WHOP_API_KEY`, `WHOP_COMPANY_ID`, `WHOP_PLAN_EXECUTIVE`, `WHOP_PLAN_EXPERIENCE`, `WHOP_WEBHOOK_SECRET`, `GEMINI_MODEL`, `NEXT_PUBLIC_POSTHOG_HOST`.
+
+| Key | Needed | What happens without it |
+|---|---|---|
+| `MEALDB_API_KEY` | Before public launch | Uses TheMealDB's shared test key, which is for development only. Buy a supporter key. |
+| `GEMINI_API_KEY` | For the AI extras | Recipes rewrite with the built-in rules and Fix My Mistake works by tapping instead of from a photo. Nothing breaks. |
+| `NEXT_PUBLIC_POSTHOG_KEY` | To measure the launch | No analytics are collected. |
+| `GOOGLE_PLAY_SERVICE_ACCOUNT_JSON`, `GOOGLE_PLAY_PACKAGE_NAME`, `GOOGLE_RTDN_TOKEN` | Before the Android app goes on Google Play | Without them the app can't confirm Play purchases. Setup: `docs/SETUP.md` §3b. |
+| `APPLE_BUNDLE_ID` | Only when iPhone purchases are added | App Store notifications are refused. |
+| `STRIPE_US_*`, `STRIPE_UK_*` | Not needed | Whop is the web checkout. |
+
+Not keys, but needed: Google sign-in switched on in Supabase (Auth → Providers) with the live site in the redirect URLs, and Whop's webhook pointing at `/api/billing/whop/webhook`.
 
 ## 11. Verified at handover
 

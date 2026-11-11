@@ -37,6 +37,8 @@ export interface OfferView {
 
 interface Props {
   user: { id: string; name: string; email: string };
+  /** Demo payments allowed (no real accounts or payments configured): shows the pretend trial button. */
+  demo?: boolean;
   level: string;
   /** The plan they already have: Executive sees "you're all set", Experience sees the upgrade. */
   tier: Tier;
@@ -49,7 +51,7 @@ interface Props {
   benefits: string[];
 }
 
-export function CheckoutPanel({ user, level, tier, store: serverStore, offers, defaultOffer, launch, payLaterReady, benefits }: Props) {
+export function CheckoutPanel({ user, level, tier, store: serverStore, offers, defaultOffer, launch, payLaterReady, benefits, demo = false }: Props) {
   const [chosen, setChosen] = useState(defaultOffer);
   const [payLater, setPayLater] = useState(false);
   const [session, setSession] = useState<Extract<StartCheckout, { ok: true }> | null>(null);
@@ -181,7 +183,7 @@ export function CheckoutPanel({ user, level, tier, store: serverStore, offers, d
           <button onClick={pay} disabled={pending} className="min-h-14 w-full rounded-full bg-button text-lg font-semibold text-button-ink disabled:opacity-60">
             {pending ? "Preparing secure checkout…" : `Continue: ${offer.priceLine}`}
           </button>
-        ) : offer.planType === "renewal" ? (
+        ) : demo && offer.planType === "renewal" ? (
           <form action={setDemoPlan.bind(null, chosen as OfferId)}>
             <button className="min-h-14 w-full rounded-full bg-button text-lg font-semibold text-button-ink">Start my free trial (demo)</button>
             <p className="mt-2 text-center text-xs text-muted">Demo mode: add your Whop plan IDs to take real payments.</p>
