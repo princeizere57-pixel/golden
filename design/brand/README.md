@@ -8,6 +8,7 @@ Everything needed to rebuild Golden's icons without any outside tool or service.
 | `claw-gold-transparent.png` | The gold claw cut out, square, transparent (1058 px) |
 | `claw-black-transparent.png` | The black claw used everywhere now, transparent (1058 px) |
 | `golden-app-icon.jpg`, `golden-app-icon.pdf` | The app icon (black claw on white, 1024 px) for stores, decks and print |
+| `claw-gold-shine.png`, `make_splash.py` | The claw with a still gold shine, and the script that puts it on the Android and iPhone splash screens |
 | `make_icons.py` | Writes the app icons, splash screens and web icons from a claw PNG |
 | `make_favicon.py` | Writes `favicon.ico` (16–64 px, bolder at small sizes) and `src/app/icon.png` |
 
