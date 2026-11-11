@@ -57,6 +57,13 @@ describe("the 5 free days unlock everything, then the chosen plan", () => {
     expect(accessFrom([{ status: "active", current_period_end: "2027-11-15T12:00:00Z", offer: "experience" }], NOW)).toEqual({ tier: "experience", plan: "experience", trial: false });
   });
 
+  it("locks on the trial end date even if the provider's webhook never comes", () => {
+    const stale = accessFrom([{ status: "trialing", current_period_end: "2026-11-01T00:00:00Z", offer: "experience" }], NOW);
+    expect(stale).toEqual({ tier: "experience", plan: "experience", trial: false });
+    expect(can(stale.tier, "pantry")).toBe(false);
+    expect(can(stale.tier, "cookMode")).toBe(true);
+  });
+
   it("free stays free; a trial with no plan unlocks nothing", () => {
     expect(accessFor("free", true)).toEqual({ tier: "free", plan: "free", trial: false });
   });
