@@ -68,6 +68,11 @@ export function CheckoutPanel({ user, level, tier, store: serverStore, offers, d
   }, [serverStore]);
   const android = store === "google_play";
 
+  // Warm Whop up while the buyer reads: fetch the form's code and Whop's script now, not after "Continue".
+  useEffect(() => {
+    if (store === "web") void import("@/components/whop-embed").then((m) => m.warmWhop());
+  }, [store]);
+
   if (tier === "executive") {
     return (
       <main className="mx-auto flex min-h-dvh max-w-lg flex-col items-center justify-center px-6 text-center">
@@ -114,7 +119,10 @@ export function CheckoutPanel({ user, level, tier, store: serverStore, offers, d
       <p className="mt-3 text-muted">Every dinner you rescue from the bin is money back in your pocket. Here&apos;s what you unlock:</p>
       <ul className="mt-3 space-y-2">
         {benefits.map((b) => (
-          <li key={b} className="flex gap-2"><span aria-hidden className="text-basil">✓</span>{b}</li>
+          <li key={b} className="flex gap-2">
+            <span aria-hidden className="text-basil">✓</span>
+            <BenefitText text={b} />
+          </li>
         ))}
       </ul>
 
@@ -216,11 +224,27 @@ function OfferCard({ offer, checked, onChange }: { offer: OfferView; checked: bo
       </span>
       {checked && (
         <ul className="mt-2 space-y-1 pl-9 text-sm">
-          {offer.includes.map((i) => <li key={i}>✓ {i}</li>)}
+          {offer.includes.map((i) => (
+            <li key={i} className="flex gap-2">
+              <span aria-hidden className="text-basil">✓</span>
+              <BenefitText text={i} />
+            </li>
+          ))}
           {offer.excludes.map((i) => <li key={i} className="text-muted line-through">✕ {i}</li>)}
         </ul>
       )}
       {offer.badge && <span className="absolute -top-2.5 right-4 rounded-full bg-button px-2.5 py-0.5 text-xs font-bold text-button-ink">{offer.badge}</span>}
     </label>
+  );
+}
+
+/** "Benefit (Feature)": the benefit in full, the feature name on one line and quieter. */
+function BenefitText({ text }: { text: string }) {
+  const m = /^(.*?)\s*\(([^)]+)\)$/.exec(text);
+  if (!m) return <span>{text}</span>;
+  return (
+    <span>
+      {m[1]} <span className="whitespace-nowrap text-muted">({m[2]})</span>
+    </span>
   );
 }
