@@ -31,14 +31,14 @@ export function Brand({ className = "text-3xl" }: { className?: string }) {
 /** Tab pages carry their own big title on phones, so the header only shows there on wide screens. */
 const TAB_PAGES = /^\/(for-you|shopping|saved|plan)?$/;
 
-export function SiteHeader({ welcomeAtRoot = false }: { welcomeAtRoot?: boolean }) {
+export function SiteHeader({ welcomeAtRoot = false, upsell = false }: { welcomeAtRoot?: boolean; upsell?: boolean }) {
   const path = usePathname();
   if (FULL_SCREEN.test(path) || (welcomeAtRoot && path === "/")) return null;
   return (
     <header className={`sticky top-0 z-30 border-b border-line bg-bg/90 backdrop-blur ${TAB_PAGES.test(path) ? "hidden" : ""}`}>
       <nav className="mx-auto flex items-center gap-4 px-4 py-3" aria-label="Main">
         <Link href="/"><Brand /></Link>
-        {COOK.test(path) ? <span className="ml-auto" /> : <Link href="/checkout" className="ml-auto rounded-full bg-button px-4 py-2.5 text-sm font-semibold text-button-ink">Try free</Link>}
+        {upsell && !COOK.test(path) ? <Link href="/checkout" className="ml-auto rounded-full bg-button px-4 py-2.5 text-sm font-semibold text-button-ink">Try free</Link> : <span className="ml-auto" />}
         <Link href="/you" aria-label="Mini You and your progress" className="overflow-hidden rounded-full bg-accent-soft"><MiniYou headOnly size={42} /></Link>
       </nav>
     </header>

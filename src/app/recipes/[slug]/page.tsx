@@ -1,14 +1,12 @@
-import { elapsedMinutes } from "@/lib/links";
 import type { Metadata } from "next";
-import Link from "next/link";
 import { notFound } from "next/navigation";
-import { UnlockButton } from "@/components/plan-lock";
+import { RecipeDetail, type CookAccess } from "@/components/recipe-detail";
 import { can } from "@/lib/billing/entitlements";
-import { AddToListButton, SaveButton } from "@/components/recipe-actions";
-import { SkillSteps } from "@/components/skill-steps";
-import { SourcePhoto } from "@/components/source-photo";
 import { RECIPES, getRecipe } from "@/lib/data/recipes";
+import { planHref } from "@/lib/links";
+import { pairingsFor } from "@/lib/pairings";
 import { activeMinutes } from "@/lib/skill/adapt";
+import { difficulty } from "@/lib/skill/difficulty";
 import { getViewer } from "@/lib/viewer";
 
 type Props = { params: Promise<{ slug: string }> };
@@ -26,56 +24,18 @@ export default async function RecipePage({ params }: Props) {
   const recipe = getRecipe((await params).slug);
   if (!recipe) notFound();
   const viewer = await getViewer();
-  const locked = recipe.premium && !can(viewer.tier, "premiumRecipes");
-  const canCook = can(viewer.tier, "cookMode");
-  const total = elapsedMinutes(recipe.blocks);
+  const access: CookAccess = recipe.premium && !can(viewer.tier, "premiumRecipes") ? "locked-recipe" : can(viewer.tier, "cookMode") ? "open" : "locked-cook";
 
   return (
-    <main className="mx-auto grid gap-10 px-4 py-10 pb-24">
-      <aside>
-        <SourcePhoto recipe={recipe} className="mb-6 aspect-square" />
-        <p className="text-sm text-muted">{recipe.category} · {recipe.chef}</p>
-        <h1 className="mt-1 text-3xl font-bold tracking-tight">{recipe.title}</h1>
-        <p className="mt-3 text-muted">{recipe.summary}</p>
-        <dl className="mt-4 flex gap-6 text-sm">
-          <div><dt className="text-muted">Serves</dt><dd className="font-semibold">{recipe.serves}</dd></div>
-          <div><dt className="text-muted">Hands-on</dt><dd className="font-semibold">{activeMinutes(recipe)} min</dd></div>
-          <div><dt className="text-muted">Total</dt><dd className="font-semibold">{Math.round(total)} min</dd></div>
-        </dl>
-        <h2 className="mt-8 font-bold">Ingredients</h2>
-        <ul className="mt-2 divide-y divide-line">
-          {recipe.ingredients.map((i) => (
-            <li key={i.id} className="flex justify-between gap-4 py-2 text-sm">
-              <span>{i.name}{i.prep && <span className="text-muted">, {i.prep}</span>}</span>
-              <span className="tabular-nums text-muted">{i.quantity} {i.unit}</span>
-            </li>
-          ))}
-        </ul>
-        {locked ? (
-          <UnlockButton feature="premiumRecipes" label="Unlock this recipe" />
-        ) : !canCook ? (
-          <UnlockButton feature="cookMode" label="Unlock cook mode" />
-        ) : (
-          <>
-            <Link href={`/recipes/${recipe.slug}/cook`} className="mt-6 flex min-h-14 items-center justify-center rounded-full bg-button text-lg font-semibold text-button-ink">Start cook mode</Link>
-            <Link href={`/plan?dish=${recipe.slug}`} className="mt-3 flex min-h-12 items-center justify-center rounded-full border-2 border-button font-semibold">Plan &amp; cook this</Link>
-          </>
-        )}
-        <div className="mt-3 flex gap-3">
-          <SaveButton recipe={recipe} />
-          <AddToListButton recipe={recipe} />
-        </div>
-      </aside>
-      <section aria-label="Method">
-        {locked ? (
-          <div className="rounded-3xl border border-line bg-surface p-8">
-            <h2 className="text-xl font-bold">This one&apos;s a Premium recipe</h2>
-            <p className="mt-2 text-muted">Start a free trial to see the method at your level and cook it hands-free.</p>
-          </div>
-        ) : (
-          <SkillSteps recipe={recipe} initialSkill={viewer.skill} />
-        )}
-      </section>
-    </main>
+    <RecipeDetail
+      recipe={recipe}
+      skill={viewer.skill}
+      level={difficulty(recipe).label}
+      activeMinutes={activeMinutes(recipe)}
+      cookHref={`/recipes/${recipe.slug}/cook`}
+      planHref={planHref([recipe.slug])}
+      access={access}
+      pairings={pairingsFor(recipe, RECIPES)}
+    />
   );
 }
