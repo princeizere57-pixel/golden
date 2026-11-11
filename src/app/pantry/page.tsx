@@ -23,7 +23,9 @@ export default async function PantryPage() {
   return (
     <main className="mx-auto px-4 pb-10 pt-6">
       <h1 className="font-display text-[2.3rem]">Pantry-to-<span className="text-accent">Plate</span></h1>
-      <p className="mt-2 text-muted">Clear out the fridge, waste nothing and skip the shop. Golden cross-references {recipes.length} recipes with what you already have.</p>
+      {/* eslint-disable-next-line @next/next/no-img-element -- Golden's own photo */}
+      <img src="/photos/chef-chopping.jpg" alt="Halved cherry tomatoes on a chopping board, ready for dinner" className="mt-4 aspect-[16/9] w-full rounded-3xl object-cover" />
+      <p className="mt-4 text-muted">Clear out the fridge, waste nothing and skip the shop. Golden cross-references {recipes.length} recipes with what you already have.</p>
       <PantryMatcher recipes={recipes} />
     </main>
   );
