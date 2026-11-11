@@ -7,6 +7,7 @@ import { importRecipeAction } from "@/app/actions/import";
 import { SourcePhoto } from "@/components/source-photo";
 import { listImports, removeImport, saveImport } from "@/lib/import/store";
 import type { Recipe } from "@/lib/types";
+import { ClawMark } from "@/components/claw-loader";
 
 export function ImportPanel() {
   const router = useRouter();
@@ -43,7 +44,7 @@ export function ImportPanel() {
           className="min-h-14 flex-1 rounded-2xl border border-line bg-surface px-4 text-base"
         />
         <button disabled={pending} className="min-h-14 rounded-2xl bg-button px-6 font-bold text-button-ink disabled:opacity-60">
-          {pending ? "Importing…" : "Import"}
+          {pending ? <span className="inline-flex items-center gap-2"><ClawMark size={24} />Importing…</span> : "Import"}
         </button>
       </form>
       <p className="mt-2 h-5 text-sm" role="alert">{error && <span className="text-tomato">{error}</span>}</p>
