@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { getUser } from "@/lib/auth";
 import { JOURNEY_COOKIE } from "@/lib/journey";
 import { parseTier, planCookieValue, type Tier } from "@/lib/billing/entitlements";
+import { demoPaymentsAllowed } from "@/lib/billing/demo";
 import { ATTRACTION } from "@/lib/billing/offers";
 import { signValue } from "@/lib/signed-cookie";
 import { PLAN_COOKIE, PREFS_COOKIE, SKILL_COOKIE, parseSkill } from "@/lib/viewer";
@@ -48,9 +49,9 @@ export async function finishJourney() {
   redirect("/");
 }
 
-/** Demo-only plan switch, used when Stripe isn't configured. Real plans come from webhooks. */
+/** Demo-only plan switch (no real accounts or payments configured). Real plans come from webhooks. */
 export async function setDemoPlan(plan: Tier | "premium") {
-  if (process.env.STRIPE_US_SECRET_KEY || process.env.STRIPE_UK_SECRET_KEY) throw new Error("Demo plans are disabled when Stripe is configured");
+  if (!demoPaymentsAllowed()) throw new Error("Demo plans are disabled when real accounts or payments are configured");
   const tier = parseTier(plan);
   // Demo trial: everything unlocked for the free days, then the chosen plan.
   const trialEnds = tier === "free" ? undefined : Date.now() + ATTRACTION.days * 86_400_000;

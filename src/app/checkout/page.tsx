@@ -8,6 +8,7 @@ import { whopApiConfigured, whopEmbedConfigured } from "@/lib/billing/whop-check
 import { requestStore } from "@/lib/native/shell";
 import { preloadHints } from "@whop/elements";
 import { getViewer } from "@/lib/viewer";
+import { demoPaymentsAllowed } from "@/lib/billing/demo";
 
 export const metadata: Metadata = { title: "Checkout" };
 
@@ -39,6 +40,7 @@ export default async function CheckoutPage({ searchParams }: { searchParams: Pro
       user={{ id: user.id, name: user.name, email: user.email }}
       level={LEVEL[viewer.skill]}
       tier={viewer.access.plan}
+      demo={demoPaymentsAllowed()}
       store={store}
       offers={offers.map((o) => ({
         id: o.id,
