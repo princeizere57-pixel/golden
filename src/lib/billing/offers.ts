@@ -55,17 +55,17 @@ export const ATTRACTION = {
 };
 
 /**
- * What each plan gets you, one line each: the problem it ends, the value you get instead, then the
- * feature that does it in brackets (rendered quieter on checkout and the landing).
+ * What each plan gets you, one line each: the result you want, made quicker, easier and more likely
+ * to work, then the feature that does it in brackets (rendered quieter on checkout and the landing).
  */
 export const EXECUTIVE_FEATURES = [
-  "No more cold sides and juggling: every dish hot at the same minute (Multi-Dish Timing Orchestrator)",
-  "No more binning a ruined dinner: burnt, salty or split, saved in seconds (Fix My Mistake)",
-  "No more food going off in the fridge: tonight's dinner from what you have (Pantry-to-Plate)",
-  "No more pricey takeaways: Chinese, Korean and Italian you nail at home (Technique Modules)",
-  "No more recipes that lose you halfway: steps written for your level (Skill-Adaptation Engine)",
-  "No more wasted shopping: cook hands-free and buy only what you'll use (Cook Mode + Smart Shopping List)",
-  "No risk: cook 10 perfect dishes or get your money back (10 Perfect Dishes Guarantee)",
+  "Every dish hot at the same minute, without the juggling (Multi-Dish Timing Orchestrator)",
+  "Burnt, salty or split? Saved in seconds, not binned (Fix My Mistake)",
+  "Dinner tonight from what's already in your fridge, no extra shop (Pantry-to-Plate)",
+  "Chinese, Korean and Italian dishes you nail first time (Technique Modules)",
+  "Every recipe made simple for your level, so it works first time (Skill-Adaptation Engine)",
+  "Cook hands-free and buy only what you'll use (Cook Mode + Smart Shopping List)",
+  "Cook 10 perfect dishes or get your money back (10 Perfect Dishes Guarantee)",
 ];
 
 export const OFFERS: Offer[] = [
@@ -96,9 +96,9 @@ export const OFFERS: Offer[] = [
     whopPlan: "plan_2Tozpw2x8yzvn",
     kind: "core",
     includes: [
-      "No more recipes that lose you halfway: steps written for your level (Skill-Adaptation Engine)",
-      "No more burnt or forgotten timings: one step at a time, timers running for you (Cook Mode)",
-      "No more wasted shopping: buy only what you'll use, with tips from better cooks (Smart Shopping List + Community)",
+      "Every recipe made simple for your level, so it works first time (Skill-Adaptation Engine)",
+      "One step at a time with timers running for you, hands free (Cook Mode)",
+      "Buy only what you'll use, and get tips from better cooks (Smart Shopping List + Community)",
     ],
     excludes: ["Multi-Dish Timing Orchestrator", "'Fix My Mistake' AI Doctor", "Pantry-to-Plate Matcher", "Cuisine technique modules", "Money-back guarantee"],
   },
