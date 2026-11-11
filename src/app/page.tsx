@@ -136,7 +136,7 @@ export default async function Discover({ searchParams }: { searchParams: Promise
         {RECIPES.filter((r) => r.realTime).map((r) => <PhotoCard key={r.slug} recipe={r} />)}
       </Rail>
 
-      <PantryRail recipes={pantryRecipes(300)} />
+      {can(viewer.tier, "pantry") && <PantryRail recipes={pantryRecipes(300)} />}
 
       {picks.length > 0 && <Rail heading="Right at your level" href="/for-you">{picks.map((r) => <PhotoCard key={r.slug} recipe={r} />)}</Rail>}
 

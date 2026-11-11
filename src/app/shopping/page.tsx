@@ -16,7 +16,7 @@ export default async function ShoppingPage() {
       {can(tier, "shoppingList") ? (
         <>
           <div className="mt-6"><PantryEditor /></div>
-          <PantryRail recipes={pantryRecipes()} inline />
+          {can(tier, "pantry") ? <PantryRail recipes={pantryRecipes()} inline /> : <div className="mt-4"><PlanLock feature="pantry" compact /></div>}
           <ShoppingList />
         </>
       ) : (

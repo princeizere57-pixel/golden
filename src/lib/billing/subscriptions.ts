@@ -83,7 +83,9 @@ const rowLive = (r: SubscriptionRow, now: number) => {
 export function accessFrom(rows: SubscriptionRow[], now = Date.now()): Access {
   const live = rows.filter((r) => rowLive(r, now));
   const plan = bestTier(live.map((r) => parseTier(r.offer ?? "executive")));
-  const trialRow = live.find((r) => r.status === "trialing");
+  // Free days end on their date even if the provider's "trial over" webhook is late or lost:
+  // past the end date the row counts as the chosen plan, so the extras lock by themselves.
+  const trialRow = live.find((r) => r.status === "trialing" && (!r.current_period_end || Date.parse(r.current_period_end) > now));
   const ends = trialRow?.current_period_end ? Date.parse(trialRow.current_period_end) : undefined;
   return accessFor(plan, Boolean(trialRow), ends);
 }
