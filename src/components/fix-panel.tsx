@@ -11,7 +11,6 @@ import { track } from "@/lib/analytics";
 import { XP } from "@/lib/gamify";
 import { recordFixed, recordMistake } from "@/lib/progress-store";
 import { MISTAKES, fixMistake, type Fix, type MistakeId } from "@/lib/recovery/fixes";
-import { ClawInline } from "@/components/claw-loader";
 
 /** Shrinks a photo to a 512 px JPEG in the browser before anything else happens. */
 async function shrink(file: File): Promise<string> {
@@ -96,7 +95,7 @@ export function FixPanel({ dish, defaultVolumeMl, aiReady }: { dish: string; def
         </div>
         <input ref={file} type="file" accept="image/*" capture="environment" className="sr-only" aria-label="Photo of the dish" onChange={(e) => onPhoto(e.target.files?.[0])} />
       </div>
-      {pending && <p className="mt-3 text-sm" aria-live="polite"><ClawInline text="Looking at your dish…" /></p>}
+      {pending && <p className="mt-3 text-sm text-muted" aria-live="polite">Looking at your dish…</p>}
       {note && <p className="mt-3 rounded-2xl bg-surface p-3 text-sm" aria-live="polite">{note}</p>}
 
       <fieldset className="mt-4">
