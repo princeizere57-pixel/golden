@@ -1,14 +1,13 @@
-import { elapsedMinutes } from "@/lib/links";
 import type { Metadata } from "next";
-import Link from "next/link";
 import { notFound } from "next/navigation";
-import { UnlockButton } from "@/components/plan-lock";
+import { RecipeDetail } from "@/components/recipe-detail";
 import { can } from "@/lib/billing/entitlements";
-import { AddToListButton, SaveButton } from "@/components/recipe-actions";
-import { SkillSteps } from "@/components/skill-steps";
-import { SourcePhoto } from "@/components/source-photo";
+import { RECIPES } from "@/lib/data/recipes";
+import { planHref } from "@/lib/links";
 import { mealRecipe } from "@/lib/mealdb/client";
+import { pairingsFor } from "@/lib/pairings";
 import { activeMinutes } from "@/lib/skill/adapt";
+import { difficulty } from "@/lib/skill/difficulty";
 import { getViewer } from "@/lib/viewer";
 
 type Props = { params: Promise<{ id: string }> };
@@ -22,43 +21,23 @@ export default async function MealPage({ params }: Props) {
   const { id } = await params;
   const [recipe, viewer] = await Promise.all([mealRecipe(id), getViewer()]);
   if (!recipe) notFound();
-  const total = elapsedMinutes(recipe.blocks);
 
   return (
-    <main className="mx-auto grid gap-10 px-4 py-10 pb-24">
-      <aside>
-        <SourcePhoto recipe={recipe} className="mb-6 aspect-square" />
-        <p className="text-sm text-muted">{recipe.summary}</p>
-        <h1 className="mt-1 text-3xl font-bold tracking-tight">{recipe.title}</h1>
+    <RecipeDetail
+      recipe={recipe}
+      skill={viewer.skill}
+      level={difficulty(recipe).label}
+      activeMinutes={activeMinutes(recipe)}
+      cookHref={`/meals/${id}/cook`}
+      planHref={planHref([recipe.slug])}
+      access={can(viewer.tier, "cookMode") ? "open" : "locked-cook"}
+      pairings={pairingsFor(recipe, RECIPES)}
+      credit={
         <p className="mt-3 text-sm">
-          Recipe from{" "}
-          <a href={recipe.source!.url} target="_blank" rel="noopener noreferrer" className="underline">TheMealDB ↗</a>
+          Recipe from <a href={recipe.source!.url} target="_blank" rel="noopener noreferrer" className="underline">TheMealDB ↗</a>
         </p>
-        <dl className="mt-4 flex gap-6 text-sm">
-          <div><dt className="text-muted">Hands-on</dt><dd className="font-semibold">~{Math.round(activeMinutes(recipe))} min</dd></div>
-          <div><dt className="text-muted">Total</dt><dd className="font-semibold">~{Math.round(total)} min</dd></div>
-        </dl>
-        <h2 className="mt-8 font-bold">Ingredients</h2>
-        <ul className="mt-2 divide-y divide-line">
-          {recipe.ingredients.map((i) => <li key={i.id} className="py-2 text-sm">{i.raw ?? i.name}</li>)}
-        </ul>
-        <div className="mt-6 flex gap-3">
-          <SaveButton recipe={recipe} />
-          <AddToListButton recipe={recipe} />
-        </div>
-        {can(viewer.tier, "cookMode") ? (
-          <>
-            <Link href={`/meals/${id}/cook`} className="mt-4 flex min-h-14 items-center justify-center rounded-full bg-button font-semibold text-button-ink">Start cook mode</Link>
-            <Link href={`/plan?dish=mealdb-${id}`} className="mt-3 flex min-h-12 items-center justify-center rounded-full border-2 border-button font-semibold">Plan &amp; cook this</Link>
-          </>
-        ) : (
-          <UnlockButton feature="cookMode" label="Unlock cook mode" />
-        )}
-      </aside>
-      <section aria-label="Method">
-        <SkillSteps recipe={recipe} initialSkill={viewer.skill} />
-        <p className="mt-6 text-xs text-muted">Timers and cues are worked out from the original method; times are estimates where the recipe doesn&apos;t give one.</p>
-      </section>
-    </main>
+      }
+      methodNote="Timers and cues are worked out from the original method; times are estimates where the recipe doesn't give one."
+    />
   );
 }

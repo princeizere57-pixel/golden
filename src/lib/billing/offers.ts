@@ -76,7 +76,7 @@ export const OFFERS: Offer[] = [
     planEnv: "WHOP_PLAN_EXECUTIVE",
     whopPlan: "plan_EJWuPToHk9nUw",
     kind: "core",
-    badge: "80% off · Founding price",
+    badge: "80% off",
     includes: EXECUTIVE_FEATURES,
   },
   {

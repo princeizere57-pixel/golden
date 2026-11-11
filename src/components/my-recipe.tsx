@@ -3,9 +3,9 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { CookView } from "@/components/cook-view";
-import { UnlockButton } from "@/components/plan-lock";
-import { SkillSteps } from "@/components/skill-steps";
-import { SourcePhoto } from "@/components/source-photo";
+import { RecipeDetail } from "@/components/recipe-detail";
+import { activeMinutes } from "@/lib/skill/adapt";
+import { difficulty } from "@/lib/skill/difficulty";
 import { getImport } from "@/lib/import/store";
 import type { Recipe, SkillLevel } from "@/lib/types";
 import { ClawLoader } from "@/components/claw-loader";
@@ -41,29 +41,18 @@ export function MyRecipe({ slug, skill, canCook }: { slug: string; skill: SkillL
   const recipe = useImport(slug);
   if (recipe === undefined) return <ClawLoader />;
   if (!recipe) return <Missing />;
+  // Private to this device: no "Plan it" or pairings (Plan a meal can't read on-device imports).
   return (
-    <main className="mx-auto grid gap-10 px-4 py-10 pb-24">
-      <aside>
-        <SourcePhoto recipe={recipe} className="mb-6 aspect-[4/3]" />
-        <p className="text-sm text-muted">My imports · private</p>
-        <h1 className="mt-1 text-3xl font-bold tracking-tight">{recipe.title}</h1>
-        <Credit recipe={recipe} />
-        {recipe.summary && <p className="mt-3 text-muted">{recipe.summary}</p>}
-        <h2 className="mt-8 font-bold">Ingredients · serves {recipe.serves}</h2>
-        <ul className="mt-2 divide-y divide-line">
-          {recipe.ingredients.map((i) => <li key={i.id} className="py-2 text-sm">{i.raw ?? i.name}</li>)}
-        </ul>
-        {canCook ? (
-          <Link href={`/my/${recipe.slug}/cook`} className="mt-6 flex min-h-14 items-center justify-center rounded-full bg-button font-semibold text-button-ink">Start cook mode</Link>
-        ) : (
-          <UnlockButton feature="cookMode" label="Unlock cook mode" />
-        )}
-      </aside>
-      <section aria-label="Method">
-        <SkillSteps recipe={recipe} initialSkill={skill} />
-        <p className="mt-6 text-xs text-muted">Steps, timers and cues were generated from the original method. Check the original if anything looks off.</p>
-      </section>
-    </main>
+    <RecipeDetail
+      recipe={{ ...recipe, category: "My imports · private" }}
+      skill={skill}
+      level={difficulty(recipe).label}
+      activeMinutes={activeMinutes(recipe)}
+      cookHref={`/my/${recipe.slug}/cook`}
+      access={canCook ? "open" : "locked-cook"}
+      credit={<Credit recipe={recipe} />}
+      methodNote="Steps, timers and cues were generated from the original method. Check the original if anything looks off."
+    />
   );
 }
 
