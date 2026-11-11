@@ -19,6 +19,7 @@ import type { OfferId } from "@/lib/billing/offers";
 import type { Store } from "@/lib/native/user-agent";
 import { track } from "@/lib/analytics";
 import { ClawInline } from "@/components/claw-loader";
+import { ClawMark } from "@/components/claw-loader";
 
 const WhopEmbed = dynamic(() => import("@/components/whop-embed").then((m) => m.WhopEmbed), { ssr: false });
 
@@ -172,7 +173,7 @@ export function CheckoutPanel({ user, level, tier, store: serverStore, offers, d
           </div>
         ) : offer.embedReady ? (
           <button onClick={pay} disabled={pending} className="min-h-14 w-full rounded-full bg-button text-lg font-semibold text-button-ink disabled:opacity-60">
-            {pending ? "Preparing secure checkout…" : `Continue: ${offer.priceLine}`}
+            {pending ? <span className="inline-flex items-center gap-2"><ClawMark size={28} />Preparing secure checkout…</span> : `Continue: ${offer.priceLine}`}
           </button>
         ) : offer.planType === "renewal" ? (
           <form action={setDemoPlan.bind(null, chosen as OfferId)}>

@@ -7,6 +7,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { completeGoogleSignIn } from "@/app/actions/auth";
+import { ClawMark } from "@/components/claw-loader";
 
 export default function AuthCallback() {
   const router = useRouter();
@@ -34,8 +35,8 @@ export default function AuthCallback() {
         </>
       ) : (
         <>
-          <h1 className="font-display text-3xl">Signing you in…</h1>
-          <div className="mt-6 h-10 w-10 animate-spin rounded-full border-4 border-line border-t-accent" aria-hidden />
+          <ClawMark size={96} />
+          <h1 className="mt-6 font-display text-3xl">Signing you in…</h1>
         </>
       )}
     </main>

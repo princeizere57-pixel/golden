@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import { demoSignIn, requestEmailLink } from "@/app/actions/auth";
 import { track } from "@/lib/analytics";
+import { ClawMark } from "@/components/claw-loader";
 
 function GoogleG() {
   return (
@@ -58,7 +59,7 @@ export function SignInPanel({ supabaseUrl }: { supabaseUrl: string | null }) {
                 Email
                 <input type="email" required autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} className="mt-1 min-h-12 w-full rounded-xl border border-line bg-bg px-3" placeholder="you@example.com" />
               </label>
-              <button disabled={pending} className="min-h-14 w-full rounded-full bg-button text-lg font-semibold text-button-ink disabled:opacity-60">{pending ? "Sending…" : "Email me a sign-in link"}</button>
+              <button disabled={pending} className="min-h-14 w-full rounded-full bg-button text-lg font-semibold text-button-ink disabled:opacity-60">{pending ? <span className="inline-flex items-center gap-2"><ClawMark size={28} />Sending…</span> : "Email me a sign-in link"}</button>
               {error && <p role="alert" className="text-sm text-tomato">{error}</p>}
             </form>
           )}
