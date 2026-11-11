@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { parseFridge, rankMeals } from "@/lib/pantry";
+import { covers, pantrySuggestions, parseFridge, rankMeals } from "@/lib/pantry";
 
 describe("pantry-to-plate matcher", () => {
   it("reads what people type about their fridge", () => {
@@ -27,5 +27,25 @@ describe("pantry-to-plate matcher", () => {
       { slug: "stir-fry", ingredients: ["Eggs", "Rice", "Onion", "Chicken", "Tomatoes"] },
     ];
     expect(rankMeals(recipes, parseFridge("eggs, rice, onion, chicken, spinach")).map((m) => m.recipe.slug)).toEqual(["stir-fry", "plain-rice"]);
+  });
+});
+
+describe("pantry suggestions", () => {
+  it("counts a family word: pasta covers penne, cheese covers parmesan, not eggplant for egg", () => {
+    expect(covers("pasta", "Penne Rigate")).toBe(true);
+    expect(covers("cheese", "Parmesan")).toBe(true);
+    expect(covers("eggs", "Egg Yolks")).toBe(true);
+    expect(covers("egg", "Eggplant")).toBe(false);
+  });
+
+  it("suggests meals from only two or three items, best covered first", () => {
+    const recipes = [
+      { slug: "carbonara", ingredients: ["Spaghetti", "Eggs", "Pecorino", "Guanciale", "Black Pepper"] },
+      { slug: "egg-fried-rice", ingredients: ["Rice", "Eggs", "Soy Sauce"] },
+      { slug: "curry", ingredients: ["Chicken", "Coconut Milk", "Curry Paste"] },
+    ];
+    const s = pantrySuggestions(recipes, ["eggs", "rice", "pasta"]);
+    expect(s.map((m) => m.recipe.slug)).toEqual(["egg-fried-rice", "carbonara"]);
+    expect(pantrySuggestions(recipes, [])).toEqual([]);
   });
 });

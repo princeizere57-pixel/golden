@@ -1,12 +1,12 @@
 "use client";
 
-// Pantry editor (on the Shopping list page) and the "Cook from your pantry" rail on Discover.
+// Pantry editor (on the Shopping list page) and the meals it suggests (below it, and on Discover).
 
 import Link from "next/link";
 import { useState } from "react";
 import { useStore } from "@/components/recipe-actions";
 import { addPantry, listPantry, removePantry } from "@/lib/device-store";
-import { pantryMatch } from "@/lib/pantry";
+import { pantrySuggestions } from "@/lib/pantry";
 
 export const usePantry = () => useStore(listPantry, []);
 
@@ -18,7 +18,7 @@ export function PantryEditor() {
   return (
     <section aria-labelledby="pantry" className="rounded-3xl bg-surface p-5">
       <h2 id="pantry" className="text-lg font-semibold">My pantry</h2>
-      <p className="mt-1 text-sm text-muted">Tell Golden what you have. Discover suggests recipes you can almost make, and &ldquo;Add to list&rdquo; skips what you already own.</p>
+      <p className="mt-1 text-sm text-muted">Tell Golden what you have. Golden suggests meals that use it, and &ldquo;Add to list&rdquo; skips what you already own.</p>
       <form
         onSubmit={(e) => {
           e.preventDefault();
@@ -56,33 +56,33 @@ export interface PantryRecipe {
 }
 
 /** Recipes ranked by how much of them the pantry already covers. */
-export function PantryRail({ recipes }: { recipes: PantryRecipe[] }) {
+export function PantryRail({ recipes, inline = false }: { recipes: PantryRecipe[]; inline?: boolean }) {
   const pantry = usePantry();
-  if (pantry.length < 2) return null;
-  const ranked = recipes
-    .map((r) => ({ r, m: pantryMatch(r.ingredients, pantry) }))
-    .filter((x) => x.m.ratio >= 0.4)
-    .sort((a, b) => b.m.ratio - a.m.ratio || a.m.missing.length - b.m.missing.length)
-    .slice(0, 10);
-  if (!ranked.length) return null;
+  if (!pantry.length) return null;
+  const ranked = pantrySuggestions(recipes, pantry);
+  if (!ranked.length) {
+    return inline ? (
+      <p className="mt-4 rounded-2xl bg-accent-soft p-4 text-sm">No meal uses these yet. Add a couple more things, like a vegetable, a meat or a tin, and ideas show up here.</p>
+    ) : null;
+  }
   return (
-    <section className="mt-10">
+    <section className={inline ? "-mx-4 mt-6" : "mt-10"} aria-labelledby={inline ? "pantry-meals" : undefined}>
       <div className="mb-3 px-4">
-        <h2 className="text-[1.45rem] font-semibold tracking-tight">Cook from your pantry</h2>
-        <p className="text-sm text-muted">Less shopping, less waste: you already have most of these.</p>
+        <h2 id={inline ? "pantry-meals" : undefined} className="text-[1.45rem] font-semibold tracking-tight">{inline ? "Meals you can make" : "Cook from your pantry"}</h2>
+        <p className="text-sm text-muted">Less shopping, less waste: these use what you already have.</p>
       </div>
       <div className="rail flex gap-4 overflow-x-auto px-4 pb-1">
-        {ranked.map(({ r, m }) => (
-          <Link key={r.slug} href={r.href} className="block w-64 shrink-0">
+        {ranked.map(({ recipe: r, match: m }) => (
+          <Link key={r.slug} href={r.href} className="block w-56 shrink-0">
             {r.image ? (
-              // eslint-disable-next-line @next/next/no-img-element -- TheMealDB photo
+              // eslint-disable-next-line @next/next/no-img-element -- recipe photo
               <img src={r.image} alt="" className="aspect-square w-full rounded-3xl object-cover" loading="lazy" />
             ) : (
               <span className="block aspect-square w-full rounded-3xl bg-surface" />
             )}
             <span className="mt-2.5 block text-[17px] leading-snug">{r.title}</span>
             <span className="text-sm text-muted">
-              You have {Math.round(m.ratio * 100)}%{m.missing.length ? ` · need ${m.missing.slice(0, 2).join(", ")}${m.missing.length > 2 ? "…" : ""}` : ""}
+              {m.missing.length ? `You have ${m.have.length} of ${m.have.length + m.missing.length} · need ${m.missing.slice(0, 2).join(", ")}${m.missing.length > 2 ? "…" : ""}` : "You have everything"}
             </span>
           </Link>
         ))}
