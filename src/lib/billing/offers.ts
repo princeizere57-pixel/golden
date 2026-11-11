@@ -54,14 +54,18 @@ export const ATTRACTION = {
   days: 5,
 };
 
+/**
+ * What each plan gets you, one line each: the result you want, made quicker, easier and more likely
+ * to work, then the feature that does it in brackets (rendered quieter on checkout and the landing).
+ */
 export const EXECUTIVE_FEATURES = [
-  "Multi-Dish Timing Orchestrator: every dish finishes hot at the same minute",
-  "'Fix My Mistake' AI Doctor: rescue a dish from a photo or a few words",
-  "Pantry-to-Plate Matcher: cook what's already in your fridge",
-  "Chinese, Korean and Italian technique modules",
-  "Skill-Adaptation Engine: every recipe rewritten for your level",
-  "Hands-free cook mode, smart shopping list and the community",
-  "The 10 Perfect Dishes money-back guarantee",
+  "Every dish hot at the same minute, without the juggling (Multi-Dish Timing Orchestrator)",
+  "Burnt, salty or split? Saved in seconds, not binned (Fix My Mistake)",
+  "Dinner tonight from what's already in your fridge, no extra shop (Pantry-to-Plate)",
+  "Chinese, Korean and Italian dishes you nail first time (Technique Modules)",
+  "Every recipe made simple for your level, so it works first time (Skill-Adaptation Engine)",
+  "Cook hands-free and buy only what you'll use (Cook Mode + Smart Shopping List)",
+  "Cook 10 perfect dishes or get your money back (10 Perfect Dishes Guarantee)",
 ];
 
 export const OFFERS: Offer[] = [
@@ -91,7 +95,11 @@ export const OFFERS: Offer[] = [
     planEnv: "WHOP_PLAN_EXPERIENCE",
     whopPlan: "plan_2Tozpw2x8yzvn",
     kind: "core",
-    includes: ["Skill-Adaptation Engine: every recipe rewritten for your level", "Hands-free cook mode with timers", "Smart shopping list and the community"],
+    includes: [
+      "Every recipe made simple for your level, so it works first time (Skill-Adaptation Engine)",
+      "One step at a time with timers running for you, hands free (Cook Mode)",
+      "Buy only what you'll use, and get tips from better cooks (Smart Shopping List + Community)",
+    ],
     excludes: ["Multi-Dish Timing Orchestrator", "'Fix My Mistake' AI Doctor", "Pantry-to-Plate Matcher", "Cuisine technique modules", "Money-back guarantee"],
   },
 ];

@@ -59,3 +59,38 @@ export async function prepareWhopCheckout(offer: Offer, metadata: GoldenMetadata
     return { ok: false, error: "Whop couldn't start checkout. Check WHOP_API_KEY and WHOP_COMPANY_ID." };
   }
 }
+
+/**
+ * Whop's own hosted checkout page for an offer, carrying Golden's metadata (order, account, plan),
+ * for when the embedded form is slow to load. Needs WHOP_API_KEY + WHOP_COMPANY_ID; null otherwise.
+ */
+export async function hostedCheckoutUrl(offer: Offer, metadata: GoldenMetadata, returnUrl: string): Promise<string | null> {
+  if (!whopApiConfigured()) return null;
+  const planId = planIdFor(offer);
+  try {
+    const client = new WhopClient({ token: process.env.WHOP_API_KEY! });
+    const config = await client.checkoutConfigurations.create({
+      account_id: process.env.WHOP_COMPANY_ID!,
+      metadata: { ...metadata },
+      ...(returnUrl.startsWith("https://") ? { redirect_url: returnUrl } : {}),
+      ...(planId
+        ? { plan_id: planId }
+        : {
+            plan: {
+              title: offer.name,
+              description: offer.tagline,
+              currency: "usd",
+              plan_type: offer.planType,
+              initial_price: offer.planType === "one_time" ? offer.price : offer.trialDays ? 0 : offer.price,
+              renewal_price: offer.planType === "renewal" ? offer.price : undefined,
+              billing_period: offer.billingPeriodDays,
+              trial_period_days: offer.trialDays || undefined,
+            },
+          }),
+    });
+    return config.purchase_url ?? null;
+  } catch (err) {
+    console.error("[whop] hosted checkout failed", (err as Error).message);
+    return null;
+  }
+}
