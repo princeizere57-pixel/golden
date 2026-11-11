@@ -15,6 +15,13 @@ const GIVES_BACK = [
   { Icon: LifebuoyIcon, title: "Your meals", text: "Every dish comes out right and lands hot together, instead of cold, overcooked or in the bin." },
 ];
 
+/** One real moment per promise: food you paid for, a calm evening, the meal itself. */
+const GIVES_BACK_PHOTOS = [
+  { src: "/photos/counter-groceries.webp", alt: "Tomatoes, eggs and fresh bread on a kitchen counter" },
+  { src: "/photos/steaming-pot.webp", alt: "A pot steaming gently by a sunny window" },
+  { src: "/photos/salmon-bowl.webp", alt: "A plate of salmon, green beans and herby couscous" },
+];
+
 export default function WelcomePage() {
   return (
     <main className="relative mx-auto min-h-dvh max-w-lg overflow-x-hidden bg-surface pb-40">
@@ -36,9 +43,10 @@ export default function WelcomePage() {
         </h2>
         <p className="mt-2 text-muted">A family of four throws away around $1,500 of food a year (USDA estimate). Here&apos;s where Golden stops it.</p>
         <div className="mt-4 grid gap-3">
-          {GIVES_BACK.map(({ Icon, title, text }) => (
-            <div key={title} className="flex items-start gap-3 rounded-2xl bg-surface p-4">
-              <Icon size={40} className="shrink-0" />
+          {GIVES_BACK.map(({ title, text }, i) => (
+            <div key={title} className="flex items-center gap-4 rounded-2xl bg-surface p-3">
+              {/* eslint-disable-next-line @next/next/no-img-element -- Golden's own photo */}
+              <img src={GIVES_BACK_PHOTOS[i].src} alt={GIVES_BACK_PHOTOS[i].alt} loading="lazy" className="h-20 w-20 shrink-0 rounded-2xl object-cover" />
               <p><strong>{title}.</strong> {text}</p>
             </div>
           ))}

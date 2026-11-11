@@ -31,6 +31,13 @@ const PATH = {
   ],
 };
 
+/** What cooking looks like at each level: first knife skills, confident pan work, restaurant heat. */
+const LEVEL_PHOTO = {
+  beginner: { src: "/photos/chopping-herbs.webp", alt: "Chopping fresh coriander on a wooden board" },
+  intermediate: { src: "/photos/stirring-pan.webp", alt: "Stirring a pan of vegetables by the window" },
+  chef: { src: "/photos/chef-flambe.webp", alt: "A chef flambéing a pan in a busy kitchen" },
+} as const;
+
 export default async function ForYouPage() {
   const viewer = await getViewer();
   const library = libraryRecipes();
@@ -41,6 +48,8 @@ export default async function ForYouPage() {
     <main className="mx-auto pb-10">
       <div className="px-4 pt-6">
         <h1 className="font-display text-[2.3rem]">For you</h1>
+        {/* eslint-disable-next-line @next/next/no-img-element -- Golden's own photo */}
+        <img src={LEVEL_PHOTO[viewer.skill].src} alt={LEVEL_PHOTO[viewer.skill].alt} className="mt-3 aspect-[16/9] w-full rounded-3xl object-cover" />
         <p className="mt-2 text-muted">
           Your skill path at <strong className="text-ink">{LEVEL[viewer.skill]}</strong> level.{" "}
           <Link href="/onboarding" className="underline">Retake the quiz</Link>

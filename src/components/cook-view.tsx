@@ -103,7 +103,9 @@ export function CookView({ recipe, initialSkill, canFix, exitHref = `/recipes/${
           </ul>
           {step.notes.length > 0 && <ul className="mt-6 space-y-1 text-lg text-muted">{step.notes.map((n, i) => <li key={i}>{n}</li>)}</ul>}
 
-          <StepPicture key={block.id} src={block.picture} className="step-in mx-auto mt-6 block h-56 w-56" />
+          {/* The recipe's own step picture, or a transparent technique picture for this kind of step
+              (prep board, pan on the heat, simmering pot) so every recipe's cook mode shows one. */}
+          <StepPicture key={block.id} src={block.picture ?? `/photos/technique-${block.kind}.webp`} className="step-in mx-auto mt-6 block h-56 w-56" />
 
           <StepPictures recipe={recipe} index={index} last={last} />
 
