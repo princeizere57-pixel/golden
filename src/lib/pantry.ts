@@ -7,11 +7,28 @@ export const normalise = (s: string) => s.toLowerCase().replace(/[^a-z ]/g, " ")
 
 const singular = (w: string) => w.replace(/(oes|ies)$/, (m) => (m === "ies" ? "y" : "o")).replace(/s$/, "");
 
-/** True when a pantry item covers an ingredient ("chicken" covers "chicken thighs"). */
+const words = (s: string) => normalise(s).split(" ").map(singular).join(" ");
+
+/** Pantry words that stand for a whole family: "pasta" covers spaghetti, "cheese" covers parmesan. */
+const FAMILIES: Record<string, string[]> = {
+  pasta: ["spaghetti", "penne", "linguine", "fettuccine", "tagliatelle", "macaroni", "rigatoni", "lasagne", "lasagna", "fusilli", "farfalle", "orzo", "conchiglie", "pappardelle", "vermicelli"],
+  cheese: ["parmesan", "parmigiano", "cheddar", "mozzarella", "feta", "gruyere", "ricotta", "halloumi", "pecorino", "mascarpone", "brie", "gouda", "stilton", "paneer"],
+  egg: ["egg yolk", "egg white"],
+  onion: ["shallot", "spring onion", "scallion"],
+  tomato: ["passata", "tomato puree", "tinned tomato", "chopped tomato"],
+  potato: ["new potato", "sweet potato"],
+  chicken: ["chicken breast", "chicken thigh", "chicken leg", "chicken wing"],
+  beef: ["minced beef", "ground beef", "steak", "brisket"],
+  milk: ["whole milk", "semi skimmed milk"],
+  bean: ["kidney bean", "black bean", "cannellini bean", "butter bean", "haricot bean", "chickpea"],
+};
+
+/** True when a pantry item covers an ingredient ("chicken" covers "chicken thighs", "pasta" covers "penne"). */
 export function covers(pantryItem: string, ingredient: string): boolean {
-  const p = normalise(pantryItem).split(" ").map(singular).join(" ");
-  const i = normalise(ingredient).split(" ").map(singular).join(" ");
-  return p.length > 1 && (i === p || ` ${i} `.includes(` ${p} `));
+  const p = words(pantryItem);
+  const i = ` ${words(ingredient)} `;
+  if (p.length < 2) return false;
+  return [p, ...(FAMILIES[p] ?? []).map(words)].some((w) => i.includes(` ${w} `));
 }
 
 export const isStaple = (ingredient: string) => STAPLES.some((s) => covers(s, ingredient));
@@ -73,4 +90,21 @@ export function rankMeals<T extends { ingredients: string[] }>(recipes: T[], pan
     })
     .filter((m) => m.match.have.length > 0 && m.match.ratio >= minRatio)
     .sort((a, b) => fridgeScore(b.match) - fridgeScore(a.match) || b.match.ratio - a.match.ratio);
+}
+
+/**
+ * Meals to suggest from a saved pantry (Discover and the Shopping list): anything that uses at
+ * least one thing you have, highest share covered first, then the most of your items used, then
+ * the fewest to buy. Looser than rankMeals so even two or three items get ideas.
+ */
+export function pantrySuggestions<T extends { ingredients: string[] }>(recipes: T[], pantry: string[], limit = 10): RankedMeal<T>[] {
+  if (!pantry.length) return [];
+  return recipes
+    .map((recipe) => {
+      const match = pantryMatch(recipe.ingredients, pantry);
+      return { recipe, match, instant: match.have.length > 0 && match.missing.length === 0 };
+    })
+    .filter((m) => m.match.have.length > 0)
+    .sort((a, b) => b.match.ratio - a.match.ratio || b.match.have.length - a.match.have.length || a.match.missing.length - b.match.missing.length)
+    .slice(0, limit);
 }

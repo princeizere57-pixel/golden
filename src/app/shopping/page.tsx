@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
-import { PantryEditor } from "@/components/pantry";
+import { PantryEditor, PantryRail } from "@/components/pantry";
 import { PlanLock } from "@/components/plan-lock";
 import { ShoppingList } from "@/components/shopping-list";
 import { can } from "@/lib/billing/entitlements";
+import { pantryRecipes } from "@/lib/library";
 import { getViewer } from "@/lib/viewer";
 
 export const metadata: Metadata = { title: "Shopping list" };
@@ -15,6 +16,7 @@ export default async function ShoppingPage() {
       {can(tier, "shoppingList") ? (
         <>
           <div className="mt-6"><PantryEditor /></div>
+          <PantryRail recipes={pantryRecipes()} inline />
           <ShoppingList />
         </>
       ) : (

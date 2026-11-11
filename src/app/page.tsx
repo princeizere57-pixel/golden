@@ -10,7 +10,7 @@ import { TodayCard } from "@/components/today-card";
 import { TIER_NAME, can } from "@/lib/billing/entitlements";
 import { TRIAL_HEADLINE_DAYS, offerById } from "@/lib/billing/offers";
 import { RECIPES } from "@/lib/data/recipes";
-import { byCategory, dishOfTheDay, forLevel, libraryRecipes } from "@/lib/library";
+import { byCategory, dishOfTheDay, forLevel, libraryRecipes, pantryRecipes } from "@/lib/library";
 import { formatDuration, planHref, totalMinutes } from "@/lib/links";
 import { thumb } from "@/lib/mealdb/convert";
 import { difficulty } from "@/lib/skill/difficulty";
@@ -136,7 +136,7 @@ export default async function Discover({ searchParams }: { searchParams: Promise
         {RECIPES.filter((r) => r.realTime).map((r) => <PhotoCard key={r.slug} recipe={r} />)}
       </Rail>
 
-      {can(viewer.tier, "pantry") && <PantryRail recipes={library.slice(0, 200).map((r) => ({ slug: r.slug, href: recipeHref(r), title: r.title, image: r.image ? thumb(r.image) : undefined, ingredients: r.ingredients.map((i) => i.name) }))} />}
+      <PantryRail recipes={pantryRecipes(300)} />
 
       {picks.length > 0 && <Rail heading="Right at your level" href="/for-you">{picks.map((r) => <PhotoCard key={r.slug} recipe={r} />)}</Rail>}
 
