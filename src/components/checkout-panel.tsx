@@ -1,13 +1,13 @@
 "use client";
 
 // Checkout, in the order a buyer needs it: what they get at their level, the attraction offer
-// (free giveaway entry + referral link), the plans and upgrades, then Whop's embedded payment.
+// (with the real founding countdown), the plans and upgrades, then Whop's embedded payment.
 
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useEffect, useState, useTransition } from "react";
 import { startCheckout, type StartCheckout } from "@/app/actions/checkout";
-import { enterGiveaway, type EntryResult } from "@/app/actions/giveaway";
+import { Countdown } from "@/components/landing/countdown";
 import { finishJourney, setDemoPlan } from "@/app/actions/viewer";
 import { MiniYou } from "@/components/mini-you";
 import { TrialTimeline } from "@/components/trial-timeline";
@@ -45,18 +45,16 @@ interface Props {
   store: Store;
   offers: OfferView[];
   defaultOffer: string;
-  launch: { left: number; spots: number; endsOn: string; open: boolean };
+  launch: { left: number; spots: number; endsOn: string; endsAt: string; open: boolean };
   payLaterReady: boolean;
-  drawDate: string;
   benefits: string[];
 }
 
-export function CheckoutPanel({ user, level, tier, store: serverStore, offers, defaultOffer, launch, payLaterReady, drawDate, benefits }: Props) {
+export function CheckoutPanel({ user, level, tier, store: serverStore, offers, defaultOffer, launch, payLaterReady, benefits }: Props) {
   const [chosen, setChosen] = useState(defaultOffer);
   const [payLater, setPayLater] = useState(false);
   const [session, setSession] = useState<Extract<StartCheckout, { ok: true }> | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [entry, setEntry] = useState<EntryResult | null>(null);
   const [pending, startTransition] = useTransition();
   const offer = offers.find((o) => o.id === chosen)!;
   const firstName = user.name.split(" ")[0];
@@ -94,11 +92,6 @@ export function CheckoutPanel({ user, level, tier, store: serverStore, offers, d
     });
   }
 
-  function join() {
-    startTransition(async () => setEntry(await enterGiveaway()));
-  }
-
-  const shareUrl = entry?.ok ? `${window.location.origin}/?ref=${entry.code}` : "";
 
   return (
     <main className="mx-auto max-w-lg px-5 pb-10 pt-4">
@@ -131,7 +124,8 @@ export function CheckoutPanel({ user, level, tier, store: serverStore, offers, d
       {/* 3. Plans and upgrades */}
       {launch.open && (
         <p className="mt-7 rounded-2xl border-2 border-button bg-[#fef9c3] p-3 text-center text-sm font-semibold">
-          Founding price: 80% off the Executive Chef System. {launch.left.toLocaleString("en-US")} of {launch.spots.toLocaleString("en-US")} spots left, ends {launch.endsOn}.
+          Founding price: 80% off the Executive Chef System. {launch.left.toLocaleString("en-US")} of {launch.spots.toLocaleString("en-US")} spots left.
+          <span className="mt-1 block">Ends {launch.endsOn}, in <Countdown endsAt={launch.endsAt} compact /></span>
         </p>
       )}
       <fieldset className="mt-4 space-y-3" disabled={Boolean(session)}>
@@ -196,31 +190,6 @@ export function CheckoutPanel({ user, level, tier, store: serverStore, offers, d
       </section>
       )}
 
-      <section className="mt-7 rounded-3xl bg-charcoal p-5 text-white" aria-labelledby="ga">
-        <p className="text-xs font-semibold uppercase tracking-wide text-[#facc15]">Free bonus: The Golden Giveaway</p>
-        <h2 id="ga" className="mt-1 text-xl font-bold">Win a free year, and one for the friend who invited you</h2>
-        <p className="mt-1 text-sm text-white/80">Free to enter, no purchase needed. Draw on {drawDate}. <Link href="/giveaway" className="underline">Rules</Link></p>
-        {entry?.ok ? (
-          <div className="mt-3 rounded-2xl bg-white/10 p-3 text-sm">
-            <p>You&apos;re in! Share your link. If a friend who joins through it wins, you win a year too.</p>
-            <div className="mt-2 flex gap-2">
-              <input readOnly value={shareUrl} className="min-h-11 flex-1 rounded-xl bg-white px-3 text-ink" aria-label="Your referral link" onFocus={(e) => e.currentTarget.select()} />
-              <button
-                onClick={() => (navigator.share ? navigator.share({ title: "Golden", text: "Learn to cook at your level with Golden", url: shareUrl }).catch(() => {}) : navigator.clipboard.writeText(shareUrl))}
-                className="min-h-11 rounded-xl bg-[#facc15] px-4 font-semibold text-[#1f1d1b]"
-              >
-                Share
-              </button>
-            </div>
-            <p className="mt-2 text-white/70">{entry.referrals} friend{entry.referrals === 1 ? "" : "s"} joined through your link.</p>
-          </div>
-        ) : (
-          <>
-            <button onClick={join} disabled={pending} className="mt-3 min-h-12 w-full rounded-full bg-[#facc15] font-semibold text-[#1f1d1b] disabled:opacity-60">Enter the giveaway</button>
-            {entry && !entry.ok && <p className="mt-2 text-sm text-white/80" role="alert">{entry.error}</p>}
-          </>
-        )}
-      </section>
 
       <form action={finishJourney}>
         <button className="mt-4 flex min-h-12 w-full items-center justify-center font-medium">Not now, take me to my recipes</button>

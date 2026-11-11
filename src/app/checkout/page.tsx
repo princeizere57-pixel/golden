@@ -5,7 +5,6 @@ import { getUser } from "@/lib/auth";
 import { launchState } from "@/lib/billing/launch";
 import { DEFAULT_OFFER, OFFERS, money, offerById, priceLine } from "@/lib/billing/offers";
 import { whopApiConfigured, whopEmbedConfigured } from "@/lib/billing/whop-checkout";
-import { GIVEAWAY } from "@/lib/giveaway";
 import { requestStore } from "@/lib/native/shell";
 import { getViewer } from "@/lib/viewer";
 
@@ -50,9 +49,8 @@ export default async function CheckoutPage({ searchParams }: { searchParams: Pro
         planType: o.planType,
       }))}
       defaultOffer={preselect}
-      launch={{ left: launch.left, spots: launch.spots, endsOn: new Date(launch.endsAt).toLocaleDateString("en-US", { month: "long", day: "numeric", timeZone: "UTC" }), open: launch.open }}
+      launch={{ left: launch.left, spots: launch.spots, endsOn: new Date(launch.endsAt).toLocaleDateString("en-US", { month: "long", day: "numeric", timeZone: "UTC" }), endsAt: launch.endsAt, open: launch.open }}
       payLaterReady={web && whopApiConfigured()}
-      drawDate={new Date(GIVEAWAY.endsAt).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric", timeZone: "UTC" })}
       benefits={[...BENEFITS[viewer.skill], "Pantry-to-Plate Matcher, Chinese, Korean and Italian technique modules, and the community"]}
     />
   );

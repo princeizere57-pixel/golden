@@ -1,8 +1,9 @@
 // Builds a local cache of full TheMealDB recipes (instructions, ingredients, photos) so the app
 // can serve them without per-meal API calls. Run: npm run data:mealdb
 //
-// Fetches whole alphabetical blocks with search.php?f=<letter>, starting with a–f in parallel
-// and continuing letter by letter until it has at least MIN_MEALS. Writes src/data/mealdb-recipes.json.
+// Fetches every alphabetical block with search.php?f=<letter> (a–z, six letters at a time), keeps
+// only meals with a photo, and writes src/data/mealdb-recipes.json. Fails (keeping the build on the
+// live API) if fewer than MIN_MEALS came back.
 
 import { mkdirSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
@@ -11,7 +12,7 @@ import { fileURLToPath } from "node:url";
 import type { CachedMeal } from "../src/lib/mealdb/convert";
 
 const MIN_MEALS = 100;
-const FIRST_LETTERS = ["a", "b", "c", "d", "e", "f"];
+const BATCH = 6;
 const ALL_LETTERS = "abcdefghijklmnopqrstuvwxyz".split("");
 const KEY = process.env.MEALDB_API_KEY || "1";
 const OUT = join(dirname(fileURLToPath(import.meta.url)), "..", "src", "data", "mealdb-recipes.json");
@@ -46,6 +47,8 @@ function clean(meal: RawMeal): CachedMeal | null {
     const name = text(meal[`strIngredient${i}`]);
     if (name) ingredients.push({ name, measure: text(meal[`strMeasure${i}`]) ?? "" });
   }
+  // Recipes without a photo are left out of Golden.
+  if (!text(meal.strMealThumb)) return null;
   const id = text(meal.idMeal);
   const name = text(meal.strMeal);
   const instructions = text(meal.strInstructions);
@@ -77,16 +80,13 @@ const add = (letter: string, meals: RawMeal[]) => {
   console.log(`  ${letter}: ${meals.length} found, ${kept} new`);
 };
 
-console.log(`Fetching letters ${FIRST_LETTERS.join(", ")} in parallel…`);
-const results = await Promise.all(FIRST_LETTERS.map((letter) => fetchLetter(letter)));
-FIRST_LETTERS.forEach((letter, i) => add(letter, results[i]));
-
-const used = [...FIRST_LETTERS];
-for (const letter of ALL_LETTERS.filter((l) => !FIRST_LETTERS.includes(l))) {
-  if (byId.size >= MIN_MEALS) break;
-  console.log(`Only ${byId.size} meals so far; fetching ${letter}…`);
-  add(letter, await fetchLetter(letter));
-  used.push(letter);
+const used: string[] = [];
+for (let i = 0; i < ALL_LETTERS.length; i += BATCH) {
+  const letters = ALL_LETTERS.slice(i, i + BATCH);
+  console.log(`Fetching letters ${letters.join(", ")}…`);
+  const results = await Promise.all(letters.map((letter) => fetchLetter(letter)));
+  letters.forEach((letter, j) => add(letter, results[j]));
+  used.push(...letters);
 }
 
 const meals = [...byId.values()].sort((a, b) => a.strMeal.localeCompare(b.strMeal));
