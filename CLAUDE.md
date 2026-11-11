@@ -69,7 +69,7 @@ REA (`rea-agents`) was used to study Mob's public website (mob.co.uk): its route
 ### Module F — TheMealDB library (`src/lib/mealdb/`, `/explore`, `/meals/[id]`)
 - Public recipe API (search, categories, lookup) converted to our `Recipe` shape by `convert.ts`, reusing the import pipeline (`parseIngredient`, `stepToBlock`), so every meal gets the skill slider, cook mode, timers and Fix My Mistake. Slugs are `mealdb-<id>`; `findRecipe()` resolves them for server actions.
 - Responses cached for a day (`next.revalidate`). Photos load from TheMealDB's CDN (`/medium` 350 px variant in lists).
-- **Local bulk cache:** `npm run data:mealdb` (`scripts/seed-mealdb.mts`) fetches full recipes letter by letter (`search.php?f=a`…, a–f in parallel, more letters until ≥100), de-duplicates and writes `src/data/mealdb-recipes.json`. `cache.ts` serves meal lookups from it before calling the API. The file is gitignored: regenerate it, don't commit it.
+- **Local bulk cache:** `npm run data:mealdb` (`scripts/seed-mealdb.mts`) fetches full recipes for every letter (`search.php?f=a`…`z`, six at a time), keeps only meals with a photo, de-duplicates and writes `src/data/mealdb-recipes.json`. `cache.ts` serves meal lookups from it before calling the API. The file is gitignored: regenerate it, don't commit it.
 - **Licence:** `MEALDB_API_KEY` empty = shared test key `1`, development only. A public or app-store release requires a TheMealDB supporter key. Always credit TheMealDB and link to the meal.
 
 ## 5. Monetisation and payment architecture (`src/lib/billing/`)
@@ -93,6 +93,8 @@ REA (`rea-agents`) was used to study Mob's public website (mob.co.uk): its route
 ## 7. Look and flow (Mob-inspired, skill-anchored)
 
 The interface follows the editorial pattern seen in Mob's app, re-done with our own copy, questions and logic. Never copy Mob's wording, fonts, logo or images.
+- **Fonts:** body text is Geist everywhere (`--font-body`, set directly on `body`, like the landing page); big headlines use `.font-display` (Archivo); other titles (h1–h4 inside `.app-frame`) use the system UI font.
+- **Recipes need a photo:** lists (library, search, categories) leave out recipes without one; `tests/recipe-images.test.ts` keeps Golden's own recipes covered.
 - **Theme** (`globals.css`): white page, near-black ink, orange `--accent` for the highlighted word in headlines, yellow pill buttons (`bg-button text-button-ink`: `--button` #facc15 with dark text), rounded option cards. Headlines use `.font-display` (Archivo, black weight, wide). Cook mode keeps its own high-contrast theme.
 - **First run:** `/welcome` → `/signin` (Google via Supabase OAuth, token verified server-side in `src/lib/auth.ts`; labelled demo sign-in when Supabase keys are absent) → `/onboarding` (Mini You greets you by name, then the questions) → `/checkout` (plan choice, $0 due today, trial end date; Stripe when configured). `/` requires sign-in and a level. Previously: `/welcome` → `/onboarding` (`onboarding-flow.tsx`): one question per screen with progress bar, back and close. Questions and scoring live in `src/lib/skill/quiz.ts`: confidence + techniques decide the level; household and time become prefs (`bac-prefs` cookie). Then a "building your skill path" step, the level result, and the 7-day trial offer. `/` redirects to `/welcome` until a level is set.
 - **Tabs** (`site-chrome.tsx`): floating pill tab bar (Discover, For you, Plan a meal, Shopping list with a to-buy badge, Saved).

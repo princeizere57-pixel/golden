@@ -62,13 +62,13 @@ async function mapLimit<T, R>(items: T[], limit: number, fn: (item: T) => Promis
 export async function categoryRecipes(category: string): Promise<Recipe[]> {
   const summaries = await mealsByCategory(category);
   const recipes = await mapLimit(summaries, 8, (s) => mealRecipe(s.idMeal));
-  return recipes.filter((r): r is Recipe => r !== null);
+  return recipes.filter((r): r is Recipe => r !== null && Boolean(r.image));
 }
 
 /** Full recipes matching a search (search.php already returns full meals). */
 export async function searchRecipes(query: string): Promise<Recipe[]> {
   const data = await get<{ meals?: Meal[] | null }>(`search.php?s=${encodeURIComponent(query)}`);
-  return (data?.meals ?? []).map(mealToRecipe).filter((r): r is Recipe => r !== null);
+  return (data?.meals ?? []).map(mealToRecipe).filter((r): r is Recipe => r !== null && Boolean(r.image));
 }
 
 /** Seed recipe or TheMealDB recipe, by slug. */

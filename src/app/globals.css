@@ -46,7 +46,14 @@
 body {
   background: var(--bg);
   color: var(--ink);
-  font-family: var(--font-sans);
+  /* Geist, like the landing page. Named directly: --font-sans is resolved at :root, before the
+     font's variable (set on <body>) exists, so it silently fell back to the phone's system font. */
+  font-family: var(--font-body), system-ui, sans-serif;
+}
+
+/* Titles in the app keep their own face (the system UI font); big headlines use .font-display. */
+.app-frame :is(h1, h2, h3, h4):not(.font-display) {
+  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
 }
 
 /* Heavy, wide headline face. */
