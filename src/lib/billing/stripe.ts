@@ -29,7 +29,7 @@ export interface CheckoutInput {
   cancelUrl: string;
 }
 
-/** Creates a subscription Checkout Session with a 7-day trial; returns its hosted URL. */
+/** Creates a subscription Checkout Session with the 5-day free trial; returns its hosted URL. */
 export async function createCheckoutSession(input: CheckoutInput, fetchImpl: Fetch = fetch): Promise<string> {
   const key = stripeKey(input.entity);
   if (!key) throw new Error(`Stripe is not configured for the ${input.entity.toUpperCase()} entity`);

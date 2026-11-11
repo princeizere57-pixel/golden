@@ -1,19 +1,9 @@
-// Whop: hosted checkout links plus signed membership webhooks.
+// Whop: signed membership webhooks (checkout itself is embedded: whop-checkout.ts).
 // Docs: https://docs.whop.com/developer/guides/webhooks (Standard Webhooks signing) and the
 // Membership object (status: trialing | active | past_due | completed | canceled | expired | unresolved).
 
 import { createHmac, timingSafeEqual } from "node:crypto";
 import type { SubscriptionStatus } from "@/lib/billing/subscriptions";
-
-export type WhopInterval = "year" | "month";
-
-/** Checkout links copied from the Whop dashboard (one per plan). */
-export function whopCheckoutUrl(interval: WhopInterval): string | undefined {
-  const url = interval === "year" ? process.env.WHOP_CHECKOUT_URL_YEAR : process.env.WHOP_CHECKOUT_URL_MONTH;
-  return url?.startsWith("https://") ? url : undefined;
-}
-
-export const whopConfigured = () => Boolean(whopCheckoutUrl("year") || whopCheckoutUrl("month"));
 
 /**
  * Verifies a Whop webhook. Whop signs `${webhook-id}.${webhook-timestamp}.${body}` with

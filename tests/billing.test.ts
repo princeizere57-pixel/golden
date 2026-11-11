@@ -57,7 +57,7 @@ describe("Stripe", () => {
     );
     expect(url).toBe("https://checkout.stripe.test/s");
     const body = new URLSearchParams(String(seen!.init.body));
-    expect(body.get("subscription_data[trial_period_days]")).toBe("3");
+    expect(body.get("subscription_data[trial_period_days]")).toBe("5");
     expect(body.get("mode")).toBe("subscription");
     expect((seen!.init.headers as Record<string, string>).Authorization).toBe("Bearer sk_test_uk");
     delete process.env.STRIPE_UK_SECRET_KEY;

@@ -16,6 +16,9 @@ describe("offers", () => {
     expect(priceLine(offerById("experience")!)).toBe("5 days free, then $50/year");
     expect(perMonth(offerById("executive")!)).toBe("$8.33");
     expect(TRIAL_HEADLINE_DAYS).toBe(5);
+    // The live Whop plans, each with the 5-day free trial.
+    expect(offerById("executive")!.whopPlan).toBe("plan_EJWuPToHk9nUw");
+    expect(offerById("experience")!.whopPlan).toBe("plan_2Tozpw2x8yzvn");
   });
 
   it("makes unique, recognisable order IDs", () => {

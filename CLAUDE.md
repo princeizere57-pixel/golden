@@ -111,7 +111,7 @@ These set The Chef's AI apart; keep them original (no third-party mascots, icon 
 
 ## 9. Whop checkout
 
-- `/checkout` sends buyers to Whop's hosted checkout when `WHOP_CHECKOUT_URL_YEAR` / `WHOP_CHECKOUT_URL_MONTH` are set (links copied from the Whop dashboard); otherwise Stripe if configured, otherwise a labelled demo. Signed-in Premium users see a "You're on Premium" screen instead of a redirect.
+- `/checkout` shows Whop's embedded checkout (Whop Elements, `whop-checkout.ts`) selling the offer's Whop plan: Executive `plan_EJWuPToHk9nUw`, Experience `plan_2Tozpw2x8yzvn` (`whopPlan` in `offers.ts`, both with the 5-day free trial; `WHOP_PLAN_EXECUTIVE` / `WHOP_PLAN_EXPERIENCE` override). Signed-in Executive users see a "You're on Executive" screen; inside the store apps checkout never shows Whop.
 - `/api/billing/whop/webhook` verifies Whop's Standard Webhooks signature (`webhook-id`, `webhook-timestamp`, `webhook-signature: v1,<base64>`; HMAC-SHA256 over `id.timestamp.body`; 5-minute window) with `WHOP_WEBHOOK_SECRET`, then maps the membership status (`src/lib/billing/whop.ts`) into `subscriptions` with `provider = 'whop'` and `whop_user_id` (migration 0003).
 - Linking a Whop membership to an app account uses `metadata.app_user_id` when present; otherwise match on `whop_user_id`. Static checkout links can't carry our user ID, so confirm the account match before granting Premium in production.
 
