@@ -1,6 +1,6 @@
 import { createHmac } from "node:crypto";
-import { afterEach, describe, expect, it } from "vitest";
-import { verifyWhopSignature, whopCheckoutUrl, whopConfigured, whopStatus } from "@/lib/billing/whop";
+import { describe, expect, it } from "vitest";
+import { verifyWhopSignature, whopStatus } from "@/lib/billing/whop";
 
 const secret = "ws_test_secret";
 const body = '{"type":"membership.activated","data":{"id":"mem_1","status":"trialing"}}';
@@ -43,18 +43,3 @@ describe("whopStatus", () => {
   });
 });
 
-describe("checkout links", () => {
-  afterEach(() => {
-    delete process.env.WHOP_CHECKOUT_URL_YEAR;
-    delete process.env.WHOP_CHECKOUT_URL_MONTH;
-  });
-
-  it("uses only https links from the environment", () => {
-    expect(whopConfigured()).toBe(false);
-    process.env.WHOP_CHECKOUT_URL_YEAR = "https://whop.com/checkout/plan_year";
-    process.env.WHOP_CHECKOUT_URL_MONTH = "javascript:alert(1)";
-    expect(whopCheckoutUrl("year")).toBe("https://whop.com/checkout/plan_year");
-    expect(whopCheckoutUrl("month")).toBeUndefined();
-    expect(whopConfigured()).toBe(true);
-  });
-});

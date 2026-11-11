@@ -39,7 +39,7 @@ The checkout page shows Whop's payment form inside Golden (Whop Elements). Offer
 
 **Option A: plans you create in Whop (simplest)**
 1. In Whop, create one plan per offer with the same price, type and trial.
-2. Copy each plan ID (`plan_…`) into `.env.local`: `WHOP_PLAN_EXECUTIVE` ($100/year founding price) and `WHOP_PLAN_EXPERIENCE` ($50/year), both with a 5-day free trial.
+2. The live plans are already in the code (`whopPlan` in `src/lib/billing/offers.ts`): Executive `plan_EJWuPToHk9nUw` ($100/year founding price) and Experience `plan_2Tozpw2x8yzvn` ($50/year), both with a 5-day free trial. To sell different plans, set `WHOP_PLAN_EXECUTIVE` / `WHOP_PLAN_EXPERIENCE` in Vercel, or change `whopPlan`.
 
 **Option B: let Golden create them (also enables Buy now, pay later)**
 1. Whop dashboard → Developer → API keys: create a key → `WHOP_API_KEY`.
@@ -50,17 +50,6 @@ The checkout page shows Whop's payment form inside Golden (Whop Elements). Offer
 - Developer → Webhooks: URL `https://<your-live-domain>/api/billing/whop/webhook`, events `payment.succeeded`, `membership.activated`, `membership.updated`. Secret (`ws_…`) → `WHOP_WEBHOOK_SECRET`. Golden marks the order paid and grants access from the webhook, never from the browser.
 - After payment Whop returns buyers to `/checkout/return` with `payment` and `status`.
 
-### Older link-based setup
-1. In your Whop dashboard create a **product** (e.g. "The Chef's Golden Premium") with two **plans**: $100/year (Executive Chef System) and $50/year (The Golden Experience), each with a **5-day free trial**.
-2. Copy each plan's **checkout link** →
-   ```
-   WHOP_CHECKOUT_URL_YEAR=https://whop.com/...
-   WHOP_CHECKOUT_URL_MONTH=https://whop.com/...
-   ```
-3. **Checkout settings → redirect after purchase**: `https://<your-live-domain>/` so buyers come back to the app.
-4. **Developer → Webhooks → Create webhook**: URL `https://<your-live-domain>/api/billing/whop/webhook`, events `membership.activated` and `membership.updated`. Copy the signing secret (`ws_…`) → `WHOP_WEBHOOK_SECRET`.
-5. Webhooks need a public address: deploy first (step 5), or use a tunnel while testing.
-6. Ask buyers to use the same email at Whop as in the app; memberships are saved with Whop's user ID for matching.
 
 ## 3b. Google Play Billing (Android app)
 

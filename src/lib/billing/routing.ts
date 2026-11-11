@@ -2,6 +2,7 @@
 // processor's current pricing before relying on them.
 
 import type { BillingEntity } from "@/lib/types";
+import { ATTRACTION } from "@/lib/billing/offers";
 
 export type Currency = "usd" | "gbp";
 export type Interval = "year" | "month";
@@ -26,7 +27,8 @@ export const PRICES: Record<Currency, Record<Interval, Price>> = {
   },
 };
 
-export const TRIAL_DAYS = 3;
+/** Free days before the first charge: the 5-Day Zero-Waste Challenge (offers.ts). */
+export const TRIAL_DAYS = ATTRACTION.days;
 
 export interface EntityConfig {
   entity: BillingEntity;

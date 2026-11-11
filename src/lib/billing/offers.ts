@@ -8,8 +8,9 @@
 //   for the first FOUNDING_SPOTS members during the launch window, backed by the
 //   "10 Perfect Dishes" money-back guarantee.
 //
-// Whop plans: set WHOP_PLAN_EXECUTIVE / WHOP_PLAN_EXPERIENCE to plans with these exact prices, or
-// leave them empty and Golden creates the plan inline from these numbers (needs WHOP_API_KEY).
+// Whop plans (each with the 5-day free trial): Executive plan_EJWuPToHk9nUw, Experience
+// plan_2Tozpw2x8yzvn (`whopPlan` below). WHOP_PLAN_EXECUTIVE / WHOP_PLAN_EXPERIENCE override them;
+// with neither, Golden creates the plan inline from these numbers (needs WHOP_API_KEY).
 
 export type OfferId = "executive" | "experience";
 
@@ -25,8 +26,10 @@ export interface Offer {
   regularPrice?: number;
   billingPeriodDays?: number;
   trialDays: number;
-  /** Env var holding the Whop plan ID (plan_…) created in the dashboard. */
+  /** Env var that can override the Whop plan ID (plan_…). */
   planEnv: string;
+  /** The Whop plan sold for this offer (5-day free trial, then the yearly price). */
+  whopPlan?: string;
   kind: "core" | "upsell";
   badge?: string;
   includes: string[];
@@ -71,6 +74,7 @@ export const OFFERS: Offer[] = [
     billingPeriodDays: 365,
     trialDays: ATTRACTION.days,
     planEnv: "WHOP_PLAN_EXECUTIVE",
+    whopPlan: "plan_EJWuPToHk9nUw",
     kind: "core",
     badge: "80% off · Founding price",
     includes: EXECUTIVE_FEATURES,
@@ -84,6 +88,7 @@ export const OFFERS: Offer[] = [
     billingPeriodDays: 365,
     trialDays: ATTRACTION.days,
     planEnv: "WHOP_PLAN_EXPERIENCE",
+    whopPlan: "plan_2Tozpw2x8yzvn",
     kind: "core",
     includes: ["Skill-Adaptation Engine: every recipe rewritten for your level", "Hands-free cook mode with timers", "Smart shopping list and the community"],
     excludes: ["Multi-Dish Timing Orchestrator", "'Fix My Mistake' AI Doctor", "Pantry-to-Plate Matcher", "Cuisine technique modules", "Money-back guarantee"],

@@ -1,5 +1,5 @@
 // Prepares a Whop embedded checkout for one of Golden's offers. Server-only.
-// - A plan created in the Whop dashboard (WHOP_PLAN_* env) can be sold directly with `plan`.
+// - The offer's Whop plan (offers.ts `whopPlan`, or a WHOP_PLAN_* env override) is sold directly with `plan`.
 // - Pay-later, or offers without a plan ID, use a checkout configuration made here with the
 //   SDK (inline plan from offers.ts, Golden's metadata, BNPL methods switched on).
 
@@ -16,7 +16,7 @@ export type PreparedCheckout =
   | { ok: false; error: string };
 
 export const planIdFor = (offer: Offer) => {
-  const id = process.env[offer.planEnv];
+  const id = process.env[offer.planEnv] || offer.whopPlan;
   return id && /^plan_[A-Za-z0-9]+$/.test(id) ? id : undefined;
 };
 
