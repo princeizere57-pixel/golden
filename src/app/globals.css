@@ -315,15 +315,3 @@ html {
 @media (prefers-reduced-motion: reduce) {
   .claw-mark::after { display: none; }
 }
-
-/* While any photo loads, the shining claw (black, with a gold band sweeping down it) sits on white
-   behind it; the photo covers it once it arrives. Only opaque photos (object-cover): transparent
-   pictures and icons are left alone. Static claw under reduced motion. */
-img.object-cover:not([class*="opacity-"]) {
-  background: #fff url("/brand/claw-shine.webp") center / min(38%, 88px) no-repeat;
-}
-@media (prefers-reduced-motion: reduce) {
-  img.object-cover:not([class*="opacity-"]) {
-    background-image: url("/brand/claw.png");
-  }
-}

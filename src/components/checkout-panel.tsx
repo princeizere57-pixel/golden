@@ -18,8 +18,6 @@ import { TIER_NAME, type Tier } from "@/lib/billing/entitlements";
 import type { OfferId } from "@/lib/billing/offers";
 import type { Store } from "@/lib/native/user-agent";
 import { track } from "@/lib/analytics";
-import { ClawInline } from "@/components/claw-loader";
-import { ClawMark } from "@/components/claw-loader";
 
 const WhopEmbed = dynamic(() => import("@/components/whop-embed").then((m) => m.WhopEmbed), { ssr: false });
 
@@ -156,7 +154,7 @@ export function CheckoutPanel({ user, level, tier, store: serverStore, offers, d
 
       {/* 4. Payment: Google Play in the Android app, nothing in the iPhone app (yet), Whop on the web */}
       {store === null ? (
-        <p className="mt-6 py-4 text-center"><ClawInline text="Loading payment…" /></p>
+        <p className="mt-6 py-4 text-center text-muted" role="status">Loading payment…</p>
       ) : android ? (
         <PlayCheckout offerId={chosen} offerName={offer.name} userId={user.id} />
       ) : store === "none" ? (
@@ -173,7 +171,7 @@ export function CheckoutPanel({ user, level, tier, store: serverStore, offers, d
           </div>
         ) : offer.embedReady ? (
           <button onClick={pay} disabled={pending} className="min-h-14 w-full rounded-full bg-button text-lg font-semibold text-button-ink disabled:opacity-60">
-            {pending ? <span className="inline-flex items-center gap-2"><ClawMark size={28} />Preparing secure checkout…</span> : `Continue: ${offer.priceLine}`}
+            {pending ? "Preparing secure checkout…" : `Continue: ${offer.priceLine}`}
           </button>
         ) : offer.planType === "renewal" ? (
           <form action={setDemoPlan.bind(null, chosen as OfferId)}>

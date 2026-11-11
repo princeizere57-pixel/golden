@@ -8,7 +8,6 @@ import { adaptRecipeAction } from "@/app/actions/adapt";
 import { setSkill } from "@/app/actions/viewer";
 import { adaptRecipe } from "@/lib/skill/adapt";
 import { SKILL_LEVELS, type AdaptedRecipe, type Recipe, type SkillLevel } from "@/lib/types";
-import { ClawInline } from "@/components/claw-loader";
 
 const LABEL: Record<SkillLevel, string> = { beginner: "Beginner", intermediate: "Intermediate", chef: "Chef" };
 const KIND: Record<string, string> = { prep: "Prep", heat: "Heat", timing: "Timer" };
@@ -60,7 +59,7 @@ export function SkillSteps({ recipe, initialSkill }: { recipe: Recipe; initialSk
     <div>
       <SkillSlider value={adapted.skill} onChange={change} />
       <p className="mt-2 h-5 text-xs text-muted" aria-live="polite">
-        {pending ? <ClawInline text="Rewriting for your level…" /> : adapted.source === "ai" ? "Rewritten by AI for your level" : ""}
+        {pending ? "Rewriting for your level…" : adapted.source === "ai" ? "Rewritten by AI for your level" : ""}
       </p>
       <ol className="mt-4 space-y-4">
         {adapted.steps.map((step, i) => (

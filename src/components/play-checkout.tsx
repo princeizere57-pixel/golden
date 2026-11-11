@@ -9,7 +9,6 @@ import { useEffect, useState, useTransition } from "react";
 import { verifyPlayPurchase } from "@/app/actions/play";
 import { PLAY_PRODUCTS, describePlayOffer, pickPlayOffer, playProductFor, type PlayProductDetails } from "@/lib/billing/play-products";
 import { PLAY_CANCELLED, PlayBilling } from "@/lib/native/play-billing";
-import { ClawMark } from "@/components/claw-loader";
 
 export function PlayCheckout({ offerId, offerName, userId }: { offerId: string; offerName: string; userId: string }) {
   const router = useRouter();
@@ -78,7 +77,7 @@ export function PlayCheckout({ offerId, offerName, userId }: { offerId: string; 
         disabled={pending || !offer}
         className="flex min-h-14 w-full items-center justify-center rounded-full bg-button text-lg font-semibold text-button-ink disabled:opacity-60"
       >
-        {pending ? <span className="inline-flex items-center gap-2"><ClawMark size={28} />Waiting for Google Play…</span> : offer ? `Continue: ${describePlayOffer(offer)}` : details ? `${offerName} isn't on sale in Google Play yet` : "Loading Google Play prices…"}
+        {pending ? "Waiting for Google Play…" : offer ? `Continue: ${describePlayOffer(offer)}` : details ? `${offerName} isn't on sale in Google Play yet` : "Loading Google Play prices…"}
       </button>
       {error && <p role="alert" className="mt-2 text-center text-sm text-tomato">{error}</p>}
       <p className="mt-3 text-center text-xs text-muted">
