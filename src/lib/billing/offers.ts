@@ -39,8 +39,8 @@ export interface Offer {
 
 /** The founding launch: limited spots and a fixed end date (override with LAUNCH_ENDS_AT). */
 export const FOUNDING_SPOTS = 500;
-/** One week from the founding launch (fixed, the same for everyone; never resets). */
-export const LAUNCH_ENDS_AT = process.env.NEXT_PUBLIC_LAUNCH_ENDS_AT || "2026-11-18T23:59:59Z";
+/** Two weeks from the founding launch (fixed, the same for everyone; never resets). */
+export const LAUNCH_ENDS_AT = process.env.NEXT_PUBLIC_LAUNCH_ENDS_AT || "2026-11-25T23:59:59Z";
 
 export const GUARANTEE = {
   name: "10 Perfect Dishes Money-Back Guarantee",
