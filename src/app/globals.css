@@ -275,8 +275,9 @@ html {
   -webkit-mask: url("/brand/claw.png") center / contain no-repeat;
   mask: url("/brand/claw.png") center / contain no-repeat;
   background: linear-gradient(135deg, transparent 36%, rgba(184, 134, 11, 0.55) 42%, #f5c518 47%, #ffe27a 50%, #f5c518 53%, rgba(184, 134, 11, 0.55) 58%, transparent 64%) 0 0 / 200% 200% no-repeat;
-  background-position: 100% 100%;
-  opacity: 0;
+  /* Resting place: the gold band across the middle of the claw (also the still shine when the
+     phone asks for no animations). */
+  background-position: 50% 50%;
 }
 .claw-loader {
   position: fixed;
@@ -289,20 +290,21 @@ html {
 }
 @media (prefers-reduced-motion: no-preference) {
   .claw-mark::after {
-    animation: claw-shine 1.6s cubic-bezier(0.45, 0, 0.3, 1) infinite;
+    /* Starts with the band already on the claw (negative delay), so even a short wait shows gold. */
+    animation: claw-shine 1.2s linear -0.45s infinite;
   }
   .claw-loader .claw-mark {
-    animation: claw-glow 1.6s ease-in-out infinite;
+    animation: claw-glow 1.2s ease-in-out infinite;
   }
   /* Only shows if loading takes a moment, so fast pages don't flash it. */
   .claw-loader {
-    animation: claw-in 0.25s ease-out 0.12s both;
+    animation: claw-in 0.2s ease-out 0.05s both;
   }
 }
+/* The band travels from the tips at the top to the ends at the bottom, always on the claw. */
 @keyframes claw-shine {
-  0% { background-position: 100% 100%; opacity: 1; }
-  70% { background-position: 0 0; opacity: 1; }
-  100% { background-position: 0 0; opacity: 0; }
+  from { background-position: 92% 92%; }
+  to { background-position: 8% 8%; }
 }
 @keyframes claw-glow {
   0%, 100% { filter: drop-shadow(0 0 0 rgba(250, 204, 21, 0)); }
@@ -313,5 +315,5 @@ html {
   to { opacity: 1; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .claw-mark::after { display: none; }
+  .claw-mark::after { animation: none; background-position: 50% 50%; }
 }
