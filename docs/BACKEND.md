@@ -81,7 +81,7 @@ Run the migrations in order (`supabase/migrations/0001…0006`), or paste `supab
 
 ### TheMealDB library in Supabase (migration 0008)
 
-`mealdb_meals` (id, name, category, area, instructions, thumb, youtube, source, ingredients jsonb, date_modified) holds the whole TheMealDB library (793 meals on 12 Nov 2026). Every Vercel build upserts it from `scripts/seed-mealdb.mts` with the service role key, and rebuilds the app's recipe cache from it if TheMealDB is unreachable. Public read (it's public recipe data), server-only writes. **Run `supabase/migrations/0008_mealdb_meals.sql` once in the SQL editor**; until then the build logs "couldn't save the library" and carries on.
+`mealdb_meals` (id, name, category, area, instructions, thumb, youtube, source, ingredients jsonb, date_modified) holds the whole TheMealDB library (793 meals on 12 Nov 2026). Every Vercel build upserts it from `scripts/seed-mealdb.mts` with the service role key, and rebuilds the app's recipe cache from it if TheMealDB is unreachable. Public read (it's public recipe data), server-only writes. Migration 0008 was run on 12 Nov 2026; builds log "Supabase: saved 793 meals to mealdb_meals".
 
 ## 5. Auth and sessions
 
@@ -154,7 +154,7 @@ Suggested order: profiles → progress (the feedback prompt and Today card depen
 
 ## 10. Open items, in priority order
 
-1. Production env: done for `SESSION_SECRET`, Supabase and Whop; migrations 0001–0007 have been run. **Run 0008 (`mealdb_meals`).** Still missing: see "Keys left for launch" below.
+1. Production env: done for `SESSION_SECRET`, Supabase and Whop; migrations 0001–0008 have been run (0008 = `mealdb_meals`, filled with 793 meals on every build). Still missing: see "Keys left for launch" below.
 2. Move on-device data to Supabase (§8), starting with `profiles` and progress.
 3. Whop account linking for static links (§6.1); customer portal link.
 4. Rate limits on Gemini actions (`adaptRecipeAction`, `diagnoseDish`) and on `createPost`/`sendFeedback`.
