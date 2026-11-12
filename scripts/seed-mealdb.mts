@@ -18,8 +18,18 @@ import type { CachedMeal } from "../src/lib/mealdb/convert";
 const MIN_MEALS = 100;
 const BATCH = 6;
 const ALL_LETTERS = "abcdefghijklmnopqrstuvwxyz0123456789".split("");
-const KEY = process.env.MEALDB_API_KEY?.trim();
-const BASE = KEY ? `https://www.themealdb.com/api/json/v2/${KEY}` : "https://www.themealdb.com/api/json/v1/1";
+const V1 = "https://www.themealdb.com/api/json/v1/1";
+let KEY = process.env.MEALDB_API_KEY?.trim();
+let BASE = KEY ? `https://www.themealdb.com/api/json/v2/${KEY}` : V1;
+// Check the supporter key first: if TheMealDB refuses it, say so and use the V1 test key.
+if (KEY) {
+  const probe = await fetch(`${BASE}/list.php?c=list`, { signal: AbortSignal.timeout(30_000) }).catch((e: Error) => ({ ok: false, status: e.message }) as const);
+  if (!probe.ok) {
+    console.warn(`TheMealDB refused the V2 supporter key (${probe.status}); using the V1 test key. Check MEALDB_API_KEY.`);
+    KEY = undefined;
+    BASE = V1;
+  } else console.log("TheMealDB V2 supporter key accepted.");
+}
 const OUT = join(dirname(fileURLToPath(import.meta.url)), "..", "src", "data", "mealdb-recipes.json");
 
 type RawMeal = Record<string, string | null | undefined>;
