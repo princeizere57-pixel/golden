@@ -14,13 +14,21 @@ export function mealdbBase(key = process.env.MEALDB_API_KEY?.trim()): string {
   return key ? `https://www.themealdb.com/api/json/v2/${key}` : "https://www.themealdb.com/api/json/v1/1";
 }
 
-async function get<T>(path: string): Promise<T | null> {
+async function fetchJson<T>(base: string, path: string): Promise<T | null> {
   try {
-    const res = await fetch(`${mealdbBase()}/${path}`, { next: { revalidate: DAY }, signal: AbortSignal.timeout(20_000) });
+    const res = await fetch(`${base}/${path}`, { next: { revalidate: DAY }, signal: AbortSignal.timeout(20_000) });
     return res.ok ? ((await res.json()) as T) : null;
   } catch {
     return null;
   }
+}
+
+/** V2 with the supporter key; if TheMealDB refuses it (inactive or mistyped key), the V1 test key. */
+async function get<T>(path: string): Promise<T | null> {
+  const base = mealdbBase();
+  const data = await fetchJson<T>(base, path);
+  if (data !== null || base === mealdbBase("")) return data;
+  return fetchJson<T>(mealdbBase(""), path);
 }
 
 export async function mealCategories(): Promise<string[]> {
