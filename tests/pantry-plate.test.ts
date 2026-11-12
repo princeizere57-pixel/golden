@@ -49,3 +49,21 @@ describe("pantry suggestions", () => {
     expect(pantrySuggestions(recipes, [])).toEqual([]);
   });
 });
+
+describe("pantry typing", () => {
+  it("matches spaced spellings: chick peas covers chickpeas", () => {
+    expect(covers("chick peas", "Chickpeas")).toBe(true);
+    expect(covers("chick peas", "Tinned chickpeas")).toBe(true);
+  });
+
+  it("completes what's being typed to the commonest ingredient", async () => {
+    const { completeIngredient } = await import("@/components/pantry");
+    const recipes = [
+      { slug: "a", href: "/a", title: "A", ingredients: ["Chicken thighs", "Garlic"] },
+      { slug: "b", href: "/b", title: "B", ingredients: ["Chicken breast", "Chickpeas"] },
+    ];
+    expect(completeIngredient("Chick", recipes)).toBe("chicken");
+    expect(completeIngredient("chick pe", recipes)).toBe("chickpeas");
+    expect(completeIngredient("ch", recipes)).toBeUndefined();
+  });
+});

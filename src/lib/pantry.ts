@@ -28,7 +28,9 @@ export function covers(pantryItem: string, ingredient: string): boolean {
   const p = words(pantryItem);
   const i = ` ${words(ingredient)} `;
   if (p.length < 2) return false;
-  return [p, ...(FAMILIES[p] ?? []).map(words)].some((w) => i.includes(` ${w} `));
+  // "chick peas" covers "Chickpeas": also compare with the spaces taken out.
+  const squashed = i.replace(/ /g, "");
+  return [p, ...(FAMILIES[p] ?? []).map(words)].some((w) => i.includes(` ${w} `) || (w.includes(" ") && squashed.includes(w.replace(/ /g, ""))));
 }
 
 export const isStaple = (ingredient: string) => STAPLES.some((s) => covers(s, ingredient));
