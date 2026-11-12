@@ -56,7 +56,7 @@ All documented in `.env.example`. The ones that matter for the backend:
 | `STRIPE_US_*`, `STRIPE_UK_*` | Legacy Stripe path (US/UK entities). Whop is the live web checkout. |
 | `APPLE_BUNDLE_ID` | App Store Server Notifications V2 (no iOS purchase flow in the app yet). |
 | `GEMINI_API_KEY`, `GEMINI_MODEL` | AI rewrites and Fix My Mistake photo diagnosis. Every AI feature has a non-AI fallback. |
-| `MEALDB_API_KEY` | TheMealDB supporter key. Set in Vercel on 12 Nov 2026, but TheMealDB answered 404 for it on every address (`api/json/v2/<key>`, `<key>/json/v2`, `api/json/v1/<key>`), so the app falls back to the V1 test key. The build log line "TheMealDB …" shows which address worked. Fix: confirm the key in the TheMealDB account and update it in Vercel. |
+| `MEALDB_API_KEY` | TheMealDB premium (supporter) key, set in Vercel on 12 Nov 2026 and confirmed working on the V2 API (`api/json/v2/<key>`). The build log shows "TheMealDB supporter key accepted". If it ever stops working, the app falls back to the V1 test key and the log says so. |
 | `NEXT_PUBLIC_POSTHOG_KEY`, `NEXT_PUBLIC_POSTHOG_HOST` | Analytics (no-op without a key, honours Do Not Track). |
 
 ## 4. Database (Supabase)
@@ -161,12 +161,12 @@ Suggested order: profiles → progress (the feedback prompt and Today card depen
 5. Read recipes from Supabase (`recipes`/`recipe_blocks` are already seeded) so content can change without a deploy.
 6. CI: add a GitHub Actions workflow running `npm run typecheck && npm run lint && npm test` on every PR.
 7. Google Play: create the two subscriptions, service account and RTDN (`docs/SETUP.md` §3b), build the Android app in Android Studio and test with a licence tester. The Java plugin hasn't been compiled yet.
-8. TheMealDB supporter key: set in Vercel but refused (404); confirm the key with TheMealDB. The full library (793 meals) is cached either way.
+8. TheMealDB premium key: done, working on V2 (production use allowed for supporters; keep the TheMealDB credit).
 9. One codebase for both apps (golden + golden-v1), deployed twice.
 
 ## Keys left for launch (checked on Vercel, 11 Nov 2026)
 
-Already set in Vercel (production): `SESSION_SECRET`, `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, `WHOP_API_KEY`, `WHOP_COMPANY_ID`, `WHOP_PLAN_EXECUTIVE`, `WHOP_PLAN_EXPERIENCE`, `WHOP_WEBHOOK_SECRET`, `GEMINI_MODEL`, `NEXT_PUBLIC_POSTHOG_HOST`, `MEALDB_API_KEY` (set, but refused by TheMealDB: confirm the key).
+Already set in Vercel (production): `SESSION_SECRET`, `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, `WHOP_API_KEY`, `WHOP_COMPANY_ID`, `WHOP_PLAN_EXECUTIVE`, `WHOP_PLAN_EXPERIENCE`, `WHOP_WEBHOOK_SECRET`, `GEMINI_MODEL`, `NEXT_PUBLIC_POSTHOG_HOST`, `MEALDB_API_KEY` (premium key, working).
 
 | Key | Needed | What happens without it |
 |---|---|---|
