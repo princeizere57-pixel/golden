@@ -20,15 +20,36 @@ const BATCH = 6;
 const ALL_LETTERS = "abcdefghijklmnopqrstuvwxyz0123456789".split("");
 const V1 = "https://www.themealdb.com/api/json/v1/1";
 let KEY = process.env.MEALDB_API_KEY?.trim();
-let BASE = KEY ? `https://www.themealdb.com/api/json/v2/${KEY}` : V1;
-// Check the supporter key first: if TheMealDB refuses it, say so and use the V1 test key.
+let BASE = V1;
+// Try the supporter key on each address TheMealDB might use for it (same list as client.ts) and
+// keep the first that answers with real data; otherwise say so and use the V1 test key.
 if (KEY) {
-  const probe = await fetch(`${BASE}/list.php?c=list`, { signal: AbortSignal.timeout(30_000) }).catch((e: Error) => ({ ok: false, status: e.message }) as const);
-  if (!probe.ok) {
-    console.warn(`TheMealDB refused the V2 supporter key (${probe.status}); using the V1 test key. Check MEALDB_API_KEY.`);
+  const candidates = [
+    `https://www.themealdb.com/api/json/v2/${KEY}`,
+    `https://www.themealdb.com/${KEY}/json/v2`,
+    `https://www.themealdb.com/api/json/v1/${KEY}`,
+  ];
+  let found: string | undefined;
+  for (const base of candidates) {
+    const shown = base.replace(KEY, "<key>");
+    try {
+      const res = await fetch(`${base}/list.php?c=list`, { signal: AbortSignal.timeout(30_000) });
+      const body = res.ok ? ((await res.json().catch(() => null)) as { meals?: unknown[] } | null) : null;
+      if (body?.meals?.length) {
+        found = base;
+        console.log(`TheMealDB supporter key accepted at ${shown}.`);
+        break;
+      }
+      console.warn(`TheMealDB: ${shown} refused the key (HTTP ${res.status}).`);
+    } catch (err) {
+      console.warn(`TheMealDB: ${shown} failed (${(err as Error).message}).`);
+    }
+  }
+  if (found) BASE = found;
+  else {
+    console.warn("TheMealDB refused the supporter key everywhere; using the V1 test key. Check MEALDB_API_KEY.");
     KEY = undefined;
-    BASE = V1;
-  } else console.log("TheMealDB V2 supporter key accepted.");
+  }
 }
 const OUT = join(dirname(fileURLToPath(import.meta.url)), "..", "src", "data", "mealdb-recipes.json");
 
@@ -154,4 +175,4 @@ writeFileSync(
   OUT,
   JSON.stringify({ source: "https://www.themealdb.com", fetchedAt: new Date().toISOString(), letters: used, count: meals.length, meals }, null, 2) + "\n",
 );
-console.log(`Saved ${meals.length} meals (API ${KEY ? "v2, supporter key" : "v1, test key"}) from letters ${used.join("")} plus the category sweep to ${OUT} in ${((Date.now() - started) / 1000).toFixed(1)} s.`);
+console.log(`Saved ${meals.length} meals (${KEY ? "supporter key" : "V1 test key"}) from letters ${used.join("")} plus the category sweep to ${OUT} in ${((Date.now() - started) / 1000).toFixed(1)} s.`);

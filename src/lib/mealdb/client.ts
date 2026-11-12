@@ -23,12 +23,31 @@ async function fetchJson<T>(base: string, path: string): Promise<T | null> {
   }
 }
 
-/** V2 with the supporter key; if TheMealDB refuses it (inactive or mistyped key), the V1 test key. */
+/** Addresses to try for the supporter key, in order (same list as scripts/seed-mealdb.mts). */
+function bases(): string[] {
+  const key = process.env.MEALDB_API_KEY?.trim();
+  if (!key) return [mealdbBase("")];
+  return [mealdbBase(key), `https://www.themealdb.com/${key}/json/v2`, `https://www.themealdb.com/api/json/v1/${key}`, mealdbBase("")];
+}
+
+/** The first address that answered, remembered for this server instance. */
+let working: string | undefined;
+
+/** The supporter key on whichever address TheMealDB accepts it; the V1 test key if none does. */
 async function get<T>(path: string): Promise<T | null> {
-  const base = mealdbBase();
-  const data = await fetchJson<T>(base, path);
-  if (data !== null || base === mealdbBase("")) return data;
-  return fetchJson<T>(mealdbBase(""), path);
+  if (working) {
+    const data = await fetchJson<T>(working, path);
+    if (data !== null) return data;
+  }
+  for (const base of bases()) {
+    if (base === working) continue;
+    const data = await fetchJson<T>(base, path);
+    if (data !== null) {
+      working = base;
+      return data;
+    }
+  }
+  return null;
 }
 
 export async function mealCategories(): Promise<string[]> {
