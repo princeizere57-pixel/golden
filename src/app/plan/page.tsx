@@ -16,6 +16,7 @@ import { can } from "@/lib/billing/entitlements";
 import { difficulty } from "@/lib/skill/difficulty";
 import type { Recipe } from "@/lib/types";
 import { getViewer } from "@/lib/viewer";
+import { MealDbCredit } from "@/components/mealdb-credit";
 
 export const metadata: Metadata = { title: "Plan a meal" };
 
@@ -57,6 +58,7 @@ export default async function PlanPage({ searchParams }: { searchParams: Promise
         {!multi && <div className="mt-4"><PlanLock feature="multiDish" compact /></div>}
         <DishPicker options={choices.map(option)} max={max} />
         <p className="mt-8 text-sm text-muted">Looking for something else? <Link href="/explore" className="underline">Explore every recipe</Link>, then tap &ldquo;Plan &amp; cook this&rdquo;.</p>
+        <MealDbCredit flush />
       </main>
     );
   }
@@ -126,6 +128,7 @@ export default async function PlanPage({ searchParams }: { searchParams: Promise
           <PlanLock feature="fixMyMistake" compact />
         )}
       </div>
+      <MealDbCredit flush />
     </main>
   );
 }

@@ -8,6 +8,11 @@
 // came back.
 //
 // MEALDB_API_KEY (supporter key) uses the V2 API; without it, the V1 test key "1" (development only).
+// With a working key it also asks for the full list in one call (search.php?s=, supporters only).
+//
+// Supabase: when NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY are set and migration 0008
+// has been run, every meal is upserted into `mealdb_meals`. If TheMealDB can't be reached, the
+// cache is rebuilt from that table instead, so a build never loses the library.
 
 import { mkdirSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
@@ -116,6 +121,7 @@ function clean(meal: RawMeal): CachedMeal | null {
     strMealThumb: text(meal.strMealThumb),
     strYoutube: text(meal.strYoutube),
     strSource: text(meal.strSource),
+    dateModified: text(meal.dateModified),
     ingredients,
   };
 }
@@ -133,6 +139,12 @@ const add = (letter: string, meals: RawMeal[]) => {
   }
   console.log(`  ${letter}: ${meals.length} found, ${kept} new`);
 };
+
+// Supporters can list the whole database in one call; the letters and sweep below fill any gap.
+if (KEY) {
+  const all = await getJson<{ meals?: RawMeal[] | null }>("search.php?s=");
+  if (all?.meals?.length) add("full list", all.meals);
+}
 
 const used: string[] = [];
 for (let i = 0; i < ALL_LETTERS.length; i += BATCH) {
@@ -164,10 +176,84 @@ for (let i = 0; i < missing.length; i += BATCH) {
   add("lookup", results.flatMap((r) => r?.meals ?? []));
 }
 
+// ---- Supabase (optional): keep a copy of the library in the database, and read it back when
+// TheMealDB is down. Never fails the build.
+const SB_URL = process.env.NEXT_PUBLIC_SUPABASE_URL?.replace(/\/$/, "");
+const SB_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
+const sbHeaders = SB_KEY ? { apikey: SB_KEY, Authorization: `Bearer ${SB_KEY}`, "Content-Type": "application/json" } : undefined;
+
+interface MealRow {
+  id: string;
+  name: string;
+  category: string | null;
+  area: string | null;
+  instructions: string;
+  thumb: string | null;
+  youtube: string | null;
+  source: string | null;
+  ingredients: CachedMeal["ingredients"];
+  date_modified: string | null;
+}
+const toRow = (m: CachedMeal): MealRow => ({
+  id: m.idMeal,
+  name: m.strMeal,
+  category: m.strCategory,
+  area: m.strArea,
+  instructions: m.strInstructions,
+  thumb: m.strMealThumb,
+  youtube: m.strYoutube,
+  source: m.strSource,
+  ingredients: m.ingredients,
+  date_modified: m.dateModified ?? null,
+});
+const fromRow = (r: MealRow): CachedMeal => ({
+  idMeal: r.id,
+  strMeal: r.name,
+  strCategory: r.category,
+  strArea: r.area,
+  strInstructions: r.instructions,
+  strMealThumb: r.thumb,
+  strYoutube: r.youtube,
+  strSource: r.source,
+  dateModified: r.date_modified,
+  ingredients: r.ingredients,
+});
+
+if (byId.size < MIN_MEALS && SB_URL && sbHeaders) {
+  console.warn(`TheMealDB gave ${byId.size} meals; reading the library from Supabase (mealdb_meals) instead.`);
+  try {
+    const res = await fetch(`${SB_URL}/rest/v1/mealdb_meals?select=*&limit=5000`, { headers: sbHeaders, signal: AbortSignal.timeout(60_000) });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    for (const row of (await res.json()) as MealRow[]) if (row.thumb) byId.set(row.id, fromRow(row));
+    console.log(`  Supabase: ${byId.size} meals.`);
+  } catch (err) {
+    console.warn(`  Supabase read failed (${(err as Error).message}).`);
+  }
+}
+
 const meals = [...byId.values()].sort((a, b) => a.strMeal.localeCompare(b.strMeal));
 if (meals.length < MIN_MEALS) {
   console.error(`Only got ${meals.length} meals (need ${MIN_MEALS}); not writing the cache. Check your connection and retry.`);
   process.exit(1);
+}
+
+if (SB_URL && sbHeaders) {
+  let saved = 0;
+  try {
+    for (let i = 0; i < meals.length; i += 200) {
+      const res = await fetch(`${SB_URL}/rest/v1/mealdb_meals?on_conflict=id`, {
+        method: "POST",
+        headers: { ...sbHeaders, Prefer: "resolution=merge-duplicates,return=minimal" },
+        body: JSON.stringify(meals.slice(i, i + 200).map(toRow)),
+        signal: AbortSignal.timeout(60_000),
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status} ${(await res.text()).slice(0, 120)}`);
+      saved += Math.min(200, meals.length - i);
+    }
+    console.log(`Supabase: saved ${saved} meals to mealdb_meals.`);
+  } catch (err) {
+    console.warn(`Supabase: couldn't save the library (${(err as Error).message}). Run migration 0008 to create mealdb_meals.`);
+  }
 }
 
 mkdirSync(dirname(OUT), { recursive: true });

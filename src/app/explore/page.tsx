@@ -2,10 +2,10 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { chooseSkill } from "@/app/actions/viewer";
 import { NoMatches } from "@/components/no-matches";
-import { categoryRecipes, mealCategories, searchRecipes } from "@/lib/mealdb/client";
+import { categoryRecipes, mealCategories, mealIdsWithIngredients, recipesForIds, searchRecipes } from "@/lib/mealdb/client";
 import { thumb } from "@/lib/mealdb/convert";
 import { RECIPES } from "@/lib/data/recipes";
-import { libraryRecipes } from "@/lib/library";
+import { libraryRecipes, recipesWithIngredients } from "@/lib/library";
 import { recipeHref } from "@/lib/links";
 import { mergeResults } from "@/lib/search";
 import { difficulty, rankForSkill } from "@/lib/skill/difficulty";
@@ -22,9 +22,21 @@ export default async function ExplorePage({ searchParams }: { searchParams: Prom
   const { q, c } = await searchParams;
   const query = q?.trim().slice(0, 60);
   const category = query ? undefined : (c ?? DEFAULT_CATEGORY);
-  const [viewer, categories, found] = await Promise.all([getViewer(), mealCategories(), query ? searchRecipes(query) : categoryRecipes(category!)]);
+  // "chicken, garlic, lemon": search by up to four ingredients (TheMealDB V2 multi-ingredient filter
+  // plus our own recipes and the cached library) instead of by name.
+  const ingredients = query && query.includes(",") ? query.split(",").map((s) => s.trim()).filter((s) => s.length > 1).slice(0, 4) : [];
+  const byIngredients = ingredients.length > 0;
+  const [viewer, categories, found] = await Promise.all([
+    getViewer(),
+    mealCategories(),
+    byIngredients ? mealIdsWithIngredients(ingredients).then(recipesForIds) : query ? searchRecipes(query) : categoryRecipes(category!),
+  ]);
   // Golden's own recipes first (seed, real-time, cached library), then TheMealDB's live results.
-  const recipes = query ? mergeResults([...RECIPES, ...libraryRecipes()], query, found) : found;
+  const recipes = byIngredients
+    ? [...recipesWithIngredients(ingredients), ...found].filter((r, i, all) => all.findIndex((x) => x.slug === r.slug) === i)
+    : query
+      ? mergeResults([...RECIPES, ...libraryRecipes()], query, found)
+      : found;
 
   const rated = recipes.map((recipe) => ({ recipe, difficulty: difficulty(recipe) }));
   const ranked = rankForSkill(rated, viewer.skill, (r) => r.difficulty.level);
@@ -59,9 +71,12 @@ export default async function ExplorePage({ searchParams }: { searchParams: Prom
 
       <form action="/explore" className="mt-5 flex gap-3" role="search">
         <label htmlFor="q" className="sr-only">Search recipes</label>
-        <input id="q" name="q" defaultValue={query} placeholder="Search: curry, lasagne, pancakes…" className="min-h-12 flex-1 rounded-2xl border border-line bg-surface px-4" />
+        <input id="q" name="q" defaultValue={query} placeholder="A dish, or ingredients: chicken, garlic" className="min-h-12 flex-1 rounded-2xl border border-line bg-surface px-4" />
         <button className="min-h-12 rounded-2xl bg-button px-5 font-semibold text-button-ink">Search</button>
       </form>
+      <p className="mt-2 text-sm text-muted">
+        Got ingredients to use up? Type up to four with commas, like <Link href="/explore?q=chicken%2C+garlic%2C+lemon" className="font-medium text-ink underline">chicken, garlic, lemon</Link>.
+      </p>
 
       {categories.length > 0 && (
         <nav aria-label="Categories" className="rail -mx-4 mt-4 flex gap-2 overflow-x-auto px-4 pb-2">
@@ -87,7 +102,7 @@ export default async function ExplorePage({ searchParams }: { searchParams: Prom
       ) : (
         <>
           <Grid
-            heading={`${query ? `“${query}”` : category}: best for ${SKILL_LABEL[viewer.skill]} cooks`}
+            heading={`${byIngredients ? `With ${ingredients.join(", ")}` : query ? `“${query}”` : category}: best for ${SKILL_LABEL[viewer.skill]} cooks`}
             empty={`Nothing here is rated for ${SKILL_LABEL[viewer.skill]} level yet. The closest matches are below.`}
             items={forYou}
           />

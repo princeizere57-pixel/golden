@@ -7,6 +7,7 @@ import { RECIPES } from "@/lib/data/recipes";
 import { libraryRecipes } from "@/lib/library";
 import { recipeHref } from "@/lib/links";
 import { thumb } from "@/lib/mealdb/convert";
+import { MealDbCredit } from "@/components/mealdb-credit";
 
 export const metadata: Metadata = { title: "Pantry-to-Plate" };
 
@@ -27,6 +28,7 @@ export default async function PantryPage() {
       <img src="/photos/chef-chopping.jpg" alt="Halved cherry tomatoes on a chopping board, ready for dinner" className="mt-4 aspect-[16/9] w-full rounded-3xl object-cover" />
       <p className="mt-4 text-muted">Clear out the fridge, waste nothing and skip the shop. Golden cross-references {recipes.length} recipes with what you already have.</p>
       <PantryMatcher recipes={recipes} />
+      <MealDbCredit flush />
     </main>
   );
 }

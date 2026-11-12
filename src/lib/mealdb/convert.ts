@@ -14,6 +14,8 @@ export interface Meal {
   strMealThumb?: string | null;
   strYoutube?: string | null;
   strSource?: string | null;
+  /** When TheMealDB added or last edited the meal ("YYYY-MM-DD HH:MM:SS"). */
+  dateModified?: string | null;
   [key: `strIngredient${number}` | `strMeasure${number}`]: string | null | undefined;
 }
 
@@ -36,6 +38,8 @@ export interface CachedMeal {
   strMealThumb: string | null;
   strYoutube: string | null;
   strSource: string | null;
+  /** Optional in caches written before 12 Nov 2026. */
+  dateModified?: string | null;
   ingredients: Array<{ name: string; measure: string }>;
 }
 

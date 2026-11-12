@@ -5,6 +5,7 @@ import { ShoppingList } from "@/components/shopping-list";
 import { can } from "@/lib/billing/entitlements";
 import { pantryRecipes } from "@/lib/library";
 import { getViewer } from "@/lib/viewer";
+import { MealDbCredit } from "@/components/mealdb-credit";
 
 export const metadata: Metadata = { title: "Shopping list" };
 
@@ -22,6 +23,7 @@ export default async function ShoppingPage() {
       ) : (
         <PlanLock feature="shoppingList" back={{ href: "/explore", label: "Browse recipes" }} />
       )}
+      <MealDbCredit flush />
     </main>
   );
 }
