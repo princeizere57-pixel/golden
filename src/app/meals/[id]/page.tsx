@@ -33,7 +33,7 @@ export default async function MealPage({ params }: Props) {
       access={can(viewer.tier, "cookMode") ? "open" : "locked-cook"}
       pairings={pairingsFor(recipe, RECIPES)}
       credit={
-        <p className="mt-3 text-sm">
+        <p key="credit" className="mt-3 text-sm">
           Recipe from <a href={recipe.source!.url} target="_blank" rel="noopener noreferrer" className="underline">TheMealDB ↗</a>
         </p>
       }
