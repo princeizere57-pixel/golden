@@ -106,3 +106,48 @@ export async function searchRecipes(query: string): Promise<Recipe[]> {
 export async function findRecipe(slug: string, seed: (slug: string) => Recipe | undefined): Promise<Recipe | undefined> {
   return seed(slug) ?? (slug.startsWith(MEALDB_PREFIX) ? (await mealRecipe(slug.slice(MEALDB_PREFIX.length))) ?? undefined : undefined);
 }
+
+// ---- Premium discovery (V2): popular, latest and multi-ingredient search. A supporter key lifts
+// the limits (10 latest, the full multi-ingredient result); without one, V2 still answers with the
+// test key in smaller amounts. Every caller has a local fallback, so nothing breaks offline.
+
+const V2_TEST = "https://www.themealdb.com/api/json/v2/1";
+
+/** The supporter key's address first (if it works), then V2 with the test key. */
+async function getV2<T>(path: string): Promise<T | null> {
+  const key = process.env.MEALDB_API_KEY?.trim();
+  const tries = [...(key ? [mealdbBase(key), `https://www.themealdb.com/${key}/json/v2`] : []), V2_TEST];
+  for (const base of tries) {
+    const data = await fetchJson<T>(base, path);
+    if (data !== null) return data;
+  }
+  return null;
+}
+
+const ids = (data: { meals?: Array<{ idMeal: string }> | null } | null) => (data?.meals ?? []).map((m) => m.idMeal).filter((id) => /^\d+$/.test(id));
+
+/** Full recipes (with a photo) for meal IDs, in order, from the cache or a lookup. */
+export async function recipesForIds(mealIds: string[]): Promise<Recipe[]> {
+  const recipes = await mapLimit([...new Set(mealIds)], 6, (id) => mealRecipe(id));
+  return recipes.filter((r): r is Recipe => r !== null && Boolean(r.image));
+}
+
+/** TheMealDB's most popular meals (popular.php). */
+export async function popularMealIds(): Promise<string[]> {
+  return ids(await getV2<{ meals?: Array<{ idMeal: string }> | null }>("popular.php"));
+}
+
+/** The meals most recently added to TheMealDB (latest.php: 10 with a supporter key). */
+export async function latestMealIds(): Promise<string[]> {
+  return ids(await getV2<{ meals?: Array<{ idMeal: string }> | null }>("latest.php"));
+}
+
+/** Meals that use every one of up to four ingredients (V2 multi-ingredient filter). */
+export async function mealIdsWithIngredients(ingredients: string[]): Promise<string[]> {
+  const list = ingredients
+    .map((i) => i.trim().toLowerCase().replace(/\s+/g, "_"))
+    .filter((i) => /^[a-z0-9_'-]{2,40}$/.test(i))
+    .slice(0, 4);
+  if (!list.length) return [];
+  return ids(await getV2<{ meals?: Array<{ idMeal: string }> | null }>(`filter.php?i=${list.map(encodeURIComponent).join(",")}`));
+}

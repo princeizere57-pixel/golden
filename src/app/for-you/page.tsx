@@ -6,6 +6,7 @@ import { forLevel, libraryRecipes } from "@/lib/library";
 import { difficulty } from "@/lib/skill/difficulty";
 import { can } from "@/lib/billing/entitlements";
 import { getViewer } from "@/lib/viewer";
+import { MealDbCredit } from "@/components/mealdb-credit";
 
 export const metadata: Metadata = { title: "For you" };
 
@@ -82,6 +83,7 @@ export default async function ForYouPage() {
           {library.filter((r) => difficulty(r).level === next).slice(0, 8).map((r) => <PhotoCard key={r.slug} recipe={r} />)}
         </Rail>
       )}
+      <MealDbCredit />
     </main>
   );
 }

@@ -7,6 +7,7 @@ import type { PantryRecipe } from "@/components/pantry";
 import { RECIPES } from "@/lib/data/recipes";
 import { recipeHref } from "@/lib/links";
 import { mealToRecipe, thumb } from "@/lib/mealdb/convert";
+import { covers } from "@/lib/pantry";
 import { difficulty, rankForSkill } from "@/lib/skill/difficulty";
 import type { Recipe, SkillLevel } from "@/lib/types";
 
@@ -49,4 +50,31 @@ export function pantryRecipes(limit?: number): PantryRecipe[] {
     image: r.image ? thumb(r.image) : undefined,
     ingredients: r.ingredients.map((i) => i.name),
   }));
+}
+
+/** Library meals newest first, by the date TheMealDB added them (works without any key). */
+export function justAdded(limit = 10): Recipe[] {
+  return allCachedMeals()
+    .filter((m) => m.dateModified && m.strMealThumb)
+    .sort((a, b) => String(b.dateModified).localeCompare(String(a.dateModified)))
+    .slice(0, limit)
+    .map(mealToRecipe)
+    .filter((r): r is Recipe => r !== null);
+}
+
+/** Recipes (ours and the library) that use every listed ingredient ("pasta" covers penne). */
+export function recipesWithIngredients(ingredients: string[]): Recipe[] {
+  const wanted = ingredients.map((i) => i.trim()).filter((i) => i.length > 1).slice(0, 4);
+  if (!wanted.length) return [];
+  return [...RECIPES, ...libraryRecipes()].filter(
+    (r) => r.image && wanted.every((w) => r.ingredients.some((i) => covers(w, i.name))),
+  );
+}
+
+/** A random recipe that suits the level (for "Surprise me"). */
+export function surpriseRecipe(skill: SkillLevel, random = Math.random): Recipe | undefined {
+  const all = [...RECIPES, ...libraryRecipes()].filter((r) => r.image);
+  const pool = all.filter((r) => difficulty(r).level === skill);
+  const list = pool.length ? pool : all;
+  return list.length ? list[Math.floor(random() * list.length)] : undefined;
 }

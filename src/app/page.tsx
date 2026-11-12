@@ -10,13 +10,15 @@ import { TodayCard } from "@/components/today-card";
 import { TIER_NAME, can } from "@/lib/billing/entitlements";
 import { TRIAL_HEADLINE_DAYS, offerById } from "@/lib/billing/offers";
 import { RECIPES } from "@/lib/data/recipes";
-import { byCategory, dishOfTheDay, forLevel, libraryRecipes, pantryRecipes } from "@/lib/library";
+import { byCategory, dishOfTheDay, forLevel, justAdded, libraryRecipes, pantryRecipes } from "@/lib/library";
+import { latestMealIds, popularMealIds, recipesForIds } from "@/lib/mealdb/client";
 import { formatDuration, planHref, totalMinutes } from "@/lib/links";
 import { thumb } from "@/lib/mealdb/convert";
 import { difficulty } from "@/lib/skill/difficulty";
 import type { Recipe } from "@/lib/types";
 import { getUser } from "@/lib/auth";
 import { getViewer } from "@/lib/viewer";
+import { MealDbCredit } from "@/components/mealdb-credit";
 
 const LEVEL = { beginner: "Beginner", intermediate: "Intermediate", chef: "Chef" };
 
@@ -49,7 +51,7 @@ const TILES = [
 ];
 
 export default async function Discover({ searchParams }: { searchParams: Promise<{ trial?: string }> }) {
-  const [viewer, user] = await Promise.all([getViewer(), getUser()]);
+  const [viewer, user, latestIds, popularIds] = await Promise.all([getViewer(), getUser(), latestMealIds(), popularMealIds()]);
   if (!user) redirect("/welcome");
   if (!viewer.onboarded) redirect("/onboarding");
   const { trial } = await searchParams;
@@ -59,6 +61,10 @@ export default async function Discover({ searchParams }: { searchParams: Promise
   const picks = forLevel(library, viewer.skill).filter((r) => difficulty(r).level === viewer.skill).slice(0, 10);
   const stretch = library.filter((r) => difficulty(r).level === (viewer.skill === "beginner" ? "intermediate" : "chef")).slice(0, 10);
   const today = dishOfTheDay(viewer.skill);
+  // TheMealDB's newest meals (latest.php) first, topped up from the library by date added.
+  const latest = await recipesForIds(latestIds);
+  const fresh = [...latest, ...justAdded(12)].filter((r, i, all) => all.findIndex((x) => x.slug === r.slug) === i).slice(0, 10);
+  const popular = (await recipesForIds(popularIds.slice(0, 12))).slice(0, 10);
   // Tonight's pick for the Today card: a real-time recipe, a different one each day.
   const realTime = RECIPES.filter((r) => r.realTime);
   const pickRecipe = realTime[Math.floor(Date.now() / 86_400_000) % Math.max(1, realTime.length)];
@@ -122,6 +128,10 @@ export default async function Discover({ searchParams }: { searchParams: Promise
         {TILES.map((t) => <QuickTile key={t.label} href={`/explore?c=${t.category}`} label={t.label} image={firstImage(t.category)} />)}
       </nav>
 
+      <Link href="/surprise" prefetch={false} className="mx-4 mt-2.5 flex min-h-12 items-center justify-center gap-2 rounded-full border-2 border-ink font-semibold">
+        <span aria-hidden>🎲</span> Surprise me: a random dish at your level
+      </Link>
+
       <Rail heading={`Personalised picks for ${LEVEL[viewer.skill]} cooks`}>
         {COLLECTIONS[viewer.skill].map((c) => (
           <CollectionCard key={c.title} title={c.title} line={c.line} href={`/explore?c=${c.category}`} recipes={forLevel(byCategory(c.category), viewer.skill).slice(0, 4)} />
@@ -132,6 +142,10 @@ export default async function Discover({ searchParams }: { searchParams: Promise
         {RECIPES.map((r) => <PhotoCard key={r.slug} recipe={r} badge="NEW" />)}
       </Rail>
 
+      {fresh.length > 0 && (
+        <Rail heading="Just added to the library">{fresh.map((r) => <PhotoCard key={r.slug} recipe={r} badge="NEW" />)}</Rail>
+      )}
+
       <Rail heading="Real-time cooking: prep while it cooks">
         {RECIPES.filter((r) => r.realTime).map((r) => <PhotoCard key={r.slug} recipe={r} />)}
       </Rail>
@@ -141,6 +155,10 @@ export default async function Discover({ searchParams }: { searchParams: Promise
       {picks.length > 0 && <Rail heading="Right at your level" href="/for-you">{picks.map((r) => <PhotoCard key={r.slug} recipe={r} />)}</Rail>}
 
       {today && <DishOfTheDay recipe={today} />}
+
+      {popular.length >= 4 && (
+        <Rail heading="Most popular on TheMealDB right now">{popular.map((r) => <PhotoCard key={r.slug} recipe={r} />)}</Rail>
+      )}
 
       {quick.length > 0 && (
         <Rail heading={`Done in ${viewer.prefs.weeknightMinutes} minutes or less`}>
@@ -174,6 +192,7 @@ export default async function Discover({ searchParams }: { searchParams: Promise
 
       <p className="mt-10 px-4 text-xs text-muted">Recipe photos from TheMealDB.</p>
       <FeedbackPrompt />
+      <MealDbCredit />
     </main>
   );
 }
