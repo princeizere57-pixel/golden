@@ -56,7 +56,7 @@ All documented in `.env.example`. The ones that matter for the backend:
 | `STRIPE_US_*`, `STRIPE_UK_*` | Legacy Stripe path (US/UK entities). Whop is the live web checkout. |
 | `APPLE_BUNDLE_ID` | App Store Server Notifications V2 (no iOS purchase flow in the app yet). |
 | `GEMINI_API_KEY`, `GEMINI_MODEL` | AI rewrites and Fix My Mistake photo diagnosis. Every AI feature has a non-AI fallback. |
-| `MEALDB_API_KEY` | TheMealDB. Empty = shared test key, **development only**; a public/app-store release needs a supporter key. |
+| `MEALDB_API_KEY` | TheMealDB supporter key (set in Vercel, 12 Nov 2026). Turns on the V2 API for the client and the build-time recipe download. Empty = shared V1 test key, development only. |
 | `NEXT_PUBLIC_POSTHOG_KEY`, `NEXT_PUBLIC_POSTHOG_HOST` | Analytics (no-op without a key, honours Do Not Track). |
 
 ## 4. Database (Supabase)
@@ -157,16 +157,15 @@ Suggested order: profiles → progress (the feedback prompt and Today card depen
 5. Read recipes from Supabase (`recipes`/`recipe_blocks` are already seeded) so content can change without a deploy.
 6. CI: add a GitHub Actions workflow running `npm run typecheck && npm run lint && npm test` on every PR.
 7. Google Play: create the two subscriptions, service account and RTDN (`docs/SETUP.md` §3b), build the Android app in Android Studio and test with a licence tester. The Java plugin hasn't been compiled yet.
-8. TheMealDB supporter key before any public or app-store release.
+8. TheMealDB supporter key: done (V2 API).
 9. One codebase for both apps (golden + golden-v1), deployed twice.
 
 ## Keys left for launch (checked on Vercel, 11 Nov 2026)
 
-Already set in Vercel (production): `SESSION_SECRET`, `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, `WHOP_API_KEY`, `WHOP_COMPANY_ID`, `WHOP_PLAN_EXECUTIVE`, `WHOP_PLAN_EXPERIENCE`, `WHOP_WEBHOOK_SECRET`, `GEMINI_MODEL`, `NEXT_PUBLIC_POSTHOG_HOST`.
+Already set in Vercel (production): `SESSION_SECRET`, `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, `WHOP_API_KEY`, `WHOP_COMPANY_ID`, `WHOP_PLAN_EXECUTIVE`, `WHOP_PLAN_EXPERIENCE`, `WHOP_WEBHOOK_SECRET`, `GEMINI_MODEL`, `NEXT_PUBLIC_POSTHOG_HOST`, `MEALDB_API_KEY` (supporter key, V2 API).
 
 | Key | Needed | What happens without it |
 |---|---|---|
-| `MEALDB_API_KEY` | Before public launch | Uses TheMealDB's shared test key, which is for development only. Buy a supporter key. |
 | `GEMINI_API_KEY` | For the AI extras | Recipes rewrite with the built-in rules and Fix My Mistake works by tapping instead of from a photo. Nothing breaks. |
 | `NEXT_PUBLIC_POSTHOG_KEY` | To measure the launch | No analytics are collected. |
 | `GOOGLE_PLAY_SERVICE_ACCOUNT_JSON`, `GOOGLE_PLAY_PACKAGE_NAME`, `GOOGLE_RTDN_TOKEN` | Before the Android app goes on Google Play | Without them the app can't confirm Play purchases. Setup: `docs/SETUP.md` §3b. |

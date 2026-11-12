@@ -1,18 +1,22 @@
 // TheMealDB API (https://www.themealdb.com/api.php). Server-only, cached for a day.
-// The shared test key "1" is for development; public releases need a supporter key.
+// With a supporter key (MEALDB_API_KEY) it uses the V2 API; without one, the shared V1 test key
+// "1", which is for development only.
 
 import "server-only";
 import { cachedMeal } from "@/lib/mealdb/cache";
 import { MEALDB_PREFIX, mealToRecipe, type Meal, type MealSummary } from "@/lib/mealdb/convert";
 import type { Recipe } from "@/lib/types";
 
-const BASE = "https://www.themealdb.com/api/json/v1";
 const DAY = 60 * 60 * 24;
 
+/** "https://www.themealdb.com/api/json/v2/<key>" with a supporter key, else the V1 test key. */
+export function mealdbBase(key = process.env.MEALDB_API_KEY?.trim()): string {
+  return key ? `https://www.themealdb.com/api/json/v2/${key}` : "https://www.themealdb.com/api/json/v1/1";
+}
+
 async function get<T>(path: string): Promise<T | null> {
-  const key = process.env.MEALDB_API_KEY || "1";
   try {
-    const res = await fetch(`${BASE}/${key}/${path}`, { next: { revalidate: DAY }, signal: AbortSignal.timeout(20_000) });
+    const res = await fetch(`${mealdbBase()}/${path}`, { next: { revalidate: DAY }, signal: AbortSignal.timeout(20_000) });
     return res.ok ? ((await res.json()) as T) : null;
   } catch {
     return null;
