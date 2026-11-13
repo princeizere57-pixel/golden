@@ -11,6 +11,7 @@
     "db:studio": "drizzle-kit studio"
   },
   "dependencies": {
+    "@golden/shared": "workspace:*",
     "@hono/node-server": "^1.19.19",
     "@neondatabase/serverless": "^1.2.0",
     "better-auth": "^1.7.22",

@@ -15,8 +15,9 @@ function GoogleG() {
   );
 }
 
-// Where Better Auth sends the browser afterwards; failures (cancelled consent, expired link) get ?error=.
-const AFTER = { callbackURL: "/onboarding", errorCallbackURL: "/auth/callback" };
+// Where Better Auth sends the browser afterwards (/auth/finish restores a returning user's profile);
+// failures (cancelled consent, expired link) go to /auth/callback?error=.
+const AFTER = { callbackURL: "/auth/finish", errorCallbackURL: "/auth/callback" };
 
 /** "Continue with Google" or an emailed one-tap link, both through Better Auth on our API. */
 export function SignInPanel() {

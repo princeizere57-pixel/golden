@@ -15,6 +15,13 @@
       "when": 1794570872989,
       "tag": "0001_crazy_pandemic",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1794572170955,
+      "tag": "0002_handy_warhawk",
+      "breakpoints": true
     }
   ]
 }

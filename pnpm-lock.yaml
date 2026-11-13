@@ -26,6 +26,9 @@ importers:
 
   apps/api:
     dependencies:
+      '@golden/shared':
+        specifier: workspace:*
+        version: link:../../packages/shared
       '@hono/node-server':
         specifier: ^1.19.19
         version: 1.19.19(hono@4.13.18)

@@ -24,7 +24,7 @@ export default async function SignInPage() {
           <div className="rounded-3xl border border-line p-5 text-center">
             <p className="text-sm text-muted">You&apos;re signed in as</p>
             <p className="mt-1 text-lg font-semibold">{user.email}</p>
-            <Link href="/onboarding" className="mt-4 flex min-h-14 w-full items-center justify-center rounded-full bg-button text-lg font-semibold text-button-ink">Continue as {user.name.split(" ")[0]}</Link>
+            <Link href="/auth/finish" className="mt-4 flex min-h-14 w-full items-center justify-center rounded-full bg-button text-lg font-semibold text-button-ink">Continue as {user.name.split(" ")[0]}</Link>
             <form action={switchAccount}>
               <button className="mt-2 min-h-12 w-full rounded-full border-2 border-line font-semibold">Use a different account</button>
             </form>

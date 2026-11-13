@@ -2,9 +2,9 @@
 // forwarded server-to-server; an absent, expired or forged session gives null. Server-only.
 
 import "server-only";
-import { cookies, headers } from "next/headers";
+import { cookies } from "next/headers";
 import { cache } from "react";
-import { apiOrigin } from "@/lib/api-origin";
+import { apiFetch } from "@/lib/api";
 import { SESSION_COOKIES } from "@/lib/journey";
 
 export interface User {
@@ -32,11 +32,7 @@ export const getUser = cache(async (): Promise<User | null> => {
   const jar = await cookies();
   if (!SESSION_COOKIES.some((n) => jar.has(n))) return null;
   try {
-    const res = await fetch(`${apiOrigin()}/api/auth/get-session`, {
-      headers: { cookie: (await headers()).get("cookie") ?? "" },
-      cache: "no-store",
-      signal: AbortSignal.timeout(10_000),
-    });
+    const res = await apiFetch("/api/auth/get-session");
     return res.ok ? sessionUser(await res.json()) : null;
   } catch {
     return null;

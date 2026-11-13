@@ -2,7 +2,7 @@
 
 import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
-import { apiOrigin } from "@/lib/api-origin";
+import { apiFetch } from "@/lib/api";
 import { JOURNEY_COOKIE, SESSION_COOKIES } from "@/lib/journey";
 import { PLAN_COOKIE, PREFS_COOKIE, SKILL_COOKIE } from "@/lib/viewer";
 
@@ -13,12 +13,11 @@ const DEVICE_COOKIES = [...SESSION_COOKIES, "bac-user", SKILL_COOKIE, PREFS_COOK
 async function forget() {
   const h = await headers();
   try {
-    await fetch(`${apiOrigin()}/api/auth/sign-out`, {
+    await apiFetch("/api/auth/sign-out", {
       method: "POST",
       // Better Auth checks Origin on POSTs; it must be this site, which is its trusted origin.
-      headers: { cookie: h.get("cookie") ?? "", origin: `${h.get("x-forwarded-proto") ?? "http"}://${h.get("host")}`, "content-type": "application/json" },
+      headers: { origin: `${h.get("x-forwarded-proto") ?? "http"}://${h.get("host")}`, "content-type": "application/json" },
       body: "{}",
-      signal: AbortSignal.timeout(10_000),
     });
   } catch {
     // API unreachable: still sign out on this device; the session row expires on its own.

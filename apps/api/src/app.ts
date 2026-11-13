@@ -5,6 +5,7 @@ import { HTTPException } from "hono/http-exception";
 import { auth } from "./auth.js";
 import { env } from "./env.js";
 import { health } from "./routes/health.js";
+import { profile } from "./routes/profile.js";
 
 // Convention for apps/api: HTTP wiring here (middleware + mounting), request handling in
 // src/routes/*, business logic in src/services/* (added as endpoints land), data in src/db/*.
@@ -25,5 +26,6 @@ app.notFound((c) => c.json({ error: "Not Found" }, 404));
 app.on(["GET", "POST"], "/api/auth/*", (c) => auth.handler(c.req.raw));
 
 app.route("/", health);
+app.route("/", profile);
 
 export default app;

@@ -2,18 +2,30 @@
 
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
+import { apiFetch } from "@/lib/api";
 import { getUser } from "@/lib/auth";
-import { JOURNEY_COOKIE } from "@/lib/journey";
+import { JOURNEY_COOKIE, SESSION_COOKIES } from "@/lib/journey";
 import { parseTier, planCookieValue, type Tier } from "@/lib/billing/entitlements";
 import { demoPaymentsAllowed } from "@/lib/billing/demo";
 import { ATTRACTION } from "@/lib/billing/offers";
 import { signValue } from "@/lib/signed-cookie";
-import { PLAN_COOKIE, PREFS_COOKIE, SKILL_COOKIE, parseSkill } from "@/lib/viewer";
+import type { Prefs, SkillLevel } from "@/lib/types";
+import { PLAN_COOKIE, SKILL_COOKIE, parseSkill, readPrefs, rememberProfile } from "@/lib/viewer";
 
 const YEAR = 60 * 60 * 24 * 365;
 
+/** Device copy first (pages read it, and it works offline), then the account copy when signed in. */
+async function saveProfile(skill: SkillLevel, prefs: Prefs) {
+  await rememberProfile(skill, prefs);
+  const jar = await cookies();
+  if (!SESSION_COOKIES.some((n) => jar.has(n))) return;
+  const res = await apiFetch("/profile", { method: "PUT", headers: { "content-type": "application/json" }, body: JSON.stringify({ skill, prefs }) }).catch(() => null);
+  // Not fatal: this device keeps the change, and the next change retries the account copy.
+  if (!res?.ok) console.error(`profile sync failed: ${res?.status ?? "network error"}`);
+}
+
 export async function setSkill(skill: string) {
-  (await cookies()).set(SKILL_COOKIE, parseSkill(skill), { maxAge: YEAR, sameSite: "lax", path: "/" });
+  await saveProfile(parseSkill(skill), readPrefs(await cookies()));
 }
 
 /** Level switch used by forms (e.g. on Explore); the page re-renders with the new level. */
@@ -23,13 +35,12 @@ export async function chooseSkill(form: FormData) {
 
 /** Saves the onboarding answers. The level itself is scored on the client (see skillFromAnswers). */
 export async function saveOnboarding(answers: { skill: string; serves: number; weeknightMinutes: number; goals: string[] }) {
-  await setSkill(answers.skill);
-  const prefs = {
+  const prefs: Prefs = {
     serves: Math.min(12, Math.max(1, Math.round(Number(answers.serves) || 2))),
     weeknightMinutes: Math.min(240, Math.max(10, Math.round(Number(answers.weeknightMinutes) || 30))),
     goals: (Array.isArray(answers.goals) ? answers.goals : []).filter((g) => typeof g === "string").slice(0, 8),
   };
-  (await cookies()).set(PREFS_COOKIE, JSON.stringify(prefs), { maxAge: YEAR, sameSite: "lax", path: "/" });
+  await saveProfile(parseSkill(answers.skill), prefs);
 }
 
 /** Marks the first-run sequence as finished so the rest of the app opens. */
