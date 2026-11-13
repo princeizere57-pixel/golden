@@ -1,6 +1,6 @@
 import { Hono } from "hono";
 import { sql } from "drizzle-orm";
-import { getDb } from "../db/client";
+import { getDb } from "../db/client.js";
 
 // Liveness stays 200 even if the DB is down (so uptime checks don't flap); the `database`
 // field reports reachability, which is what proves the Neon wiring end to end.

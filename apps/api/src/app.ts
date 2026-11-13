@@ -2,8 +2,8 @@ import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { logger } from "hono/logger";
 import { HTTPException } from "hono/http-exception";
-import { env } from "./env";
-import { health } from "./routes/health";
+import { env } from "./env.js";
+import { health } from "./routes/health.js";
 
 // Convention for apps/api: HTTP wiring here (middleware + mounting), request handling in
 // src/routes/*, business logic in src/services/* (added as endpoints land), data in src/db/*.

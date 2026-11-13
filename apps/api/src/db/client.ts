@@ -1,7 +1,7 @@
 import { neon } from "@neondatabase/serverless";
 import { drizzle } from "drizzle-orm/neon-http";
-import { env } from "../env";
-import * as schema from "./schema";
+import { env } from "../env.js";
+import * as schema from "./schema.js";
 
 // Lazy so a missing/invalid DATABASE_URL surfaces as a caught error at query time, not an
 // import-time crash that takes the whole serverless function down.
