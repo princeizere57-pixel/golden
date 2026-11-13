@@ -1,6 +1,6 @@
-import { handle } from "hono/vercel";
+import { handle } from "@hono/node-server/vercel";
 import app from "../src/app";
 
-// Vercel function entry (web handler). vercel.json rewrites every path here; Hono routes it.
-// Hono reads the raw request body, so webhook signature checks work.
+// Vercel Node function entry. vercel.json rewrites every path here; Hono does the routing.
+// This adapter gives a Node (req,res) handler and passes the raw body (webhook signatures).
 export default handle(app);
