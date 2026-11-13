@@ -2,6 +2,7 @@ import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { logger } from "hono/logger";
 import { HTTPException } from "hono/http-exception";
+import { auth } from "./auth.js";
 import { env } from "./env.js";
 import { health } from "./routes/health.js";
 
@@ -19,6 +20,9 @@ app.onError((err, c) => {
 });
 
 app.notFound((c) => c.json({ error: "Not Found" }, 404));
+
+// Better Auth owns everything under its basePath; the web proxies /api/auth/* here unstripped.
+app.on(["GET", "POST"], "/api/auth/*", (c) => auth.handler(c.req.raw));
 
 app.route("/", health);
 
