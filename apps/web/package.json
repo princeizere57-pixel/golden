@@ -17,6 +17,7 @@
     "@whop/elements": "1.9.0",
     "@whop/elements-react": "1.9.0",
     "@whop/sdk": "2.6.0",
+    "better-auth": "^1.7.22",
     "next": "15.5.28",
     "react": "19.1.0",
     "react-dom": "19.1.0",

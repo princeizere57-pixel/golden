@@ -21,7 +21,7 @@ export default async function AccountPage({ searchParams }: { searchParams: Prom
       <h1 className="text-3xl font-bold tracking-tight">Account</h1>
       {trial === "started" && <p role="status" className="mt-4 rounded-2xl bg-basil p-4 text-white">Your free trial has started. Happy cooking!</p>}
       <dl className="mt-8 divide-y divide-line rounded-3xl border border-line bg-surface">
-        {user && <Row label={user.provider === "google" ? "Signed in with Google" : "Signed in (demo)"} value={`${user.name} · ${user.email}`} action={null} />}
+        {user && <Row label="Signed in" value={`${user.name} · ${user.email}`} action={null} />}
         <Row label="Skill level" value={SKILL_LABEL[viewer.skill]} action={<Link className="underline" href="/onboarding">Retake quiz</Link>} />
         <Row
           label={viewer.access.trial ? "Plan · free days running" : "Plan"}

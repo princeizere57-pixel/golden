@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { demoSignIn, requestEmailLink } from "@/app/actions/auth";
+import { authClient } from "@/lib/auth-client";
 import { track } from "@/lib/analytics";
 
 function GoogleG() {
@@ -15,69 +15,55 @@ function GoogleG() {
   );
 }
 
-/** "Continue with Google": Supabase OAuth when configured, otherwise a labelled demo form. */
-export function SignInPanel({ supabaseUrl }: { supabaseUrl: string | null }) {
-  const [demo, setDemo] = useState(false);
+// Where Better Auth sends the browser afterwards; failures (cancelled consent, expired link) get ?error=.
+const AFTER = { callbackURL: "/onboarding", errorCallbackURL: "/auth/callback" };
+
+/** "Continue with Google" or an emailed one-tap link, both through Better Auth on our API. */
+export function SignInPanel() {
   const [email, setEmail] = useState("");
   const [sent, setSent] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
 
   function google() {
-    if (!supabaseUrl) return setDemo(true);
+    setError(null);
     track("signin_started", { method: "google" });
-    const redirectTo = `${window.location.origin}/auth/callback`;
-    window.location.assign(`${supabaseUrl}/auth/v1/authorize?provider=google&redirect_to=${encodeURIComponent(redirectTo)}`);
+    startTransition(async () => {
+      // On success the client navigates to Google's consent screen.
+      const { error } = await authClient.signIn.social({ provider: "google", ...AFTER });
+      if (error) setError("Google sign-in isn't available right now. Try the email link instead.");
+    });
   }
 
   function emailLink(e: React.FormEvent) {
     e.preventDefault();
-    if (!supabaseUrl) return setDemo(true);
     setError(null);
     track("signin_started", { method: "email" });
     startTransition(async () => {
-      const r = await requestEmailLink(email, window.location.origin);
-      if (r.ok) setSent(true);
-      else setError(r.error ?? "Something went wrong.");
+      const { error } = await authClient.signIn.magicLink({ email: email.trim().toLowerCase(), ...AFTER });
+      if (error) setError("We couldn't send the email. Check the address and try again in a minute.");
+      else setSent(true);
     });
   }
 
   return (
     <div>
-      <button onClick={google} className="flex min-h-14 w-full items-center justify-center gap-3 rounded-full border-2 border-line bg-bg text-lg font-semibold">
+      <button onClick={google} disabled={pending} className="flex min-h-14 w-full items-center justify-center gap-3 rounded-full border-2 border-line bg-bg text-lg font-semibold disabled:opacity-60">
         <GoogleG /> Continue with Google
       </button>
-      {supabaseUrl && (
-        <>
-          <div className="my-4 flex items-center gap-3 text-sm text-muted"><span className="h-px flex-1 bg-line" />or<span className="h-px flex-1 bg-line" /></div>
-          {sent ? (
-            <p role="status" className="rounded-2xl bg-accent-soft p-4 text-center">Check your inbox: we sent a sign-in link to <strong>{email}</strong>. Open it on this device.</p>
-          ) : (
-            <form onSubmit={emailLink} className="space-y-3">
-              <label className="block text-sm font-medium">
-                Email
-                <input type="email" required autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} className="mt-1 min-h-12 w-full rounded-xl border border-line bg-bg px-3" placeholder="you@example.com" />
-              </label>
-              <button disabled={pending} className="min-h-14 w-full rounded-full bg-button text-lg font-semibold text-button-ink disabled:opacity-60">{pending ? "Sending…" : "Email me a sign-in link"}</button>
-              {error && <p role="alert" className="text-sm text-tomato">{error}</p>}
-            </form>
-          )}
-        </>
-      )}
-      {demo && (
-        <form action={demoSignIn} className="step-in mt-4 space-y-3 rounded-2xl bg-surface p-4">
-          <p className="text-sm text-muted">Google sign-in needs Supabase keys, which aren&apos;t set yet. Continue with a demo account on this device:</p>
-          <label className="block text-sm font-medium">
-            Your name
-            <input name="name" autoComplete="name" className="mt-1 min-h-12 w-full rounded-xl border border-line bg-bg px-3" placeholder="Your first name" />
-          </label>
+      <div className="my-4 flex items-center gap-3 text-sm text-muted"><span className="h-px flex-1 bg-line" />or<span className="h-px flex-1 bg-line" /></div>
+      {sent ? (
+        <p role="status" className="rounded-2xl bg-accent-soft p-4 text-center">Check your inbox: we sent a sign-in link to <strong>{email}</strong>. Open it on this device.</p>
+      ) : (
+        <form onSubmit={emailLink} className="space-y-3">
           <label className="block text-sm font-medium">
             Email
-            <input name="email" type="email" autoComplete="email" className="mt-1 min-h-12 w-full rounded-xl border border-line bg-bg px-3" placeholder="you@example.com" />
+            <input type="email" required autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} className="mt-1 min-h-12 w-full rounded-xl border border-line bg-bg px-3" placeholder="you@example.com" />
           </label>
-          <button className="min-h-14 w-full rounded-full bg-button text-lg font-semibold text-button-ink">Continue (demo)</button>
+          <button disabled={pending} className="min-h-14 w-full rounded-full bg-button text-lg font-semibold text-button-ink disabled:opacity-60">{pending ? "Sending…" : "Email me a sign-in link"}</button>
         </form>
       )}
+      {error && <p role="alert" className="mt-3 text-sm text-tomato">{error}</p>}
       <p className="mt-4 text-center text-xs text-muted">By continuing you agree to our terms. We never post anything on your behalf.</p>
     </div>
   );

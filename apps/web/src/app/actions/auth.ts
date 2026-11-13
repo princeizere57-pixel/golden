@@ -1,52 +1,41 @@
 "use server";
 
-import { randomUUID } from "node:crypto";
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
-import { USER_COOKIE, sendMagicLink, supabaseConfigured, verifySupabaseToken, type User } from "@/lib/auth";
-import { JOURNEY_COOKIE } from "@/lib/journey";
-import { signValue } from "@/lib/signed-cookie";
+import { apiOrigin } from "@/lib/api-origin";
+import { JOURNEY_COOKIE, SESSION_COOKIES } from "@/lib/journey";
 import { PLAN_COOKIE, PREFS_COOKIE, SKILL_COOKIE } from "@/lib/viewer";
 
-const MONTH = 60 * 60 * 24 * 30;
+// "bac-user" was the pre-Better-Auth session cookie; still cleared so older devices drop it.
+const DEVICE_COOKIES = [...SESSION_COOKIES, "bac-user", SKILL_COOKIE, PREFS_COOKIE, PLAN_COOKIE, JOURNEY_COOKIE];
 
-async function remember(user: User) {
-  (await cookies()).set(USER_COOKIE, signValue(JSON.stringify(user)), { maxAge: MONTH, sameSite: "lax", path: "/", httpOnly: true, secure: process.env.NODE_ENV === "production" });
-}
-
-/** Called by /auth/callback with the token Supabase returned after Google sign-in. */
-export async function completeGoogleSignIn(accessToken: string): Promise<{ ok: boolean; error?: string }> {
-  const user = await verifySupabaseToken(accessToken);
-  if (!user) return { ok: false, error: "We couldn't confirm your Google sign-in. Please try again." };
-  await remember(user);
-  return { ok: true };
-}
-
-/** Email sign-in: Supabase sends a magic link; the callback signs the user in. */
-export async function requestEmailLink(email: string, origin: string): Promise<{ ok: boolean; error?: string }> {
-  if (!supabaseConfigured()) return { ok: false, error: "Email sign-in needs Supabase keys." };
-  const ok = await sendMagicLink(email.trim().toLowerCase(), origin);
-  return ok ? { ok: true } : { ok: false, error: "We couldn't send the email. Check the address and try again in a minute." };
-}
-
-/** Development stand-in for Google when Supabase isn't configured. */
-export async function demoSignIn(form: FormData) {
-  if (supabaseConfigured()) throw new Error("Demo sign-in is disabled when Supabase is configured");
-  const name = String(form.get("name") ?? "").trim().slice(0, 60) || "Chef";
-  const email = String(form.get("email") ?? "").trim().slice(0, 120) || "cook@example.com";
-  await remember({ id: `demo-${randomUUID()}`, name, email, provider: "demo" });
-  redirect("/onboarding");
+/** Revokes the Better Auth session in the API, then forgets this device's app state. */
+async function forget() {
+  const h = await headers();
+  try {
+    await fetch(`${apiOrigin()}/api/auth/sign-out`, {
+      method: "POST",
+      // Better Auth checks Origin on POSTs; it must be this site, which is its trusted origin.
+      headers: { cookie: h.get("cookie") ?? "", origin: `${h.get("x-forwarded-proto") ?? "http"}://${h.get("host")}`, "content-type": "application/json" },
+      body: "{}",
+      signal: AbortSignal.timeout(10_000),
+    });
+  } catch {
+    // API unreachable: still sign out on this device; the session row expires on its own.
+  }
+  // The API's Set-Cookie can't reach the browser from a server-to-server call, so clear them here.
+  // A __Secure- cookie can only be overwritten with Secure set.
+  const jar = await cookies();
+  for (const name of DEVICE_COOKIES) jar.set(name, "", { maxAge: 0, path: "/", secure: name.startsWith("__Secure-") });
 }
 
 /** "Use a different account" on the sign-in page: forget this account and stay on sign-in. */
 export async function switchAccount() {
-  const jar = await cookies();
-  for (const name of [USER_COOKIE, SKILL_COOKIE, PREFS_COOKIE, PLAN_COOKIE, JOURNEY_COOKIE]) jar.delete(name);
+  await forget();
   redirect("/signin");
 }
 
 export async function signOut() {
-  const jar = await cookies();
-  for (const name of [USER_COOKIE, SKILL_COOKIE, PREFS_COOKIE, PLAN_COOKIE, JOURNEY_COOKIE]) jar.delete(name);
+  await forget();
   redirect("/");
 }

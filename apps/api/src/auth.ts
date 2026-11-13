@@ -12,6 +12,8 @@ export const auth = betterAuth({
   secret: env.BETTER_AUTH_SECRET,
   basePath: "/api/auth",
   trustedOrigins: [env.WEB_ORIGIN],
+  // Failures with no per-request errorCallbackURL (e.g. a stale Google tab) land on our page, not Better Auth's.
+  onAPIError: { errorURL: env.BETTER_AUTH_URL ? `${env.BETTER_AUTH_URL}/auth/callback` : undefined },
   database: drizzleAdapter(getDb(), { provider: "pg", schema }),
   // UUID ids keep the existing ^[0-9a-f-]{36}$ guards (subscriptions/feedback/checkout) valid.
   advanced: { database: { generateId: "uuid" } },

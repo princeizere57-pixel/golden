@@ -4,7 +4,7 @@ import { switchAccount } from "@/app/actions/auth";
 import { MiniYouFigure } from "@/components/mini-you";
 import { SignInPanel } from "@/components/sign-in-panel";
 import { Brand } from "@/components/site-chrome";
-import { getUser, supabaseConfigured } from "@/lib/auth";
+import { getUser } from "@/lib/auth";
 
 export const metadata: Metadata = { title: "Sign in" };
 
@@ -22,7 +22,7 @@ export default async function SignInPage() {
       <div className="mt-auto pt-10">
         {user ? (
           <div className="rounded-3xl border border-line p-5 text-center">
-            <p className="text-sm text-muted">You&apos;re signed in{user.provider === "google" ? " with Google" : user.provider === "demo" ? " (demo account)" : ""} as</p>
+            <p className="text-sm text-muted">You&apos;re signed in as</p>
             <p className="mt-1 text-lg font-semibold">{user.email}</p>
             <Link href="/onboarding" className="mt-4 flex min-h-14 w-full items-center justify-center rounded-full bg-button text-lg font-semibold text-button-ink">Continue as {user.name.split(" ")[0]}</Link>
             <form action={switchAccount}>
@@ -30,7 +30,7 @@ export default async function SignInPage() {
             </form>
           </div>
         ) : (
-          <SignInPanel supabaseUrl={supabaseConfigured() ? process.env.NEXT_PUBLIC_SUPABASE_URL!.replace(/\/$/, "") : null} />
+          <SignInPanel />
         )}
       </div>
     </main>
