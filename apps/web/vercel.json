@@ -1,5 +1,6 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
+  "buildCommand": "pnpm --filter @golden/shared build && pnpm run build",
   "git": {
     "deploymentEnabled": {
       "ccr-5f7fe554-5fdvox": false

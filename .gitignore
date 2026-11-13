@@ -19,6 +19,8 @@ out/
 
 # production
 build/
+# compiled workspace packages (packages/shared builds on install)
+dist/
 
 # misc
 .DS_Store
