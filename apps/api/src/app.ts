@@ -4,8 +4,12 @@ import { logger } from "hono/logger";
 import { HTTPException } from "hono/http-exception";
 import { auth } from "./auth.js";
 import { env } from "./env.js";
+import { community } from "./routes/community.js";
+import { feedback } from "./routes/feedback.js";
 import { health } from "./routes/health.js";
 import { profile } from "./routes/profile.js";
+import { progress } from "./routes/progress.js";
+import { sync } from "./routes/sync.js";
 
 // Convention for apps/api: HTTP wiring here (middleware + mounting), request handling in
 // src/routes/*, business logic in src/services/* (added as endpoints land), data in src/db/*.
@@ -27,5 +31,9 @@ app.on(["GET", "POST"], "/api/auth/*", (c) => auth.handler(c.req.raw));
 
 app.route("/", health);
 app.route("/", profile);
+app.route("/", sync);
+app.route("/", progress);
+app.route("/", feedback);
+app.route("/", community);
 
 export default app;

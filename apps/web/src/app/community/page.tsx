@@ -33,7 +33,7 @@ export default async function CommunityPage() {
       <p className="mt-2 text-muted">Share what you cooked, ask for help when it goes sideways, and learn from cooks a level above you.</p>
 
       {posts === null ? (
-        <p className="mt-6 rounded-2xl bg-surface p-4 text-sm">The community opens once the database is ready: run <code>supabase/migrations/0004_growth.sql</code> in your Supabase SQL Editor.</p>
+        <p className="mt-6 rounded-2xl bg-surface p-4 text-sm">The community can&apos;t be reached right now. Please try again in a minute.</p>
       ) : (
         <>
           <form action={createPost} className="mt-6 space-y-3 rounded-3xl border border-line p-4">

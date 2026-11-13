@@ -1,126 +1,53 @@
-// Mini You, XP, streak and the kitchen log, kept on this device. Client-side only.
+// Mini You, XP, streak and the kitchen log. The rules live in @golden/shared (applyEvent): this
+// device applies them at once for an instant UI, then the account's server applies the same rules
+// and its answer replaces the device copy (lib/sync). Client-side only.
 
-import { STORE_EVENT } from "@/lib/device-store";
-import { XP, dayKey, nextStreak, rankFor, type Mood } from "@/lib/gamify";
+import { dayKey, type Mood } from "@/lib/gamify";
+import { STORE_EVENT, sendProgressEvent } from "@/lib/sync";
+import { EMPTY_PROGRESS, applyEvent, normalizeProgress, type Avatar, type Progress, type ProgressEvent } from "@/lib/types";
 
-export interface Avatar {
-  /** Boy or girl Mini You. The girl always has her voluminous curls. */
-  figure: "boy" | "girl";
-  skin: string;
-  hair: string;
-  /** Boy only. */
-  hairStyle: "short" | "curly" | "long" | "none";
-  /** Boy only. */
-  beard: boolean;
-  glasses: boolean;
+export type { Avatar, LogEntry, LogKind, Progress } from "@/lib/types";
+export { DEFAULT_AVATAR } from "@/lib/types";
+
+const KEY = "bac-progress";
+
+export function readProgress(): Progress {
+  try {
+    // Unknown avatar fields (old photo/cartoon options) are dropped; the next save removes them.
+    return normalizeProgress(JSON.parse(localStorage.getItem(KEY) ?? "null"));
+  } catch {
+    return EMPTY_PROGRESS;
+  }
 }
 
-export type LogKind = "cooked" | "mistake" | "fixed" | "rank" | "saved" | "listed" | "quiz";
-
-export interface LogEntry {
-  id: string;
-  kind: LogKind;
-  title: string;
-  detail: string;
-  image?: string;
-  at: number;
+function record(event: ProgressEvent) {
+  const result = applyEvent(readProgress(), event, {
+    now: Date.now(),
+    today: dayKey(new Date()),
+    newId: () => `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+  });
+  try {
+    localStorage.setItem(KEY, JSON.stringify(result.progress));
+  } catch {
+    // Storage full or blocked: keep going for this visit.
+  }
+  window.dispatchEvent(new Event(STORE_EVENT));
+  sendProgressEvent(event);
+  return result;
 }
 
-export interface Progress {
-  xp: number;
-  streak: number;
-  lastCookDay: string | null;
-  dishes: number;
-  mood?: { state: Mood; at: number };
-  log: LogEntry[];
-  avatar: Avatar;
+export function recordCooked(title: string, image?: string): { xp: number; streak: number; rankedUp: boolean } {
+  const { xp, streak, rankedUp } = record({ type: "cooked", title, image, today: dayKey(new Date()) });
+  return { xp, streak, rankedUp };
 }
 
-export const DEFAULT_AVATAR: Avatar = { figure: "boy", skin: "#e0ac83", hair: "#3b2a20", hairStyle: "short", beard: false, glasses: false };
+export const recordMistake = (label: string, dish: string) => void record({ type: "mistake", label, dish });
+export const recordFixed = (headline: string) => void record({ type: "fixed", headline });
+export const recordActivity = (kind: "saved" | "listed", title: string, detail: string, image?: string) => void record({ type: "activity", kind, title, detail, image });
+export const setMood = (state: Mood) => void record({ type: "mood", state });
+export const updateAvatar = (change: Partial<Avatar>) => void record({ type: "avatar", change });
 
 /** Picks boy or girl; the girl starts with dark brown curls and no beard. */
 export function chooseFigure(figure: Avatar["figure"]) {
   updateAvatar(figure === "girl" ? { figure, hair: "#4a2c1d", beard: false } : { figure });
-}
-
-const KEY = "bac-progress";
-const EMPTY: Progress = { xp: 0, streak: 0, lastCookDay: null, dishes: 0, log: [], avatar: DEFAULT_AVATAR };
-
-export function readProgress(): Progress {
-  try {
-    const value = JSON.parse(localStorage.getItem(KEY) ?? "null");
-    if (!value) return EMPTY;
-    // Photos and cartoons are no longer used: drop them so the next save removes them from the device.
-    const { photo: _p, photoFace: _pf, cartoon: _c, useCartoon: _uc, ...avatar } = value.avatar ?? {};
-    void [_p, _pf, _c, _uc];
-    return { ...EMPTY, ...value, avatar: { ...DEFAULT_AVATAR, ...avatar } };
-  } catch {
-    return EMPTY;
-  }
-}
-
-function save(p: Progress) {
-  try {
-    localStorage.setItem(KEY, JSON.stringify({ ...p, log: p.log.slice(0, 60) }));
-  } catch {
-    // Storage full (large photo?) or blocked: keep going for this visit.
-  }
-  window.dispatchEvent(new Event(STORE_EVENT));
-}
-
-function entry(kind: LogKind, title: string, detail: string, image?: string): LogEntry {
-  return { id: `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`, kind, title, detail, image, at: Date.now() };
-}
-
-/** Adds XP and logs a rank-up when it happens. Returns the updated progress. */
-function addXp(p: Progress, amount: number): Progress {
-  const before = rankFor(p.xp);
-  const xp = p.xp + amount;
-  const after = rankFor(xp);
-  if (after.index > before.index) {
-    return { ...p, xp, mood: { state: "proud", at: Date.now() }, log: [entry("rank", "Promoted", `you're now a ${after.title}`), ...p.log] };
-  }
-  return { ...p, xp };
-}
-
-export function recordCooked(title: string, image?: string): { xp: number; streak: number; rankedUp: boolean } {
-  const p = readProgress();
-  const today = dayKey(new Date());
-  const streak = nextStreak(p.lastCookDay, p.streak, today);
-  const before = rankFor(p.xp).index;
-  let next: Progress = {
-    ...p,
-    streak,
-    lastCookDay: today,
-    dishes: p.dishes + 1,
-    mood: { state: "happy", at: Date.now() },
-    log: [entry("cooked", "Cooked", `${title} · +${XP.cooked} XP`, image), ...p.log],
-  };
-  next = addXp(next, XP.cooked);
-  save(next);
-  return { xp: XP.cooked, streak, rankedUp: rankFor(next.xp).index > before };
-}
-
-export function recordMistake(label: string, dish: string) {
-  const p = readProgress();
-  save({ ...p, mood: { state: "sad", at: Date.now() }, log: [entry("mistake", "Fix My Mistake", `${label.toLowerCase()} in ${dish}`), ...p.log] });
-}
-
-export function recordFixed(headline: string) {
-  const p = readProgress();
-  save(addXp({ ...p, mood: { state: "happy", at: Date.now() }, log: [entry("fixed", "Rescued", `${headline.toLowerCase()} · +${XP.fixed} XP`), ...p.log] }, XP.fixed));
-}
-
-export function recordActivity(kind: "saved" | "listed", title: string, detail: string, image?: string) {
-  const p = readProgress();
-  save({ ...p, log: [entry(kind, title, detail, image), ...p.log] });
-}
-
-export function setMood(state: Mood) {
-  save({ ...readProgress(), mood: { state, at: Date.now() } });
-}
-
-export function updateAvatar(change: Partial<Avatar>) {
-  const p = readProgress();
-  save({ ...p, avatar: { ...p.avatar, ...change } });
 }

@@ -10,6 +10,8 @@ const envSchema = z.object({
   BETTER_AUTH_URL: z.string().url().optional(),
   GOOGLE_CLIENT_ID: z.string().optional(),
   GOOGLE_CLIENT_SECRET: z.string().optional(),
+  // Shared secret for web-server-to-API calls on routes the browser must not reach directly.
+  INTERNAL_API_KEY: z.string().optional(),
 });
 
 export const env = envSchema.parse(process.env);

@@ -1,7 +1,9 @@
 // "Apprentice Meets Master": cooks share dishes, ask for help, and higher levels reply.
-// Stored in Supabase (`community_posts`, `community_replies`), written by the server. Server-only.
+// Stored by our API (community_posts / community_replies). Only this server may call those
+// endpoints (INTERNAL_API_KEY), because the paid-plan check happens here. Server-only.
 
 import "server-only";
+import { apiFetch } from "@/lib/api";
 import type { SkillLevel } from "@/lib/types";
 
 export interface Reply {
@@ -14,7 +16,6 @@ export interface Reply {
 
 export interface Post {
   id: string;
-  user_id: string;
   name: string;
   level: SkillLevel;
   dish: string;
@@ -24,32 +25,22 @@ export interface Post {
   community_replies: Reply[];
 }
 
-function db() {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL?.replace(/\/$/, "");
-  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
-  return url && key ? { url, headers: { apikey: key, Authorization: `Bearer ${key}`, "Content-Type": "application/json" } } : null;
-}
+const internal = () => ({ "x-internal-key": process.env.INTERNAL_API_KEY ?? "" });
 
-/** Latest posts with their replies. `null` means the community tables aren't set up yet. */
+/** Latest posts with their replies. `null` means the community can't be reached right now. */
 export async function listPosts(limit = 30): Promise<Post[] | null> {
-  const d = db();
-  if (!d) return null;
   try {
-    const res = await fetch(
-      `${d.url}/rest/v1/community_posts?select=*,community_replies(id,name,level,body,created_at)&order=created_at.desc&limit=${limit}&community_replies.order=created_at.asc`,
-      { headers: d.headers, cache: "no-store" },
-    );
-    if (!res.ok) return null;
-    return (await res.json()) as Post[];
+    const res = await apiFetch(`/community/posts?limit=${limit}`, { headers: internal() });
+    return res.ok ? ((await res.json()) as { posts: Post[] }).posts : null;
   } catch {
     return null;
   }
 }
 
-export async function insert(table: "community_posts" | "community_replies", row: Record<string, unknown>): Promise<boolean> {
-  const d = db();
-  if (!d) return false;
-  const res = await fetch(`${d.url}/rest/v1/${table}`, { method: "POST", headers: { ...d.headers, Prefer: "return=minimal" }, body: JSON.stringify(row) }).catch(() => null);
+/** Posts as the signed-in user (their cookie is forwarded); the API adds their name and level. */
+export async function send(path: string, body: Record<string, unknown>): Promise<boolean> {
+  const res = await apiFetch(path, { method: "POST", headers: { ...internal(), "content-type": "application/json" }, body: JSON.stringify(body) }).catch(() => null);
+  if (!res?.ok) console.error("[community] save failed", res?.status ?? "network error");
   return Boolean(res?.ok);
 }
 

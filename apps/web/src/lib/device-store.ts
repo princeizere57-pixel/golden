@@ -1,25 +1,14 @@
-// Saved recipes and the shopping list, kept on this device until accounts exist. Client-side only.
-// Components re-read on the "bac-store" event, which fires on every write here.
+// Saved recipes, the shopping list and the pantry. The device copy is what pages read; every write
+// is also sent to the signed-in account (lib/sync). Components re-read on the "bac-store" event.
 
-export interface SavedRecipe {
-  slug: string;
-  href: string;
-  title: string;
-  image?: string;
-  minutes: number;
-}
+import { STORE_EVENT, schedulePush } from "@/lib/sync";
+import type { SavedRecipe, ShoppingItem } from "@/lib/types";
 
-export interface ShoppingItem {
-  id: string;
-  text: string;
-  recipeTitle: string;
-  href: string;
-  done: boolean;
-}
+export { STORE_EVENT };
+export type { SavedRecipe, ShoppingItem };
 
 const SAVED = "bac-saved";
 const SHOPPING = "bac-shopping";
-export const STORE_EVENT = "bac-store";
 
 function read<T>(key: string): T[] {
   try {
@@ -37,6 +26,7 @@ function write<T>(key: string, value: T[]) {
     // Storage full or blocked: the change lasts for this visit only.
   }
   window.dispatchEvent(new Event(STORE_EVENT));
+  schedulePush(key);
 }
 
 export const listSaved = () => read<SavedRecipe>(SAVED);

@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { cookies } from "next/headers";
 import localFont from "next/font/local";
+import { AccountSync } from "@/components/account-sync";
 import { PageViews } from "@/components/page-views";
 import { SiteHeader, TabBar } from "@/components/site-chrome";
 import { TimerProvider, TimerTray } from "@/components/timers";
@@ -39,6 +40,7 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
             <TimerTray />
           </div>
           <PageViews />
+          <AccountSync />
         </TimerProvider>
       </body>
     </html>

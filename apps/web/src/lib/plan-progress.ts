@@ -1,6 +1,6 @@
-// Which dishes in the current meal plan are finished, kept on this device. Client-side only.
+// Which dishes in the current meal plan are finished. Device copy, synced to the account. Client-side only.
 
-import { STORE_EVENT } from "@/lib/device-store";
+import { STORE_EVENT, schedulePush } from "@/lib/sync";
 
 const KEY = "bac-plan-done";
 
@@ -18,6 +18,7 @@ function write(slugs: string[]) {
     localStorage.setItem(KEY, JSON.stringify(slugs));
   } catch {}
   window.dispatchEvent(new Event(STORE_EVENT));
+  schedulePush(KEY);
 }
 
 export const markPlanDone = (slug: string) => write([...new Set([...listPlanDone(), slug])]);

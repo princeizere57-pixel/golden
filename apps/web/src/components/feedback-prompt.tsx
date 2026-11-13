@@ -10,6 +10,7 @@ import { MiniYou } from "@/components/mini-you";
 import { track } from "@/lib/analytics";
 import { FEEDBACK_MAX_LENGTH, feedbackQuestion, shouldAskFeedback, type FeedbackMemory } from "@/lib/feedback";
 import { readProgress } from "@/lib/progress-store";
+import { schedulePush } from "@/lib/sync";
 
 const KEY = "bac-feedback";
 
@@ -26,6 +27,7 @@ function remember(m: FeedbackMemory) {
   try {
     localStorage.setItem(KEY, JSON.stringify(m));
   } catch {}
+  schedulePush(KEY);
 }
 
 const FACES = ["😣", "🙁", "😐", "🙂", "😍"];

@@ -4,6 +4,7 @@
 // time, so the countdown stays correct even if the tab was asleep.
 
 import { StopwatchIcon } from "@/components/icons-3d";
+import { STORE_EVENT, schedulePush } from "@/lib/sync";
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 
 export interface Timer {
@@ -62,19 +63,27 @@ export function TimerProvider({ children }: { children: React.ReactNode }) {
   const [timers, setTimers] = useState<Timer[]>([]);
   const [now, setNow] = useState(() => Date.now());
 
+  // Load on mount, and again when the account's copy arrives (a timer started on another device).
   useEffect(() => {
-    try {
-      const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) ?? "[]") as Timer[];
-      if (Array.isArray(saved)) setTimers(saved);
-    } catch {
-      // Storage unavailable: timers just won't persist.
-    }
+    const load = () => {
+      try {
+        const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) ?? "[]") as Timer[];
+        if (Array.isArray(saved)) setTimers((ts) => (JSON.stringify(ts) === JSON.stringify(saved) ? ts : saved));
+      } catch {
+        // Storage unavailable: timers just won't persist.
+      }
+    };
+    load();
+    window.addEventListener(STORE_EVENT, load);
+    return () => window.removeEventListener(STORE_EVENT, load);
   }, []);
 
   useEffect(() => {
     try {
+      if (localStorage.getItem(STORAGE_KEY) === JSON.stringify(timers)) return;
       localStorage.setItem(STORAGE_KEY, JSON.stringify(timers));
     } catch {}
+    schedulePush(STORAGE_KEY);
   }, [timers]);
 
   useEffect(() => {

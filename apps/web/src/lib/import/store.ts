@@ -1,6 +1,7 @@
-// Imported recipes live on the user's device (and in the private `imported_recipes` table
-// once accounts are wired up). Client-side only.
+// Imported recipes: a device copy plus the account's private `imported_recipes` table (only ever
+// read by their owner; never in the feed, search, segments or share). Client-side only.
 
+import { STORE_EVENT, schedulePush } from "@/lib/sync";
 import type { Recipe } from "@/lib/types";
 
 const KEY = "bac-imports";
@@ -22,6 +23,8 @@ function write(recipes: Recipe[]) {
   } catch {
     // Storage full or blocked: the import still works for this visit.
   }
+  window.dispatchEvent(new Event(STORE_EVENT));
+  schedulePush(KEY);
 }
 
 export function saveImport(recipe: Recipe) {

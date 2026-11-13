@@ -22,6 +22,13 @@
       "when": 1794572170955,
       "tag": "0002_handy_warhawk",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1794606313893,
+      "tag": "0003_hesitant_power_man",
+      "breakpoints": true
     }
   ]
 }

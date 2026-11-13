@@ -1,19 +1,16 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
 import { CookView } from "@/components/cook-view";
+import { useStore } from "@/components/recipe-actions";
 import { RecipeDetail } from "@/components/recipe-detail";
 import { activeMinutes } from "@/lib/skill/adapt";
 import { difficulty } from "@/lib/skill/difficulty";
 import { getImport } from "@/lib/import/store";
 import type { Recipe, SkillLevel } from "@/lib/types";
 
-function useImport(slug: string) {
-  const [recipe, setRecipe] = useState<Recipe | null | undefined>(undefined);
-  useEffect(() => setRecipe(getImport(slug) ?? null), [slug]);
-  return recipe;
-}
+// Re-reads when the account's copy arrives, so a new device shows the import without a reload.
+const useImport = (slug: string) => useStore<Recipe | null | undefined>(() => getImport(slug) ?? null, undefined);
 
 function Missing() {
   return (

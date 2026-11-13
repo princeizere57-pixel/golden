@@ -2,8 +2,9 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useState, useTransition } from "react";
+import { useState, useTransition } from "react";
 import { importRecipeAction } from "@/app/actions/import";
+import { useStore } from "@/components/recipe-actions";
 import { SourcePhoto } from "@/components/source-photo";
 import { listImports, removeImport, saveImport } from "@/lib/import/store";
 import type { Recipe } from "@/lib/types";
@@ -12,10 +13,8 @@ export function ImportPanel() {
   const router = useRouter();
   const [link, setLink] = useState("");
   const [error, setError] = useState<string | null>(null);
-  const [imports, setImports] = useState<Recipe[]>([]);
+  const imports = useStore<Recipe[]>(listImports, []);
   const [pending, startTransition] = useTransition();
-
-  useEffect(() => setImports(listImports()), []);
 
   function submit(e: React.FormEvent) {
     e.preventDefault();
@@ -61,10 +60,7 @@ export function ImportPanel() {
                 <span className="text-sm text-muted">from {r.source?.name}</span>
               </Link>
               <button
-                onClick={() => {
-                  removeImport(r.slug);
-                  setImports(listImports());
-                }}
+                onClick={() => removeImport(r.slug)}
                 className="min-h-11 rounded-full px-3 text-sm underline"
                 aria-label={`Remove ${r.title}`}
               >
