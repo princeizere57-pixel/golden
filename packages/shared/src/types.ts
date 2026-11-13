@@ -1,4 +1,4 @@
-// Shared domain types for Be a Chef. Every module imports from here.
+// Shared domain types for Golden. Single source of truth; imported by apps/web and apps/api.
 
 export const SKILL_LEVELS = ["beginner", "intermediate", "chef"] as const;
 export type SkillLevel = (typeof SKILL_LEVELS)[number];
