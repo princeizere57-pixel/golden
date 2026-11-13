@@ -8,8 +8,8 @@ const config: CapacitorConfig = {
   appName: "Golden",
   webDir: "mobile/www",
   server: {
-    url: "https://golden-two-pi.vercel.app",
-    cleartext: false,
+    url: "http://192.168.1.195:3000",
+    cleartext: true,
     errorPath: "index.html",
     // Sign-in pages that may open inside the app. No web payment pages: inside the store apps,
     // subscriptions go through Google Play Billing (Android) and Apple in-app purchase (iPhone).
