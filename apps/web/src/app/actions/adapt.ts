@@ -1,7 +1,7 @@
 "use server";
 
 import { generateJson } from "@/lib/ai/gemini";
-import { getRecipe } from "@/lib/data/recipes";
+import { catalogueRecipe } from "@/lib/catalogue";
 import { findRecipe } from "@/lib/mealdb/client";
 import { adaptRecipe, validateAdapted } from "@/lib/skill/adapt";
 import { fixMistake, type Fix, type MistakeId } from "@/lib/recovery/fixes";
@@ -16,7 +16,7 @@ const VOICE = {
 
 /** Rewrites a recipe for a skill level with Gemini; falls back to the deterministic engine. */
 export async function adaptRecipeAction(slug: string, skillInput: string): Promise<AdaptedRecipe | null> {
-  const recipe = await findRecipe(slug, getRecipe);
+  const recipe = await findRecipe(slug, catalogueRecipe);
   if (!recipe) return null;
   const skill = parseSkill(skillInput);
   const fallback = adaptRecipe(recipe, skill);
@@ -32,7 +32,7 @@ export async function adaptRecipeAction(slug: string, skillInput: string): Promi
 /** The deterministic fix, plus one optional AI tip for this dish. */
 export async function fixMistakeAction(slug: string, mistake: MistakeId, volumeMl: number, severity: 1 | 2 | 3): Promise<Fix & { tip?: string }> {
   const fix = fixMistake(mistake, { volumeMl, severity });
-  const recipe = await findRecipe(slug, getRecipe);
+  const recipe = await findRecipe(slug, catalogueRecipe);
   if (!recipe) return fix;
   const answer = (await generateJson(
     `A cook making "${recipe.title}" has this problem: ${mistake}. The standard fix is: ${fix.steps.join(" ")} ` +

@@ -7,8 +7,10 @@ import { env } from "./env.js";
 import { community } from "./routes/community.js";
 import { feedback } from "./routes/feedback.js";
 import { health } from "./routes/health.js";
+import { mealdb } from "./routes/mealdb.js";
 import { profile } from "./routes/profile.js";
 import { progress } from "./routes/progress.js";
+import { recipes } from "./routes/recipes.js";
 import { sync } from "./routes/sync.js";
 
 // Convention for apps/api: HTTP wiring here (middleware + mounting), request handling in
@@ -35,5 +37,7 @@ app.route("/", sync);
 app.route("/", progress);
 app.route("/", feedback);
 app.route("/", community);
+app.route("/", mealdb);
+app.route("/", recipes);
 
 export default app;

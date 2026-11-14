@@ -8,6 +8,6 @@ export const dynamic = "force-dynamic";
 
 export default async function SurprisePage() {
   const { skill } = await getViewer();
-  const recipe = surpriseRecipe(skill);
+  const recipe = await surpriseRecipe(skill);
   redirect(recipe ? recipeHref(recipe) : "/explore");
 }

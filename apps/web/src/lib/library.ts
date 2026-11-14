@@ -1,10 +1,10 @@
-// Recipes available without network calls: our seed recipes plus the local TheMealDB cache.
+// Golden's own recipes (lib/catalogue) plus the library snapshot of TheMealDB meals (taken from our API at build).
 // Powers the Discover and For you pages. Server-only.
 
 import "server-only";
 import { allCachedMeals } from "@/lib/mealdb/cache";
 import type { PantryRecipe } from "@/components/pantry";
-import { RECIPES } from "@/lib/data/recipes";
+import { catalogue } from "@/lib/catalogue";
 import { recipeHref } from "@/lib/links";
 import { mealToRecipe, thumb } from "@/lib/mealdb/convert";
 import { covers } from "@/lib/pantry";
@@ -41,9 +41,9 @@ export function dishOfTheDay(skill: SkillLevel, date = new Date()): Recipe | und
  * the library, photo required, only the fields the client needs. `limit` caps the library part
  * to keep the page light.
  */
-export function pantryRecipes(limit?: number): PantryRecipe[] {
+export async function pantryRecipes(limit?: number): Promise<PantryRecipe[]> {
   const lib = libraryRecipes();
-  return [...RECIPES.filter((r) => r.image), ...(limit ? lib.slice(0, limit) : lib)].map((r) => ({
+  return [...(await catalogue()).filter((r) => r.image), ...(limit ? lib.slice(0, limit) : lib)].map((r) => ({
     slug: r.slug,
     href: recipeHref(r),
     title: r.title,
@@ -63,17 +63,17 @@ export function justAdded(limit = 10): Recipe[] {
 }
 
 /** Recipes (ours and the library) that use every listed ingredient ("pasta" covers penne). */
-export function recipesWithIngredients(ingredients: string[]): Recipe[] {
+export async function recipesWithIngredients(ingredients: string[]): Promise<Recipe[]> {
   const wanted = ingredients.map((i) => i.trim()).filter((i) => i.length > 1).slice(0, 4);
   if (!wanted.length) return [];
-  return [...RECIPES, ...libraryRecipes()].filter(
+  return [...(await catalogue()), ...libraryRecipes()].filter(
     (r) => r.image && wanted.every((w) => r.ingredients.some((i) => covers(w, i.name))),
   );
 }
 
 /** A random recipe that suits the level (for "Surprise me"). */
-export function surpriseRecipe(skill: SkillLevel, random = Math.random): Recipe | undefined {
-  const all = [...RECIPES, ...libraryRecipes()].filter((r) => r.image);
+export async function surpriseRecipe(skill: SkillLevel, random = Math.random): Promise<Recipe | undefined> {
+  const all = [...(await catalogue()), ...libraryRecipes()].filter((r) => r.image);
   const pool = all.filter((r) => difficulty(r).level === skill);
   const list = pool.length ? pool : all;
   return list.length ? list[Math.floor(random() * list.length)] : undefined;

@@ -28,20 +28,9 @@ export interface MealSummary {
 
 export const MEALDB_PREFIX = "mealdb-";
 
-/** Shape saved by scripts/seed-mealdb.ts: the API fields with ingredients as a clean list. */
-export interface CachedMeal {
-  idMeal: string;
-  strMeal: string;
-  strCategory: string | null;
-  strArea: string | null;
-  strInstructions: string;
-  strMealThumb: string | null;
-  strYoutube: string | null;
-  strSource: string | null;
-  /** Optional in caches written before 12 Nov 2026. */
-  dateModified?: string | null;
-  ingredients: Array<{ name: string; measure: string }>;
-}
+/** The stored shape (API table, web snapshot) lives in @golden/shared with its parser. */
+export type { CachedMeal } from "@/lib/types";
+import type { CachedMeal } from "@/lib/types";
 
 export function fromCached({ ingredients, ...rest }: CachedMeal): Meal {
   const meal: Meal = { ...rest };

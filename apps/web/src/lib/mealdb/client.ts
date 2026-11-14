@@ -1,13 +1,25 @@
-// TheMealDB API (https://www.themealdb.com/api.php). Server-only, cached for a day.
-// With a supporter key (MEALDB_API_KEY) it uses the V2 API; without one, the shared V1 test key
-// "1", which is for development only.
+// Library meals: our API first (its mealdb_meals table mirrors TheMealDB nightly), TheMealDB itself
+// as the fallback. Server-only, cached. With a supporter key (MEALDB_API_KEY) TheMealDB answers on
+// V2; without one, the shared V1 test key "1", which is for development only.
 
 import "server-only";
+import { apiOrigin } from "@/lib/api-origin";
 import { cachedMeal } from "@/lib/mealdb/cache";
-import { MEALDB_PREFIX, mealToRecipe, type Meal, type MealSummary } from "@/lib/mealdb/convert";
+import { MEALDB_PREFIX, fromCached, mealToRecipe, type CachedMeal, type Meal, type MealSummary } from "@/lib/mealdb/convert";
 import type { Recipe } from "@/lib/types";
 
 const DAY = 60 * 60 * 24;
+
+/** Our API's copy of the library; null when it can't be reached (callers then ask TheMealDB). */
+async function ours<T>(path: string): Promise<T | null> {
+  try {
+    const res = await fetch(`${apiOrigin()}${path}`, { next: { revalidate: 3600 }, signal: AbortSignal.timeout(8_000) });
+    return res.ok ? ((await res.json()) as T) : null;
+  } catch {
+    return null;
+  }
+}
+const toRecipes = (meals: CachedMeal[]) => meals.map((m) => mealToRecipe(fromCached(m))).filter((r): r is Recipe => r !== null && Boolean(r.image));
 
 /** "https://www.themealdb.com/api/json/v2/<key>" with a supporter key, else the V1 test key. */
 export function mealdbBase(key = process.env.MEALDB_API_KEY?.trim()): string {
@@ -51,6 +63,8 @@ async function get<T>(path: string): Promise<T | null> {
 }
 
 export async function mealCategories(): Promise<string[]> {
+  const mine = await ours<{ categories: string[] }>("/mealdb/categories");
+  if (mine?.categories.length) return mine.categories;
   const data = await get<{ categories?: Array<{ strCategory: string }> }>("categories.php");
   return data?.categories?.map((c) => c.strCategory) ?? [];
 }
@@ -69,6 +83,9 @@ export async function mealRecipe(id: string): Promise<Recipe | null> {
   if (!/^\d+$/.test(id)) return null;
   const cached = cachedMeal(id);
   if (cached) return mealToRecipe(cached);
+  // Synced after this build's snapshot? Our API has it.
+  const mine = await ours<CachedMeal>(`/mealdb/meals/${id}`);
+  if (mine) return mealToRecipe(fromCached(mine));
   const data = await get<{ meals?: Meal[] | null }>(`lookup.php?i=${id}`);
   const meal = data?.meals?.[0];
   return meal ? mealToRecipe(meal) : null;
@@ -91,6 +108,8 @@ async function mapLimit<T, R>(items: T[], limit: number, fn: (item: T) => Promis
 
 /** Full recipes for a category (each lookup is cached for a day). Meals that fail to load are skipped. */
 export async function categoryRecipes(category: string): Promise<Recipe[]> {
+  const mine = await ours<{ meals: CachedMeal[] }>(`/mealdb/meals?category=${encodeURIComponent(category)}`);
+  if (mine?.meals.length) return toRecipes(mine.meals);
   const summaries = await mealsByCategory(category);
   const recipes = await mapLimit(summaries, 8, (s) => mealRecipe(s.idMeal));
   return recipes.filter((r): r is Recipe => r !== null && Boolean(r.image));
@@ -98,13 +117,15 @@ export async function categoryRecipes(category: string): Promise<Recipe[]> {
 
 /** Full recipes matching a search (search.php already returns full meals). */
 export async function searchRecipes(query: string): Promise<Recipe[]> {
+  const mine = await ours<{ meals: CachedMeal[] }>(`/mealdb/meals?q=${encodeURIComponent(query)}&limit=60`);
+  if (mine?.meals.length) return toRecipes(mine.meals);
   const data = await get<{ meals?: Meal[] | null }>(`search.php?s=${encodeURIComponent(query)}`);
   return (data?.meals ?? []).map(mealToRecipe).filter((r): r is Recipe => r !== null && Boolean(r.image));
 }
 
-/** Seed recipe or TheMealDB recipe, by slug. */
-export async function findRecipe(slug: string, seed: (slug: string) => Recipe | undefined): Promise<Recipe | undefined> {
-  return seed(slug) ?? (slug.startsWith(MEALDB_PREFIX) ? (await mealRecipe(slug.slice(MEALDB_PREFIX.length))) ?? undefined : undefined);
+/** Golden recipe or TheMealDB recipe, by slug. */
+export async function findRecipe(slug: string, own: (slug: string) => Recipe | undefined | Promise<Recipe | undefined>): Promise<Recipe | undefined> {
+  return (await own(slug)) ?? (slug.startsWith(MEALDB_PREFIX) ? (await mealRecipe(slug.slice(MEALDB_PREFIX.length))) ?? undefined : undefined);
 }
 
 // ---- Premium discovery (V2): popular, latest and multi-ingredient search. A supporter key lifts

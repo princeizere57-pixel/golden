@@ -36,16 +36,21 @@ describe("TheMealDB premium (V2) discovery", () => {
   });
 });
 
+// Offline: our API is unreachable, so Golden's bundled recipes stand in (and nothing hits the network).
+const offline = () => vi.stubGlobal("fetch", vi.fn(() => Promise.reject(new Error("offline"))));
+
 describe("library fallbacks", () => {
-  it("finds recipes that use every listed ingredient", () => {
-    const found = recipesWithIngredients(["garlic", "pasta"]);
+  it("finds recipes that use every listed ingredient", async () => {
+    offline();
+    const found = await recipesWithIngredients(["garlic", "pasta"]);
     expect(found.length).toBeGreaterThan(0);
     expect(found.every((r) => r.ingredients.some((i) => /garlic/i.test(i.name)))).toBe(true);
-    expect(recipesWithIngredients([])).toEqual([]);
+    expect(await recipesWithIngredients([])).toEqual([]);
   });
 
-  it("picks a surprise recipe at the cook's level when there is one", () => {
-    expect(surpriseRecipe("beginner", () => 0)?.image).toBeTruthy();
+  it("picks a surprise recipe at the cook's level when there is one", async () => {
+    offline();
+    expect((await surpriseRecipe("beginner", () => 0))?.image).toBeTruthy();
   });
 });
 

@@ -7,7 +7,7 @@ import { LockedPage, PlanLock } from "@/components/plan-lock";
 import { DishCards, DishPicker, FinishDish, type DishOption } from "@/components/plan-dishes";
 import { SkillSteps } from "@/components/skill-steps";
 import { VideoSnippet } from "@/components/video-snippet";
-import { RECIPES, getRecipe } from "@/lib/data/recipes";
+import { catalogue, catalogueRecipe } from "@/lib/catalogue";
 import { forLevel, libraryRecipes } from "@/lib/library";
 import { MAX_DISHES, formatDuration, planHref, recipeHref, totalMinutes } from "@/lib/links";
 import { findRecipe } from "@/lib/mealdb/client";
@@ -39,10 +39,10 @@ export default async function PlanPage({ searchParams }: { searchParams: Promise
   const params = await searchParams;
   const asked = [...new Set([params.dish ?? []].flat())].filter((s) => /^[a-z0-9-]{2,80}$/.test(s));
   const slugs = asked.slice(0, max);
-  const dishes = (await Promise.all(slugs.map((s) => findRecipe(s, getRecipe)))).filter((r): r is Recipe => Boolean(r));
+  const dishes = (await Promise.all(slugs.map((s) => findRecipe(s, catalogueRecipe)))).filter((r): r is Recipe => Boolean(r));
 
   if (!dishes.length) {
-    const choices = forLevel([...RECIPES, ...libraryRecipes()], viewer.skill)
+    const choices = forLevel([...(await catalogue()), ...libraryRecipes()], viewer.skill)
       .filter((r) => difficulty(r).level === viewer.skill)
       .slice(0, 30);
     return (

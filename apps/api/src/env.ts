@@ -12,6 +12,10 @@ const envSchema = z.object({
   GOOGLE_CLIENT_SECRET: z.string().optional(),
   // Shared secret for web-server-to-API calls on routes the browser must not reach directly.
   INTERNAL_API_KEY: z.string().optional(),
+  // TheMealDB supporter key (nightly library sync).
+  MEALDB_API_KEY: z.string().optional(),
+  // Vercel Cron sends "Authorization: Bearer <CRON_SECRET>".
+  CRON_SECRET: z.string().optional(),
 });
 
 export const env = envSchema.parse(process.env);

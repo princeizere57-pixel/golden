@@ -4,23 +4,23 @@ import { CookView } from "@/components/cook-view";
 import { LockedPage } from "@/components/plan-lock";
 import { can } from "@/lib/billing/entitlements";
 
-import { RECIPES, getRecipe } from "@/lib/data/recipes";
+import { catalogue, catalogueRecipe } from "@/lib/catalogue";
 import { safePlanBack } from "@/lib/links";
 import { getViewer } from "@/lib/viewer";
 
 type Props = { params: Promise<{ slug: string }>; searchParams: Promise<{ back?: string }> };
 
-export function generateStaticParams() {
-  return RECIPES.map((r) => ({ slug: r.slug }));
+export async function generateStaticParams() {
+  return (await catalogue()).map((r) => ({ slug: r.slug }));
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const recipe = getRecipe((await params).slug);
+  const recipe = await catalogueRecipe((await params).slug);
   return recipe ? { title: `Cooking ${recipe.title}` } : {};
 }
 
 export default async function CookPage({ params, searchParams }: Props) {
-  const recipe = getRecipe((await params).slug);
+  const recipe = await catalogueRecipe((await params).slug);
   if (!recipe) notFound();
   const viewer = await getViewer();
   const back = safePlanBack((await searchParams).back);

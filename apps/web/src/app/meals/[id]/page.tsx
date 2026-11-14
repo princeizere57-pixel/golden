@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { RecipeDetail } from "@/components/recipe-detail";
 import { can } from "@/lib/billing/entitlements";
-import { RECIPES } from "@/lib/data/recipes";
+import { catalogue } from "@/lib/catalogue";
 import { planHref } from "@/lib/links";
 import { mealRecipe } from "@/lib/mealdb/client";
 import { pairingsFor } from "@/lib/pairings";
@@ -31,7 +31,7 @@ export default async function MealPage({ params }: Props) {
       cookHref={`/meals/${id}/cook`}
       planHref={planHref([recipe.slug])}
       access={can(viewer.tier, "cookMode") ? "open" : "locked-cook"}
-      pairings={pairingsFor(recipe, RECIPES)}
+      pairings={pairingsFor(recipe, await catalogue())}
       credit={
         <p key="credit" className="mt-3 text-sm">
           Recipe from <a href={recipe.source!.url} target="_blank" rel="noopener noreferrer" className="underline">TheMealDB ↗</a>

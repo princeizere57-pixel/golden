@@ -1,4 +1,4 @@
-import type { Avatar, Prefs, Progress, Recipe } from "@golden/shared";
+import type { Avatar, CachedMeal, Prefs, Progress, Recipe, RecipeRow } from "@golden/shared";
 import { bigint, bigserial, boolean, index, integer, jsonb, pgTable, primaryKey, serial, smallint, text, timestamp, uuid } from "drizzle-orm/pg-core";
 import { user } from "./auth-schema.js";
 
@@ -152,4 +152,61 @@ export const communityReplies = pgTable(
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   },
   (t) => [index("community_replies_post_idx").on(t.postId, t.createdAt)],
+);
+
+// TheMealDB library, mirrored nightly by GET /cron/mealdb (services/mealdb.ts). Public data.
+export const mealdbMeals = pgTable(
+  "mealdb_meals",
+  {
+    id: text("id").primaryKey(),
+    name: text("name").notNull(),
+    category: text("category"),
+    area: text("area"),
+    instructions: text("instructions").notNull(),
+    thumb: text("thumb"),
+    youtube: text("youtube"),
+    source: text("source"),
+    ingredients: jsonb("ingredients").$type<CachedMeal["ingredients"]>().notNull(),
+    // TheMealDB's own "YYYY-MM-DD HH:MM:SS", kept as text so it round-trips unchanged.
+    dateModified: text("date_modified"),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [index("mealdb_meals_category_idx").on(t.category)],
+);
+
+// Golden's own recipes (seeded from @golden/shared by scripts/seed-recipes.ts; editable here after).
+// Column names match RecipeRow so rows from recipeToRows insert as they are.
+export const recipes = pgTable("recipes", {
+  slug: text("slug").primaryKey(),
+  title: text("title").notNull(),
+  summary: text("summary").notNull(),
+  chef: text("chef").notNull(),
+  category: text("category").notNull(),
+  dietary: text("dietary").array().notNull(),
+  serves: integer("serves").notNull(),
+  colourway: text("colourway").notNull(),
+  image: text("image"),
+  imageCredit: jsonb("image_credit").$type<RecipeRow["imageCredit"]>(),
+  video: text("video"),
+  youtube: text("youtube"),
+  premium: boolean("premium").notNull(),
+  realTime: boolean("real_time").notNull().default(false),
+  source: jsonb("source").$type<RecipeRow["source"]>(),
+  ingredients: jsonb("ingredients").$type<Recipe["ingredients"]>().notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+export const recipeBlocks = pgTable(
+  "recipe_blocks",
+  {
+    recipeSlug: text("recipe_slug")
+      .notNull()
+      .references(() => recipes.slug, { onDelete: "cascade" }),
+    position: integer("position").notNull(),
+    blockId: text("block_id").notNull(),
+    kind: text("kind").notNull(),
+    // The block minus id/kind (text, minutes, attention, cue, heat, picture…).
+    body: jsonb("body").$type<Record<string, unknown>>().notNull(),
+  },
+  (t) => [primaryKey({ columns: [t.recipeSlug, t.position] })],
 );

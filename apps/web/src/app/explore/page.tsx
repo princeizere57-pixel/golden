@@ -4,7 +4,7 @@ import { chooseSkill } from "@/app/actions/viewer";
 import { NoMatches } from "@/components/no-matches";
 import { categoryRecipes, mealCategories, mealIdsWithIngredients, recipesForIds, searchRecipes } from "@/lib/mealdb/client";
 import { thumb } from "@/lib/mealdb/convert";
-import { RECIPES } from "@/lib/data/recipes";
+import { catalogue } from "@/lib/catalogue";
 import { libraryRecipes, recipesWithIngredients } from "@/lib/library";
 import { recipeHref } from "@/lib/links";
 import { mergeResults } from "@/lib/search";
@@ -33,9 +33,9 @@ export default async function ExplorePage({ searchParams }: { searchParams: Prom
   ]);
   // Golden's own recipes first (seed, real-time, cached library), then TheMealDB's live results.
   const recipes = byIngredients
-    ? [...recipesWithIngredients(ingredients), ...found].filter((r, i, all) => all.findIndex((x) => x.slug === r.slug) === i)
+    ? [...(await recipesWithIngredients(ingredients)), ...found].filter((r, i, all) => all.findIndex((x) => x.slug === r.slug) === i)
     : query
-      ? mergeResults([...RECIPES, ...libraryRecipes()], query, found)
+      ? mergeResults([...(await catalogue()), ...libraryRecipes()], query, found)
       : found;
 
   const rated = recipes.map((recipe) => ({ recipe, difficulty: difficulty(recipe) }));

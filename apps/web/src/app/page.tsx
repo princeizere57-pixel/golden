@@ -9,7 +9,7 @@ import { FeedbackPrompt } from "@/components/feedback-prompt";
 import { TodayCard } from "@/components/today-card";
 import { TIER_NAME, can } from "@/lib/billing/entitlements";
 import { TRIAL_HEADLINE_DAYS, offerById } from "@/lib/billing/offers";
-import { RECIPES } from "@/lib/data/recipes";
+import { catalogue } from "@/lib/catalogue";
 import { byCategory, dishOfTheDay, forLevel, justAdded, libraryRecipes, pantryRecipes } from "@/lib/library";
 import { latestMealIds, popularMealIds, recipesForIds } from "@/lib/mealdb/client";
 import { formatDuration, planHref, totalMinutes } from "@/lib/links";
@@ -66,7 +66,8 @@ export default async function Discover({ searchParams }: { searchParams: Promise
   const fresh = [...latest, ...justAdded(12)].filter((r, i, all) => all.findIndex((x) => x.slug === r.slug) === i).slice(0, 10);
   const popular = (await recipesForIds(popularIds.slice(0, 12))).slice(0, 10);
   // Tonight's pick for the Today card: a real-time recipe, a different one each day.
-  const realTime = RECIPES.filter((r) => r.realTime);
+  const own = await catalogue();
+  const realTime = own.filter((r) => r.realTime);
   const pickRecipe = realTime[Math.floor(Date.now() / 86_400_000) % Math.max(1, realTime.length)];
   const pick = pickRecipe && {
     title: pickRecipe.title,
@@ -139,7 +140,7 @@ export default async function Discover({ searchParams }: { searchParams: Promise
       </Rail>
 
       <Rail heading="New recipes">
-        {RECIPES.map((r) => <PhotoCard key={r.slug} recipe={r} badge="NEW" />)}
+        {own.map((r) => <PhotoCard key={r.slug} recipe={r} badge="NEW" />)}
       </Rail>
 
       {fresh.length > 0 && (
@@ -147,10 +148,10 @@ export default async function Discover({ searchParams }: { searchParams: Promise
       )}
 
       <Rail heading="Real-time cooking: prep while it cooks">
-        {RECIPES.filter((r) => r.realTime).map((r) => <PhotoCard key={r.slug} recipe={r} />)}
+        {realTime.map((r) => <PhotoCard key={r.slug} recipe={r} />)}
       </Rail>
 
-      {can(viewer.tier, "pantry") && <PantryRail recipes={pantryRecipes(300)} />}
+      {can(viewer.tier, "pantry") && <PantryRail recipes={await pantryRecipes(300)} />}
 
       {picks.length > 0 && <Rail heading="Right at your level" href="/for-you">{picks.map((r) => <PhotoCard key={r.slug} recipe={r} />)}</Rail>}
 

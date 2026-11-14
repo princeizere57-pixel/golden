@@ -1,0 +1,278 @@
+// Original seed recipes, written for this project. They seed the API's `recipes` / `recipe_blocks`
+// tables (apps/api/scripts/seed-recipes.ts), which the web reads (apps/web/src/lib/catalogue.ts);
+// this bundled copy is the seed and the offline fallback.
+
+import type { Recipe, Segment } from "../types.js";
+import { REAL_TIME_RECIPES } from "./real-time.js";
+import { STEP_PICTURES } from "./step-pictures.js";
+
+const CLASSICS: Recipe[] = [
+  {
+    slug: "garlic-butter-pasta",
+    // Photo of a similar dish from TheMealDB (350 px variant), credited on the card and page.
+    image: "https://www.themealdb.com/images/media/meals/uquqtu1511178042.jpg/medium",
+    imageCredit: { name: "TheMealDB", url: "https://www.themealdb.com/meal/52835" },
+    title: "Garlic Butter Pasta",
+    summary: "Glossy, emulsified butter sauce built from pasta water. The first sauce every cook should own.",
+    chef: "Be a Chef Kitchen",
+    category: "Pasta",
+    dietary: ["vegetarian"],
+    serves: 2,
+    colourway: "saffron",
+    premium: false,
+    ingredients: [
+      { id: "spaghetti", name: "Spaghetti", quantity: 200, unit: "g" },
+      { id: "garlic", name: "Garlic", quantity: 4, unit: "pc", prep: "thinly sliced" },
+      { id: "butter", name: "Unsalted butter", quantity: 50, unit: "g", prep: "cubed, cold" },
+      { id: "parsley", name: "Parsley", quantity: 2, unit: "tbsp", prep: "chopped" },
+      { id: "lemon", name: "Lemon", quantity: 0.5, unit: "pc" },
+    ],
+    blocks: [
+      {
+        id: "boil",
+        kind: "heat",
+        heat: "high",
+        vessel: "large pot",
+        text: "Bring 2 litres of water to a rolling boil, then salt it generously.",
+        minutes: 8,
+        attention: "passive",
+        cue: "big bubbles break the surface constantly",
+        science: "Salt at ~1% by weight seasons the pasta from within; it doesn't meaningfully raise the boiling point.",
+        terms: { "rolling boil": "bubbles that keep going even when you stir" },
+      },
+      {
+        id: "prep",
+        kind: "prep",
+        ingredientIds: ["garlic", "parsley", "butter"],
+        text: "Slice the garlic thinly, chop the parsley and cube the butter. Keep the butter cold.",
+        minutes: 4,
+        attention: "active",
+        science: "Cold butter emulsifies more slowly and stably than melted butter.",
+      },
+      {
+        id: "cook-pasta",
+        kind: "timing",
+        timerLabel: "Pasta",
+        text: "Cook the spaghetti 1 minute short of the packet time, then reserve a mug of pasta water.",
+        minutes: 9,
+        attention: "passive",
+        cue: "it bends but still has a thin white core when bitten",
+        science: "Pulling it early lets it finish in the sauce and absorb flavour; the starchy water is your emulsifier.",
+        terms: { "al dente": "cooked but still firm to the bite" },
+      },
+      {
+        id: "garlic",
+        kind: "heat",
+        heat: "medium-low",
+        vessel: "wide frying pan",
+        text: "Warm 1 tbsp of the butter, add the garlic and cook gently.",
+        minutes: 2,
+        attention: "active",
+        cue: "the garlic is pale gold and smells sweet, not brown",
+        science: "Garlic burns above ~160 °C; low heat extracts sweetness before the Maillard browning turns bitter.",
+      },
+      {
+        id: "emulsify",
+        kind: "heat",
+        heat: "medium",
+        vessel: "wide frying pan",
+        text: "Add the pasta and a splash of pasta water, then toss while adding the cold butter a cube at a time; finish with lemon and parsley.",
+        minutes: 2,
+        attention: "active",
+        cue: "the sauce looks creamy and clings to the pasta",
+        science: "Starch stabilises the butterfat in water; keep it below a simmer or the emulsion breaks.",
+        terms: { emulsify: "blend fat and water into one smooth sauce" },
+      },
+    ],
+  },
+  {
+    slug: "crispy-chickpea-traybake",
+    // Photo of a similar dish from TheMealDB (350 px variant), credited on the card and page.
+    image: "https://www.themealdb.com/images/media/meals/tvtxpq1511464705.jpg/medium",
+    imageCredit: { name: "TheMealDB", url: "https://www.themealdb.com/meal/52870" },
+    title: "Crispy Chickpea Traybake",
+    summary: "One tray, mostly hands-off. Spiced chickpeas and peppers roasted until blistered.",
+    chef: "Be a Chef Kitchen",
+    category: "Traybakes",
+    dietary: ["vegan", "gluten-free"],
+    serves: 2,
+    colourway: "tomato",
+    premium: false,
+    ingredients: [
+      { id: "chickpeas", name: "Chickpeas", quantity: 400, unit: "g", prep: "drained and patted dry" },
+      { id: "pepper", name: "Red pepper", quantity: 2, unit: "pc", prep: "cut into strips" },
+      { id: "onion", name: "Red onion", quantity: 1, unit: "pc", prep: "cut into wedges" },
+      { id: "paprika", name: "Smoked paprika", quantity: 2, unit: "tsp" },
+      { id: "oil", name: "Olive oil", quantity: 2, unit: "tbsp" },
+    ],
+    blocks: [
+      {
+        id: "oven",
+        kind: "heat",
+        heat: "high",
+        vessel: "oven at 220 °C / 200 °C fan",
+        text: "Heat the oven with the empty tray inside.",
+        minutes: 10,
+        attention: "passive",
+        science: "A preheated tray sears on contact, so the chickpeas crisp instead of steaming.",
+      },
+      {
+        id: "prep",
+        kind: "prep",
+        ingredientIds: ["chickpeas", "pepper", "onion", "paprika", "oil"],
+        text: "Pat the chickpeas very dry, then toss everything with the oil, paprika and a pinch of salt.",
+        minutes: 6,
+        attention: "active",
+        cue: "every chickpea is lightly coated and there's no water pooling",
+        terms: { "pat dry": "press gently with a clean towel to remove surface water" },
+      },
+      {
+        id: "roast",
+        kind: "timing",
+        timerLabel: "Roast",
+        text: "Spread on the hot tray in one layer and roast, shaking once halfway.",
+        minutes: 25,
+        attention: "passive",
+        cue: "the peppers have black blisters and the chickpeas rattle when shaken",
+        science: "One layer matters: crowding traps steam and drops the surface temperature below browning.",
+      },
+    ],
+  },
+  {
+    slug: "pan-seared-salmon",
+    // Photo of a similar dish from TheMealDB (350 px variant), credited on the card and page.
+    image: "https://www.themealdb.com/images/media/meals/xxyupu1468262513.jpg/medium",
+    imageCredit: { name: "TheMealDB", url: "https://www.themealdb.com/meal/52773" },
+    title: "Pan-Seared Salmon, Crisp Skin",
+    summary: "Restaurant-crisp skin in a home pan, with a two-minute brown butter.",
+    chef: "Be a Chef Kitchen",
+    category: "Fish",
+    dietary: ["gluten-free"],
+    serves: 2,
+    colourway: "aubergine",
+    premium: true,
+    ingredients: [
+      { id: "salmon", name: "Salmon fillets, skin on", quantity: 2, unit: "pc" },
+      { id: "oil", name: "Neutral oil", quantity: 1, unit: "tbsp" },
+      { id: "butter", name: "Butter", quantity: 30, unit: "g" },
+      { id: "thyme", name: "Thyme", quantity: 3, unit: "pc", prep: "sprigs" },
+    ],
+    blocks: [
+      {
+        id: "dry",
+        kind: "prep",
+        ingredientIds: ["salmon"],
+        text: "Pat the skin completely dry and salt it; leave it for 5 minutes.",
+        minutes: 5,
+        attention: "passive",
+        science: "Salt draws out surface moisture you can blot again; dry skin is what makes crisp skin.",
+      },
+      {
+        id: "sear",
+        kind: "heat",
+        heat: "medium-high",
+        vessel: "heavy frying pan",
+        text: "Heat the oil until shimmering, lay the salmon skin-side down and press for 10 seconds; cook without moving it.",
+        minutes: 5,
+        attention: "active",
+        cue: "the colour has crept two-thirds of the way up the side",
+        science: "Pressing stops the skin buckling as proteins contract, keeping full contact for even browning.",
+        terms: { shimmering: "the oil ripples like a heat haze, just before it smokes" },
+      },
+      {
+        id: "baste",
+        kind: "heat",
+        heat: "medium",
+        vessel: "heavy frying pan",
+        text: "Flip, add the butter and thyme, then spoon the foaming butter over the fish.",
+        minutes: 1.5,
+        attention: "active",
+        cue: "the butter smells nutty and turns light brown",
+        science: "Foaming butter is past 100 °C; basting cooks the top gently while milk solids brown for flavour.",
+        terms: { baste: "spoon hot fat over food while it cooks" },
+      },
+      {
+        id: "rest",
+        kind: "timing",
+        timerLabel: "Rest",
+        text: "Rest skin-side up for 2 minutes.",
+        minutes: 2,
+        attention: "passive",
+        science: "Carry-over cooking adds ~3 °C; aim to pull at 45–50 °C in the centre for a moist finish.",
+      },
+    ],
+  },
+  {
+    slug: "fluffy-rice",
+    // Photo of a similar dish from TheMealDB (350 px variant), credited on the card and page.
+    image: "https://www.themealdb.com/images/media/meals/kw92t41604181871.jpg/medium",
+    imageCredit: { name: "TheMealDB", url: "https://www.themealdb.com/meal/53033" },
+    title: "Foolproof Fluffy Rice",
+    summary: "The absorption method, with the exact ratio and the resting step most people skip.",
+    chef: "Be a Chef Kitchen",
+    category: "Basics",
+    dietary: ["vegan", "gluten-free"],
+    serves: 2,
+    colourway: "basil",
+    premium: false,
+    ingredients: [
+      { id: "rice", name: "Basmati rice", quantity: 150, unit: "g" },
+      { id: "water", name: "Water", quantity: 225, unit: "ml" },
+    ],
+    blocks: [
+      {
+        id: "rinse",
+        kind: "prep",
+        ingredientIds: ["rice"],
+        text: "Rinse the rice in a sieve until the water runs almost clear.",
+        minutes: 2,
+        attention: "active",
+        science: "Rinsing removes loose surface starch that would otherwise glue the grains together.",
+      },
+      {
+        id: "simmer",
+        kind: "heat",
+        heat: "low",
+        vessel: "small pot with a tight lid",
+        text: "Bring the rice and water to a boil, then cover and turn to the lowest heat.",
+        minutes: 12,
+        attention: "passive",
+        cue: "small holes appear on the surface and no water is visible",
+        science: "A 1:1.5 ratio by volume for rinsed basmati; the lid traps steam to finish cooking evenly.",
+        terms: { simmer: "small, gentle bubbles, not a boil" },
+      },
+      {
+        id: "rest",
+        kind: "timing",
+        timerLabel: "Rice rest",
+        text: "Take off the heat and leave covered for 10 minutes, then fluff with a fork.",
+        minutes: 10,
+        attention: "passive",
+        science: "Resting redistributes moisture so the bottom isn't wet and the top isn't firm.",
+      },
+    ],
+  },
+];
+
+/** Attaches each step's transparent picture, when one exists. */
+const withPictures = (r: Recipe): Recipe => {
+  const have = STEP_PICTURES[r.slug];
+  if (!have) return r;
+  return { ...r, blocks: r.blocks.map((b) => (have.includes(b.id) ? { ...b, picture: `/steps/${r.slug}/${b.id}.webp` } : b)) };
+};
+
+export const RECIPES: Recipe[] = [...CLASSICS, ...REAL_TIME_RECIPES].map(withPictures);
+
+export function getRecipe(slug: string): Recipe | undefined {
+  return RECIPES.find((r) => r.slug === slug);
+}
+
+/** A data-driven home layout (see lib/discovery/segments.ts). Not wired to a page yet: Discover builds its rails directly. */
+export const HOME_SEGMENTS: Segment[] = [
+  { id: "continue", type: "continueCooking", heading: "Continue cooking" },
+  { id: "new", type: "newRecipes", heading: "New this week", limit: 8 },
+  { id: "quick", type: "rail", heading: "Under 10 minutes hands-on", filter: { maxActiveMinutes: 10 } },
+  { id: "first-steps", type: "rail", heading: "Start here", filter: { category: "Basics" }, visibility: { skills: ["beginner"] } },
+  { id: "plant", type: "rail", heading: "Plant-based", filter: { dietary: "vegan" } },
+  { id: "promo", type: "premiumPromo", heading: "Cook anything, at your level", visibility: { plans: ["free"] } },
+];
