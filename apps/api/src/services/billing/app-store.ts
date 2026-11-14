@@ -1,9 +1,8 @@
 // App Store Server Notifications V2. The payload is a JWS signed with ES256 whose x5c header
-// carries a certificate chain that must end at Apple Root CA - G3. Server-only.
+// carries a certificate chain that must end at Apple Root CA - G3.
 
-import "server-only";
 import { X509Certificate, createHash, verify } from "node:crypto";
-import type { SubscriptionStatus } from "@/lib/billing/subscriptions";
+import type { SubscriptionStatus } from "@golden/shared/billing";
 
 /** SHA-256 fingerprint of Apple Root CA - G3 (override with APPLE_ROOT_CA_SHA256 if Apple rotates it). */
 export const APPLE_ROOT_G3_SHA256 = "63343ABFB89A6A03EBB57E9B3F5FA7BE7C4F5C756F3017B3A8C488C3653E9179";

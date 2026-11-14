@@ -1,4 +1,4 @@
-// Google Play Developer API (androidpublisher v3), server-only. Confirms a subscription with Google
+// Google Play Developer API (androidpublisher v3). Confirms a subscription with Google
 // before Golden grants anything, and acknowledges new purchases (Play refunds purchases that
 // aren't acknowledged within 3 days).
 //
@@ -7,8 +7,7 @@
 // in GOOGLE_PLAY_SERVICE_ACCOUNT_JSON. The key signs a short-lived JWT exchanged for an access token.
 
 import { createSign } from "node:crypto";
-import type { SubscriptionStatus } from "@/lib/billing/subscriptions";
-import { ATTRACTION } from "@/lib/billing/offers";
+import { ATTRACTION, type SubscriptionStatus } from "@golden/shared/billing";
 
 const SCOPE = "https://www.googleapis.com/auth/androidpublisher";
 const API = "https://androidpublisher.googleapis.com/androidpublisher/v3/applications";

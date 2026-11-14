@@ -1,4 +1,5 @@
 import type { Avatar, CachedMeal, Prefs, Progress, Recipe, RecipeRow } from "@golden/shared";
+import type { BillingProvider, OfferId, SubscriptionStatus } from "@golden/shared/billing";
 import { bigint, bigserial, boolean, index, integer, jsonb, pgTable, primaryKey, serial, smallint, text, timestamp, uuid } from "drizzle-orm/pg-core";
 import { user } from "./auth-schema.js";
 
@@ -209,4 +210,40 @@ export const recipeBlocks = pgTable(
     body: jsonb("body").$type<Record<string, unknown>>().notNull(),
   },
   (t) => [primaryKey({ columns: [t.recipeSlug, t.position] })],
+);
+
+// Paid plans from every channel (Whop, Google Play, App Store), written only by verified webhooks
+// and server-side purchase checks (services/billing). user_id has no foreign key on purpose: a
+// webhook can name an account we don't know (yet), and the payment row must still be kept.
+export const subscriptions = pgTable(
+  "subscriptions",
+  {
+    provider: text("provider").$type<BillingProvider>().notNull(),
+    // Whop membership/payment id, Play purchase token or App Store originalTransactionId.
+    externalId: text("external_id").notNull(),
+    status: text("status").$type<SubscriptionStatus>().notNull(),
+    userId: text("user_id"),
+    whopUserId: text("whop_user_id"),
+    currentPeriodEnd: timestamp("current_period_end", { withTimezone: true }),
+    offer: text("offer").$type<OfferId>(),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [primaryKey({ columns: [t.provider, t.externalId] }), index("subscriptions_user_idx").on(t.userId), index("subscriptions_whop_user_idx").on(t.whopUserId)],
+);
+
+// Whop checkouts Golden started: pending when checkout opens, paid when payment.succeeded arrives.
+export const orders = pgTable(
+  "orders",
+  {
+    orderId: text("order_id").primaryKey(),
+    userId: text("user_id").notNull(),
+    offer: text("offer").$type<OfferId>().notNull(),
+    status: text("status").$type<"pending" | "paid">().notNull().default("pending"),
+    whopPaymentId: text("whop_payment_id"),
+    referredBy: text("referred_by"),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [index("orders_user_idx").on(t.userId)],
 );

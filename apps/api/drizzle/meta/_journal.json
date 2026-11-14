@@ -36,6 +36,13 @@
       "when": 1794661058299,
       "tag": "0004_uneven_miracleman",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1794663574102,
+      "tag": "0005_gifted_fenris",
+      "breakpoints": true
     }
   ]
 }

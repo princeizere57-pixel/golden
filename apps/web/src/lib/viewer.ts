@@ -6,8 +6,8 @@ import "server-only";
 import { cache } from "react";
 import { cookies } from "next/headers";
 import { getUser } from "@/lib/auth";
+import { apiFetch } from "@/lib/api";
 import { accessFromCookie, type Access, type Tier } from "@/lib/billing/entitlements";
-import { activeAccess } from "@/lib/billing/subscriptions";
 import { verifyValue } from "@/lib/signed-cookie";
 import { SKILL_LEVELS, type Prefs, type SkillLevel, type Viewer } from "@/lib/types";
 
@@ -38,18 +38,25 @@ export async function rememberProfile(skill: SkillLevel, prefs: Prefs) {
   jar.set(PREFS_COOKIE, JSON.stringify(prefs), { maxAge: YEAR, sameSite: "lax", path: "/" });
 }
 
-/** One subscription read per request, however many components ask for the viewer. */
-const accessForUser = cache((userId: string) => activeAccess(userId));
+/** The signed-in account's plan from the API, once per request; null when the API can't say. */
+const accountAccess = cache(async (): Promise<Access | null> => {
+  try {
+    const res = await apiFetch("/billing/access");
+    return res.ok ? ((await res.json()) as Access) : null;
+  } catch {
+    return null;
+  }
+});
 
 export async function getViewer(): Promise<Viewer & { tier: Tier; access: Access; onboarded: boolean; prefs: Prefs }> {
   const jar = await cookies();
-  // The plan: for real accounts the `subscriptions` table decides (the payment webhooks keep it
-  // current, so cancellations, expiries and upgrades count). The signed plan cookie is only the
-  // answer when Supabase isn't available: demo mode, or a database outage.
+  // The plan: for real accounts the API's `subscriptions` table decides (the payment webhooks keep
+  // it current, so cancellations, expiries and upgrades count). The signed plan cookie is only the
+  // answer when the API can't be reached, or in demo mode.
   // During the free days everything is unlocked; afterwards the chosen plan decides.
   const cookieAccess = accessFromCookie(verifyValue(jar.get(PLAN_COOKIE)?.value));
   const user = await getUser();
-  const access = (user ? await accessForUser(user.id) : null) ?? cookieAccess;
+  const access = (user ? await accountAccess() : null) ?? cookieAccess;
   const tier = access.tier;
   return {
     skill: parseSkill(jar.get(SKILL_COOKIE)?.value),

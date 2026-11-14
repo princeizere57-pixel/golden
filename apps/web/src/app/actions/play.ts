@@ -1,15 +1,13 @@
 "use server";
 
 // Google Play Billing, called by the Android app after Google's purchase sheet closes (or to
-// restore purchases). Premium is only granted after Google's API confirms the subscription.
+// restore purchases). The API confirms the subscription with Google before granting anything.
 
 import { cookies } from "next/headers";
 import { markJourneyDone } from "@/app/actions/viewer";
+import { apiFetch } from "@/lib/api";
 import { getUser } from "@/lib/auth";
-import { acknowledgePlaySubscription, getPlaySubscription, judgePlaySubscription, playApiConfigured } from "@/lib/billing/google-play-api";
-import { offerForPlayProduct } from "@/lib/billing/play-products";
-import { ENTITLED, saveSubscription } from "@/lib/billing/subscriptions";
-import { planCookieValue } from "@/lib/billing/entitlements";
+import { planCookieValue, type OfferId } from "@/lib/billing/entitlements";
 import { signValue } from "@/lib/signed-cookie";
 import { PLAN_COOKIE } from "@/lib/viewer";
 
@@ -17,31 +15,16 @@ const YEAR = 60 * 60 * 24 * 365;
 
 export type PlayResult = { ok: true; premium: boolean } | { ok: false; error: string };
 
+type Verified = { ok: true; entitled: boolean; offer: OfferId; trialEndsAt?: number } | { ok?: false; error?: string };
+
 export async function verifyPlayPurchase(productId: string, purchaseToken: string): Promise<PlayResult> {
-  const user = await getUser();
-  if (!user) return { ok: false, error: "Please sign in first." };
-  const offer = offerForPlayProduct(productId);
-  if (!offer) return { ok: false, error: "Unknown plan." };
-  if (!/^[\w.:-]{20,2048}$/.test(purchaseToken)) return { ok: false, error: "That purchase couldn't be read." };
-  if (!playApiConfigured()) return { ok: false, error: "Google Play purchases aren't switched on yet. You haven't been charged twice; contact support." };
+  if (!(await getUser())) return { ok: false, error: "Please sign in first." };
+  const res = await apiFetch("/billing/play/verify", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ productId, purchaseToken }) }).catch(() => null);
+  const v = res ? ((await res.json().catch(() => null)) as Verified | null) : null;
+  if (v?.ok !== true) return { ok: false, error: v?.error && res?.status !== 500 ? v.error : "We couldn't confirm your purchase right now. Try again in a moment." };
 
-  let verdict;
-  try {
-    const sub = await getPlaySubscription(purchaseToken);
-    verdict = judgePlaySubscription(sub, { userId: user.id, productId }, ENTITLED);
-  } catch (e) {
-    console.error("[play] verify failed", e);
-    return { ok: false, error: "We couldn't reach Google Play to confirm your purchase. Try again in a moment." };
-  }
-  if (!verdict.ok) return { ok: false, error: verdict.reason };
-
-  await saveSubscription({ provider: "google_play", externalId: purchaseToken, status: verdict.status, userId: user.id, currentPeriodEnd: verdict.expiry, offer }).catch((e) =>
-    console.error("[play] could not save subscription", e),
-  );
-  if (verdict.needsAck) await acknowledgePlaySubscription(productId, purchaseToken).catch((e) => console.error("[play] acknowledge failed", e));
-
-  const jar = await cookies();
-  jar.set(PLAN_COOKIE, signValue(verdict.entitled ? planCookieValue(offer, verdict.status === "trialing" && verdict.expiry ? Date.parse(verdict.expiry) : undefined) : "free"), { maxAge: YEAR, sameSite: "lax", path: "/", httpOnly: true });
-  if (verdict.entitled) await markJourneyDone();
-  return { ok: true, premium: verdict.entitled };
+  // Device copy of the plan, for when the API can't be reached (the API stays the source).
+  (await cookies()).set(PLAN_COOKIE, signValue(v.entitled ? planCookieValue(v.offer, v.trialEndsAt) : "free"), { maxAge: YEAR, sameSite: "lax", path: "/", httpOnly: true });
+  if (v.entitled) await markJourneyDone();
+  return { ok: true, premium: v.entitled };
 }

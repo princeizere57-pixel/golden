@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { accessFor, accessFromCookie, bestTier, can, parseTier, planCookieValue, planFor, type Feature } from "@/lib/billing/entitlements";
 import { OFFERS } from "@/lib/billing/offers";
-import { accessFrom, tierFrom } from "@/lib/billing/subscriptions";
+import { accessFrom, tierFrom } from "@/lib/billing/entitlements";
 import { shellFromUserAgent, storeFor } from "@/lib/native/user-agent";
 
 const NOW = Date.parse("2026-11-10T12:00:00Z");

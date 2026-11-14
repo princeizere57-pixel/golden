@@ -1,8 +1,5 @@
-// Demo payments: a pretend free trial for local development and previews without real accounts.
-// Only allowed when there are no real accounts (Supabase not configured) and no Stripe keys, so
-// on the live site nobody can give themselves a plan by calling the demo action.
+// Demo payments: a pretend free trial for local development (`next dev`). Production builds,
+// previews included, never allow it, so nobody on a deployed site can give themselves a plan.
+// Signed in with the API up, the API's subscriptions decide the plan and the demo cookie is ignored.
 
-import { supabaseConfigured } from "@/lib/auth";
-
-export const demoPaymentsAllowed = () =>
-  !supabaseConfigured() && !process.env.STRIPE_US_SECRET_KEY && !process.env.STRIPE_UK_SECRET_KEY;
+export const demoPaymentsAllowed = () => process.env.NODE_ENV !== "production";

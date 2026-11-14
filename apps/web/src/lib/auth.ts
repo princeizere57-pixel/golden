@@ -14,10 +14,6 @@ export interface User {
   avatarUrl?: string;
 }
 
-// Supabase still serves data (subscriptions, feedback, orders) until D2/P4; sign-in no longer uses it.
-export const supabaseUrl = () => process.env.NEXT_PUBLIC_SUPABASE_URL?.replace(/\/$/, "");
-export const supabaseConfigured = () => Boolean(supabaseUrl() && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
-
 /** Better Auth's get-session body → our User. Anything unexpected counts as signed out. */
 export function sessionUser(data: unknown): User | null {
   const u = (data as { user?: { id?: unknown; name?: unknown; email?: unknown; image?: unknown } } | null)?.user;

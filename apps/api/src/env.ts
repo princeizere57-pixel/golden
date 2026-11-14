@@ -16,6 +16,16 @@ const envSchema = z.object({
   MEALDB_API_KEY: z.string().optional(),
   // Vercel Cron sends "Authorization: Bearer <CRON_SECRET>".
   CRON_SECRET: z.string().optional(),
+  // Payments (services/billing). Whop: webhook secret, plus API key + company id for pay-later /
+  // hosted checkout (WHOP_PLAN_EXECUTIVE / WHOP_PLAN_EXPERIENCE optionally override the plan ids).
+  WHOP_WEBHOOK_SECRET: z.string().optional(),
+  WHOP_API_KEY: z.string().optional(),
+  WHOP_COMPANY_ID: z.string().optional(),
+  // Google Play: service-account JSON for the Developer API, package name, RTDN push token.
+  GOOGLE_PLAY_SERVICE_ACCOUNT_JSON: z.string().optional(),
+  GOOGLE_PLAY_PACKAGE_NAME: z.string().optional(),
+  GOOGLE_RTDN_TOKEN: z.string().optional(),
+  APPLE_BUNDLE_ID: z.string().optional(),
 });
 
 export const env = envSchema.parse(process.env);

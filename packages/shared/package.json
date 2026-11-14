@@ -9,6 +9,10 @@
     ".": {
       "types": "./src/index.ts",
       "default": "./dist/index.js"
+    },
+    "./billing": {
+      "types": "./src/billing/index.ts",
+      "default": "./dist/billing/index.js"
     }
   },
   "scripts": {
@@ -21,6 +25,7 @@
     "zod": "^3.25.76"
   },
   "devDependencies": {
+    "@types/node": "^20.19.43",
     "typescript": "^5"
   }
 }

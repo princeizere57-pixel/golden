@@ -1,6 +1,6 @@
 // Google Play Real-time Developer Notifications, delivered by a Pub/Sub push subscription.
 
-import type { SubscriptionStatus } from "@/lib/billing/subscriptions";
+import type { SubscriptionStatus } from "@golden/shared/billing";
 
 export interface RtdnSubscription {
   notificationType: number;

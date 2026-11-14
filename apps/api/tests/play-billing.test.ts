@@ -10,10 +10,8 @@ import {
   resetPlayTokenCache,
   serviceAccountJwt,
   type PlaySubscription,
-} from "@/lib/billing/google-play-api";
-import { OFFERS } from "@/lib/billing/offers";
-import { PLAY_PRODUCTS, describePlayOffer, offerForPlayProduct, periodLabel, pickPlayOffer, playProductFor, type PlayOffer } from "@/lib/billing/play-products";
-import { ENTITLED } from "@/lib/billing/subscriptions";
+} from "../src/services/billing/google-play.js";
+import { ENTITLED, OFFERS, PLAY_PRODUCTS, describePlayOffer, offerForPlayProduct, periodLabel, pickPlayOffer, playProductFor, type PlayOffer } from "@golden/shared/billing";
 
 const phase = (price: string, micros: number, period: string, recurrenceMode: number) => ({ formattedPrice: price, priceAmountMicros: micros, priceCurrencyCode: "USD", billingPeriod: period, recurrenceMode, billingCycleCount: recurrenceMode === 1 ? 0 : 1 });
 const base: PlayOffer = { basePlanId: "yearly", offerId: null, offerToken: "base-token", phases: [phase("$100.00", 100_000_000, "P1Y", 1)] };

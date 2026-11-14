@@ -47,11 +47,14 @@ The checkout page shows Whop's payment form inside Golden (Whop Elements). Offer
 3. Golden then creates a checkout configuration per purchase with metadata `order_id`, `golden_user_id`, `offer` (and `referred_by` for referrals). Ticking **Buy now, pay later** enables Klarna, Afterpay/Clearpay, Affirm, Sezzle, Zip and 3-month instalments where Whop offers them.
 
 **Webhook (both options)**
+- All Whop keys (`WHOP_WEBHOOK_SECRET`, `WHOP_API_KEY`, `WHOP_COMPANY_ID`, optional `WHOP_PLAN_*`) go in the **golden-api** Vercel project; the web forwards `/api/billing/*` to the API.
 - Developer → Webhooks: URL `https://<your-live-domain>/api/billing/whop/webhook`, events `payment.succeeded`, `membership.activated`, `membership.updated`. Secret (`ws_…`) → `WHOP_WEBHOOK_SECRET`. Golden marks the order paid and grants access from the webhook, never from the browser.
 - After payment Whop returns buyers to `/checkout/return` with `payment` and `status`.
 
 
 ## 3b. Google Play Billing (Android app)
+
+The Google Play keys (`GOOGLE_PLAY_*`, `GOOGLE_RTDN_TOKEN`) go in the **golden-api** Vercel project.
 
 Inside the Android app Google Play is the merchant of record; the website keeps using Whop.
 

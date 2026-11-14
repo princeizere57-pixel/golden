@@ -20,8 +20,7 @@ export async function optionalUserId(c: Context): Promise<string | null> {
 }
 
 /**
- * True only for the web server's own calls (x-internal-key). Used where the web enforces a rule
- * the API can't yet (paid-plan checks, until subscriptions move here in P4).
+ * True only for the web server's own calls (x-internal-key), e.g. a manual run of a cron job.
  */
 export function isInternal(c: Context): boolean {
   const key = env.INTERNAL_API_KEY;

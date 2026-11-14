@@ -2,9 +2,8 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { CheckoutPanel } from "@/components/checkout-panel";
 import { getUser } from "@/lib/auth";
-import { launchState } from "@/lib/billing/launch";
+import { checkoutFacts, launchState } from "@/lib/billing/launch";
 import { DEFAULT_OFFER, OFFERS, money, offerById, priceLine } from "@/lib/billing/offers";
-import { whopApiConfigured, whopEmbedConfigured } from "@/lib/billing/whop-checkout";
 import { requestStore } from "@/lib/native/shell";
 import { preloadHints } from "@whop/elements";
 import { getViewer } from "@/lib/viewer";
@@ -25,7 +24,7 @@ export default async function CheckoutPage({ searchParams }: { searchParams: Pro
   if (!user) redirect("/signin");
   const viewer = await getViewer();
   if (!viewer.onboarded) redirect("/onboarding");
-  const [launch, store, { plan }] = await Promise.all([launchState(), requestStore(), searchParams]);
+  const [launch, facts, store, { plan }] = await Promise.all([launchState(), checkoutFacts(), requestStore(), searchParams]);
   // Experience members only see the upgrade; a locked screen's ?plan= preselects its plan.
   const offers = viewer.access.plan === "experience" ? OFFERS.filter((o) => o.id === "executive") : OFFERS;
   const preselect = offerById(plan ?? "") && offers.some((o) => o.id === plan) ? plan! : offers.some((o) => o.id === DEFAULT_OFFER) ? DEFAULT_OFFER : offers[0].id;
@@ -53,12 +52,12 @@ export default async function CheckoutPage({ searchParams }: { searchParams: Pro
         includes: o.includes,
         excludes: o.excludes ?? [],
         // Web payment only on the web: never inside the store apps.
-        embedReady: web && whopEmbedConfigured(o),
+        embedReady: web && Boolean(facts.embed[o.id]),
         planType: o.planType,
       }))}
       defaultOffer={preselect}
       launch={{ left: launch.left, spots: launch.spots, endsOn: new Date(launch.endsAt).toLocaleDateString("en-US", { month: "long", day: "numeric", timeZone: "UTC" }), endsAt: launch.endsAt, open: launch.open }}
-      payLaterReady={web && whopApiConfigured()}
+      payLaterReady={web && facts.payLater}
       benefits={[...BENEFITS[viewer.skill], "Dinner from what's already in your fridge, no extra shop (Pantry-to-Plate)"]}
     />
     </>

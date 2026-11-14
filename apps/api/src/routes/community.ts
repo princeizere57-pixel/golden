@@ -1,14 +1,15 @@
 import { communityPostSchema, communityReplySchema } from "@golden/shared";
+import { can } from "@golden/shared/billing";
 import { Hono } from "hono";
+import { accessForUser } from "../services/billing/store.js";
 import { createPost, createReply, listPosts } from "../services/community.js";
-import { isInternal, requireUserId } from "../session.js";
+import { requireUserId } from "../session.js";
 
 export const community = new Hono();
 
-// Community is a paid feature and only the web knows the plan (until P4), so only the web server
-// may call these; a browser hitting them directly gets 403.
+// Community is a paid feature: signed in, on a plan that includes it (from our subscriptions).
 community.use("/community/*", async (c, next) => {
-  if (!isInternal(c)) return c.json({ error: "Forbidden" }, 403);
+  if (!can((await accessForUser(await requireUserId(c))).tier, "community")) return c.json({ error: "Community is on a plan" }, 403);
   await next();
 });
 

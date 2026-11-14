@@ -19,7 +19,7 @@ Users don't just read recipes: they pick a skill level (beginner, intermediate o
 - **Component system:** OneKit-inspired design tokens (`src/app/globals.css`) and atomic step blocks: `IngredientPrepBlock`, `HeatControlBlock`, `TimingBlock`.
 - **AI engine:** Gemini API (REST, server-only) for instruction rewriting, substitution maths and "Fix My Mistake". Every AI feature **must** have a deterministic fallback in `src/lib/` so the app works without a key and tests never call the network.
 - **Database and state:** Supabase / PostgreSQL. Tracks profiles (skill level, plan, billing region), pantry, active timers, home segments and subscriptions. Schema and row-level security live in `supabase/migrations/`.
-- **Billing:** Stripe web checkout through two entities (US and UK) plus Apple App Store and Google Play in-app purchases.
+- **Billing:** Whop web checkout (merchant of record) plus Google Play in-app purchases; an Apple App Store notification receiver waits for iOS purchases. All payment state lives in the API (`apps/api`, Neon).
 
 ## 3. What we took from Mob (REA analysis) and how we changed it
 
@@ -75,15 +75,12 @@ REA (`rea-agents`) was used to study Mob's public website (mob.co.uk): its route
 - **Credit:** `MealDbCredit` ("Library recipes and photos from TheMealDB") sits at the foot of every page that lists library recipes; meal pages link to the meal on TheMealDB.
 - **Licence:** a supporter key is bought and set as `MEALDB_API_KEY` in Vercel (both projects, never in the repo). The client and seed try it on `api/json/v2/<key>`, `<key>/json/v2` and `api/json/v1/<key>` and keep the first that answers. The working key (set 12 Nov 2026) answers on `api/json/v2/<key>`: 10 latest, 10 random, the full 793-meal list in one call. Empty = shared V1 test key `1`, development only. **Production use:** TheMealDB's terms let paid supporters publish apps (free key: development only, no app-store release); credit TheMealDB as the data source and link back; don't resell the API. The seed also sweeps every category and cuisine (`filter.php`) and looks up meals the letter search missed, so the cache holds the whole library. Always credit TheMealDB and link to the meal.
 
-## 5. Monetisation and payment architecture (`src/lib/billing/`)
+## 5. Monetisation and payment architecture (`packages/shared/src/billing/` + `apps/api/src/services/billing/`)
 
-- **Pricing (both repos, `src/lib/billing/offers.ts`, keep identical; golden-v1 is the source):** **Golden Executive Chef System $100/year** founding price (regular $500/year, 80% off for the first 500 members until `LAUNCH_ENDS_AT`, `launch.ts`) and **The Golden Experience $50/year**, both after the free **5-Day Zero-Waste Challenge** (every feature unlocked during it, whichever plan was chosen; the chosen plan is charged after) (Whop plans `WHOP_PLAN_EXECUTIVE`, `WHOP_PLAN_EXPERIENCE`; empty = created inline with `WHOP_API_KEY`). Executive is backed by the 10 Perfect Dishes guarantee (`/guarantee`). GBP prices are set separately (not converted on the fly).
-- **Entity routing (US / UK):**
-  - **US entity** (Stripe US / App Store): USD cards, Apple Pay, Google Pay. Stripe standard web pricing 2.9% + $0.30.
-  - **UK entity** (UK Ltd / Stripe UK): GBP, domestic cards and Open Banking. UK domestic card pricing 1.5% + £0.20.
-  - Customers are routed by **billing country**: GB → UK entity, everyone else → US entity. Each entity must be properly registered, collect tax where required and serve the customers routed to it. Fee figures are estimates for planning, not quotes.
+- **Pricing (both repos, `offers.ts`, keep identical; golden-v1 is the source; here it lives in `packages/shared/src/billing/offers.ts` and `apps/web/src/lib/billing/offers.ts` re-exports it):** **Golden Executive Chef System $100/year** founding price (regular $500/year, 80% off for the first 500 members until `LAUNCH_ENDS_AT`, `launch.ts`) and **The Golden Experience $50/year**, both after the free **5-Day Zero-Waste Challenge** (every feature unlocked during it, whichever plan was chosen; the chosen plan is charged after) (Whop plans `WHOP_PLAN_EXECUTIVE`, `WHOP_PLAN_EXPERIENCE`; empty = created inline with `WHOP_API_KEY`). Executive is backed by the 10 Perfect Dishes guarantee (`/guarantee`). GBP prices are set separately (not converted on the fly).
+- **Channels:** Whop on the web, Google Play in the Android app, App Store receiver for later iOS purchases. The Stripe US/UK entities were removed in P4 (unused since Whop; recover from git history if needed).
 - **Funnel:** 5-day free challenge that auto-renews into the chosen yearly plan. App Store / Google Play small-business programmes (15% commission) apply to in-app purchases.
-- **Webhooks:** Stripe (signature verified), App Store Server Notifications V2 (signed JWS, chain verified to the Apple root) and Google Play RTDN. All update `subscriptions` in Supabase.
+- **Webhooks:** Whop (Standard Webhooks), App Store Server Notifications V2 (signed JWS, chain verified to the Apple root) and Google Play RTDN, all handled by the API (`apps/api/src/routes/billing.ts`) and written to its `subscriptions` table. Public URLs stay `/api/billing/...` on the web, which proxies them to the API. Plan access: `GET /billing/access` (pure rules in `packages/shared/src/billing/`); the API also enforces paid features itself (community).
 
 ## 6. Rules for working in this repo
 
@@ -118,9 +115,9 @@ These set The Chef's AI apart; keep them original (no third-party mascots, icon 
 
 ## 9. Whop checkout
 
-- `/checkout` shows Whop's embedded checkout (Whop Elements, `whop-checkout.ts`) selling the offer's Whop plan: Executive `plan_EJWuPToHk9nUw`, Experience `plan_2Tozpw2x8yzvn` (`whopPlan` in `offers.ts`, both with the 5-day free trial; `WHOP_PLAN_EXECUTIVE` / `WHOP_PLAN_EXPERIENCE` override). Signed-in Executive users see a "You're on Executive" screen; inside the store apps checkout never shows Whop.
-- `/api/billing/whop/webhook` verifies Whop's Standard Webhooks signature (`webhook-id`, `webhook-timestamp`, `webhook-signature: v1,<base64>`; HMAC-SHA256 over `id.timestamp.body`; 5-minute window) with `WHOP_WEBHOOK_SECRET`, then maps the membership status (`src/lib/billing/whop.ts`) into `subscriptions` with `provider = 'whop'` and `whop_user_id` (migration 0003).
-- Linking a Whop membership to an app account uses `metadata.app_user_id` when present; otherwise match on `whop_user_id`. Static checkout links can't carry our user ID, so confirm the account match before granting Premium in production.
+- `/checkout` shows Whop's embedded checkout (Whop Elements; the API's `POST /billing/checkout` creates the order and returns the plan or checkout configuration) selling the offer's Whop plan: Executive `plan_EJWuPToHk9nUw`, Experience `plan_2Tozpw2x8yzvn` (`whopPlan` in `offers.ts`, both with the 5-day free trial; `WHOP_PLAN_EXECUTIVE` / `WHOP_PLAN_EXPERIENCE` override). Signed-in Executive users see a "You're on Executive" screen; inside the store apps checkout never shows Whop.
+- `/api/billing/whop/webhook` (proxied to the API) verifies Whop's Standard Webhooks signature with the Whop SDK's `unwrapWebhook` and `WHOP_WEBHOOK_SECRET` (Whop signs with the secret's literal bytes; don't swap in a hand-rolled verifier), then maps the membership status (`apps/api/src/services/billing/whop.ts`) into `subscriptions` with `provider = 'whop'` and `whop_user_id`.
+- Linking a Whop membership to an app account uses `metadata.golden_user_id` / `app_user_id` when present; otherwise a Whop user an earlier metadata-carrying event already tied to an account (`whop_user_id`); otherwise the row stays unlinked. Static checkout links can't carry our user ID, so confirm the account match before granting Premium in production.
 
 ## 10. Brand, gate, Mini You camera, email sign-in, analytics
 
@@ -167,8 +164,8 @@ These set The Chef's AI apart; keep them original (no third-party mascots, icon 
 
 - Inside the Android app (`Capacitor.getPlatform() === "android"` and the `PlayBilling` plugin present), checkout shows `PlayCheckout` instead of Whop: Google Play's own prices, Google's purchase sheet, "Restore purchases". Google Play is the merchant of record; never show Whop or other payment links inside the Android app.
 - Native: `android/app/src/main/java/com/golden/cooking/PlayBillingPlugin.java` (Billing Library 7, `getProducts` / `purchase` / `getPurchases`), registered in `MainActivity`. JS bridge: `src/lib/native/play-billing.ts`.
-- Products (`src/lib/billing/play-products.ts`): `golden_executive` and `golden_experience`, base plan `yearly`, 5-day free-trial offer. Keep them in step with `offers.ts`.
-- Server (`src/app/actions/play.ts`, `src/lib/billing/google-play-api.ts`): Premium only after the Google Play Developer API confirms the subscription (right product, `obfuscatedAccountId` = the Golden user id, not pending); then save to `subscriptions` (`provider = 'google_play'`), acknowledge, set the plan cookie. RTDN (`/api/billing/google/rtdn`) re-reads the subscription from Google before saving. Env: `GOOGLE_PLAY_SERVICE_ACCOUNT_JSON`, `GOOGLE_PLAY_PACKAGE_NAME`, `GOOGLE_RTDN_TOKEN`. Setup: `docs/SETUP.md` §3b.
+- Products (`packages/shared/src/billing/play-products.ts`): `golden_executive` and `golden_experience`, base plan `yearly`, 5-day free-trial offer. Keep them in step with `offers.ts`.
+- Server: `src/app/actions/play.ts` calls the API's `POST /billing/play/verify` (`apps/api/src/services/billing/google-play.ts`): Premium only after the Google Play Developer API confirms the subscription (right product, `obfuscatedAccountId` = the Golden user id, not pending); then save to `subscriptions` (`provider = 'google_play'`), acknowledge; the web sets the plan cookie. RTDN (`/api/billing/google/rtdn`, proxied to the API) re-reads the subscription from Google before saving. Env (API project): `GOOGLE_PLAY_SERVICE_ACCOUNT_JSON`, `GOOGLE_PLAY_PACKAGE_NAME`, `GOOGLE_RTDN_TOKEN`. Setup: `docs/SETUP.md` §3b.
 
 ## 15. Audience and message (both repos)
 
