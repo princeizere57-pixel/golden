@@ -10,3 +10,5 @@ export * from "./recipes/recipes.js";
 export { REAL_TIME_RECIPES } from "./recipes/real-time.js";
 export { STEP_PICTURES } from "./recipes/step-pictures.js";
 export * from "./recipes/rows.js";
+export * from "./skill/adapt.js";
+export * from "./recovery/fixes.js";

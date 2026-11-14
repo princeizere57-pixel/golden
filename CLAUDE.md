@@ -17,7 +17,7 @@ Users don't just read recipes: they pick a skill level (beginner, intermediate o
   - **Discovery (Mob-inspired):** full-bleed media cards, muted autoplaying loops (only when on screen), horizontal "rails" and category chips.
   - **Execution (OneKit-inspired):** modular step blocks, parallel countdown timers, large touch targets, and a high-contrast hands-free cook mode that keeps the screen awake.
 - **Component system:** OneKit-inspired design tokens (`src/app/globals.css`) and atomic step blocks: `IngredientPrepBlock`, `HeatControlBlock`, `TimingBlock`.
-- **AI engine:** Gemini API (REST, server-only) for instruction rewriting, substitution maths and "Fix My Mistake". Every AI feature **must** have a deterministic fallback in `src/lib/` so the app works without a key and tests never call the network.
+- **AI engine:** Gemini API (REST, server-only) for instruction rewriting, substitution maths and "Fix My Mistake". All Gemini calls run in the API (`apps/api/src/services/ai.ts`, routes `/ai/*`, key in the API env; fix tip and photo check need the `fixMyMistake` plan). Every AI feature **must** have a deterministic fallback in the web so the app works without a key or API, and tests never call the network.
 - **Database and state:** Supabase / PostgreSQL. Tracks profiles (skill level, plan, billing region), pantry, active timers, home segments and subscriptions. Schema and row-level security live in `supabase/migrations/`.
 - **Billing:** Whop web checkout (merchant of record) plus Google Play in-app purchases; an Apple App Store notification receiver waits for iOS purchases. All payment state lives in the API (`apps/api`, Neon).
 
@@ -44,7 +44,7 @@ REA (`rea-agents`) was used to study Mob's public website (mob.co.uk): its route
   - **Beginner:** micro-steps, explicit sensory cues ("until the edges turn golden, ~4 min"), jargon defined inline.
   - **Intermediate:** standard professional shorthand plus parallel multi-dish timing alerts.
   - **Chef:** technique-forward wording, reduction targets and flavour/chemistry notes.
-- `src/app/actions/adapt.ts` (server action) asks Gemini to rewrite the text in the same structure and validates the JSON. Any failure falls back to the deterministic result.
+- `src/app/actions/adapt.ts` (server action) sends the recipe to the API's `POST /ai/adapt`, which asks Gemini to rewrite the text in the same structure and validates the JSON (`validateAdapted`, engine in `packages/shared/src/skill/adapt.ts`). Any failure falls back to the deterministic result.
 
 ### Module B — Mob + OneKit hybrid UI
 - **Discovery feed (`/`):** segments rendered as rails; horizontal category filter chips; media cards that loop video only while visible and respect reduced motion.
@@ -135,7 +135,7 @@ These set The Chef's AI apart; keep them original (no third-party mascots, icon 
 ## 11. Plan a meal (recipe-first flow)
 
 - `/plan` (bottom tab): pick a dish rated for the cook's level from seeds + the TheMealDB library; `/plan?dish=a&dish=b` (up to 4) shows, in order: video (YouTube, privacy-enhanced, loads on tap), ingredient pills with TheMealDB ingredient pictures (`src/lib/ingredient-icons.ts`, pantry items marked), the orchestrated timeline with chimes/vibration (`MealPlanner`), "Cooking more than one dish?" add-ons, the skill-adapted method per dish, then the inline `FixPanel`.
-- `FixPanel`: optional photo (shrunk to 512 px in the browser, never stored); with `GEMINI_API_KEY`, `src/lib/ai/diagnose.ts` asks Gemini to pick the closest problem from `MISTAKES`; the fix itself always comes from `src/lib/recovery/fixes.ts`. Without a key the cook taps what they see.
+- `FixPanel`: optional photo (shrunk to 512 px in the browser, never stored); when the API has a Gemini key (`GET /ai`), its `POST /ai/diagnose` asks Gemini to pick the closest problem from `MISTAKES`; the fix itself always comes from `packages/shared/src/recovery/fixes.ts`. Without a key the cook taps what they see.
 - Recipe and meal pages have "Plan & cook this".
 - Gate: the app opens once signed in + a level (`journeyComplete`), so leaving checkout another way no longer locks people out.
 

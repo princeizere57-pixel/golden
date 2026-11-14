@@ -26,6 +26,9 @@ const envSchema = z.object({
   GOOGLE_PLAY_PACKAGE_NAME: z.string().optional(),
   GOOGLE_RTDN_TOKEN: z.string().optional(),
   APPLE_BUNDLE_ID: z.string().optional(),
+  // Gemini (services/ai.ts); empty = the web keeps its deterministic fallbacks.
+  GEMINI_API_KEY: z.string().optional(),
+  GEMINI_MODEL: z.string().optional(),
 });
 
 export const env = envSchema.parse(process.env);

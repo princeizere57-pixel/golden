@@ -11,6 +11,6 @@ export async function apiFetch(path: string, init: RequestInit = {}): Promise<Re
     ...init,
     headers: { ...(init.headers as Record<string, string> | undefined), cookie: (await headers()).get("cookie") ?? "" },
     cache: "no-store",
-    signal: AbortSignal.timeout(10_000),
+    signal: init.signal ?? AbortSignal.timeout(10_000),
   });
 }

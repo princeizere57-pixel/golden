@@ -3,6 +3,7 @@ import { cors } from "hono/cors";
 import { logger } from "hono/logger";
 import { HTTPException } from "hono/http-exception";
 import { auth } from "./auth.js";
+import { ai } from "./routes/ai.js";
 import { billing } from "./routes/billing.js";
 import { env } from "./env.js";
 import { community } from "./routes/community.js";
@@ -41,5 +42,6 @@ app.route("/", community);
 app.route("/", mealdb);
 app.route("/", recipes);
 app.route("/", billing);
+app.route("/", ai);
 
 export default app;

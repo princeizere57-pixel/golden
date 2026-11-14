@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { FixPanel } from "@/components/fix-panel";
+import { aiReady } from "@/lib/ai";
 import { IngredientPills } from "@/components/ingredient-pills";
 import { MealPlanner } from "@/components/meal-planner";
 import { LockedPage, PlanLock } from "@/components/plan-lock";
@@ -123,7 +124,7 @@ export default async function PlanPage({ searchParams }: { searchParams: Promise
 
       <div className="mt-10">
         {canFix ? (
-          <FixPanel dish={current.title} defaultVolumeMl={Math.max(250, Math.round(volume / 50) * 50)} aiReady={Boolean(process.env.GEMINI_API_KEY)} />
+          <FixPanel dish={current.title} defaultVolumeMl={Math.max(250, Math.round(volume / 50) * 50)} aiReady={await aiReady()} />
         ) : (
           <PlanLock feature="fixMyMistake" compact />
         )}

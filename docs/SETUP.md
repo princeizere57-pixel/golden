@@ -30,7 +30,7 @@ Everything below goes into a file named `.env.local` in the project folder (copy
 9. When you're ready for the public, press **Publish app** on Google's consent screen so anyone with a Google account can sign in.
 
 ## 2. Gemini: AI rewrites (optional)
-1. Create a key at https://aistudio.google.com/apikey → `GEMINI_API_KEY`.
+1. Create a key at https://aistudio.google.com/apikey → `GEMINI_API_KEY` (and optional `GEMINI_MODEL`) in the **golden-api** Vercel project (`apps/api/.env` locally). The web never sees it.
 2. Without a key, Golden uses its built-in skill engine; Mini You never needs Gemini.
 
 ## 3. Whop: payments (embedded checkout)
