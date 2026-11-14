@@ -1,6 +1,7 @@
 "use server";
 
 import { randomUUID } from "node:crypto";
+import { getUser } from "@/lib/auth";
 import { ImportError, fetchRecipePage } from "@/lib/import/fetch";
 import { extractRecipe } from "@/lib/import/parse";
 import { toRecipe } from "@/lib/import/to-blocks";
@@ -13,6 +14,8 @@ export type ImportResult = { ok: true; recipe: Recipe } | { ok: false; error: st
  * that user only; it is never stored in the public catalogue.
  */
 export async function importRecipeAction(link: string): Promise<ImportResult> {
+  // Signed in only, so the server isn't an open page fetcher for anyone on the internet.
+  if (!(await getUser())) return { ok: false, error: "Please sign in to import a recipe." };
   try {
     const { html, url } = await fetchRecipePage(link);
     const imported = extractRecipe(html, url);

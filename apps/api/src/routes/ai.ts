@@ -3,6 +3,7 @@ import { can } from "@golden/shared/billing";
 import { Hono, type Context } from "hono";
 import { bodyLimit } from "hono/body-limit";
 import { accessForUser } from "../services/billing/store.js";
+import { rateLimit } from "../services/rate-limit.js";
 import { adaptWithAi, diagnosePhoto, fixTip, geminiConfigured } from "../services/ai.js";
 import { requireUserId } from "../session.js";
 
@@ -29,7 +30,7 @@ const isRecipe = (r: unknown): r is Recipe => {
 ai.get("/ai", (c) => c.json({ ready: geminiConfigured() }));
 
 /** The recipe's steps rewritten for a level by Gemini, or null (the web then keeps its engine version). */
-ai.post("/ai/adapt", bodyLimit({ maxSize: 256 * 1024, onError: tooLarge }), async (c) => {
+ai.post("/ai/adapt", rateLimit("adapt", 60), bodyLimit({ maxSize: 256 * 1024, onError: tooLarge }), async (c) => {
   await requireUserId(c);
   const body = (await c.req.json().catch(() => null)) as { recipe?: unknown; skill?: unknown } | null;
   if (!isRecipe(body?.recipe)) return c.json({ error: "Invalid recipe" }, 400);
@@ -38,7 +39,7 @@ ai.post("/ai/adapt", bodyLimit({ maxSize: 256 * 1024, onError: tooLarge }), asyn
 });
 
 /** One extra AI tip for a Fix My Mistake rescue (Executive feature). */
-ai.post("/ai/fix-tip", async (c) => {
+ai.post("/ai/fix-tip", rateLimit("fix-tip", 30), async (c) => {
   if (!(await fixMyMistake(c))) return c.json({ error: "Fix My Mistake is on Executive" }, 403);
   const body = (await c.req.json().catch(() => null)) as { title?: unknown; mistake?: unknown; volumeMl?: unknown; severity?: unknown } | null;
   const mistake = MISTAKES.find((m) => m.id === body?.mistake)?.id;
@@ -50,7 +51,7 @@ ai.post("/ai/fix-tip", async (c) => {
 });
 
 /** Photo diagnosis: the closest problem from our catalogue (Executive feature). */
-ai.post("/ai/diagnose", bodyLimit({ maxSize: 2 * 1024 * 1024, onError: tooLarge }), async (c) => {
+ai.post("/ai/diagnose", rateLimit("diagnose", 20), bodyLimit({ maxSize: 2 * 1024 * 1024, onError: tooLarge }), async (c) => {
   if (!(await fixMyMistake(c))) return c.json({ error: "Fix My Mistake is on Executive" }, 403);
   const body = (await c.req.json().catch(() => null)) as { photo?: unknown; dish?: unknown } | null;
   if (typeof body?.photo !== "string" || body.photo.length > 1_500_000) return c.json({ ok: false, reason: "failed" });

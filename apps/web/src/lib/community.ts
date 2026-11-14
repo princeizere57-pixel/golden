@@ -35,10 +35,11 @@ export async function listPosts(limit = 30): Promise<Post[] | null> {
 }
 
 /** Posts as the signed-in user (their cookie is forwarded); the API adds their name and level. */
-export async function send(path: string, body: Record<string, unknown>): Promise<boolean> {
+export async function send(path: string, body: Record<string, unknown>): Promise<"ok" | "slow" | "failed"> {
   const res = await apiFetch(path, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(body) }).catch(() => null);
-  if (!res?.ok) console.error("[community] save failed", res?.status ?? "network error");
-  return Boolean(res?.ok);
+  if (res?.ok) return "ok";
+  console.error("[community] save failed", res?.status ?? "network error");
+  return res?.status === 429 ? "slow" : "failed";
 }
 
 /** Keeps posts short, plain text and on topic. */

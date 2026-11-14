@@ -86,6 +86,8 @@ REA (`rea-agents`) was used to study Mob's public website (mob.co.uk): its route
 
 - Run `npm run typecheck`, `npm run lint` and `npm test` before calling work done.
 - Never call the network in tests; AI and payment code must take injectable clients or fall back.
+- API writes that cost money or can be spammed (community, feedback, AI, checkout, Play verify) go through `rateLimit()` (`apps/api/src/services/rate-limit.ts`, Postgres `rate_limits`, per user, fails open). Every user-scoped route takes the owner from `requireUserId`; `apps/api/tests/authz.test.ts` lists them, so add new ones there.
+- Device sync (`apps/web/src/lib/sync.ts`): a list changed on the device stays "dirty" until the account confirms it, and a pull never overwrites a dirty list; failed XP events queue and replay. Never drop a user's write silently.
 - Secrets only come from environment variables (see `.env.example`); never commit keys.
 - Don't copy third-party content (recipes, photos, videos, copy) into the repo. Seed data must be original.
 - Accessibility: all interactive elements reachable by keyboard, visible focus, `prefers-reduced-motion` respected, minimum 44 px touch targets (64 px in cook mode).

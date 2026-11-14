@@ -22,10 +22,16 @@ const ago = (iso: string) => {
   return h < 24 ? `${h} hr ago` : `${Math.round(h / 24)} d ago`;
 };
 
-export default async function CommunityPage() {
+const ERRORS: Record<string, string> = {
+  slow: "You're posting a lot. Take a breather and try again in a bit.",
+  failed: "That didn't save. Please try again in a minute.",
+};
+
+export default async function CommunityPage({ searchParams }: { searchParams: Promise<{ error?: string }> }) {
   const { tier } = await getViewer();
   if (!can(tier, "community")) return <LockedPage feature="community" heading="Apprentice Meets Master" back={{ href: "/for-you", label: "Back to For you" }} />;
   const posts = await listPosts();
+  const error = ERRORS[(await searchParams).error ?? ""];
 
   return (
     <main className="mx-auto px-4 pb-10 pt-6">
@@ -36,6 +42,7 @@ export default async function CommunityPage() {
         <p className="mt-6 rounded-2xl bg-surface p-4 text-sm">The community can&apos;t be reached right now. Please try again in a minute.</p>
       ) : (
         <>
+          {error && <p role="alert" className="mt-6 rounded-2xl bg-accent-soft p-4 text-sm">{error}</p>}
           <form action={createPost} className="mt-6 space-y-3 rounded-3xl border border-line p-4">
             <label className="block text-sm font-semibold">
               What did you cook?

@@ -2,6 +2,7 @@ import { communityPostSchema, communityReplySchema } from "@golden/shared";
 import { can } from "@golden/shared/billing";
 import { Hono } from "hono";
 import { accessForUser } from "../services/billing/store.js";
+import { rateLimit } from "../services/rate-limit.js";
 import { createPost, createReply, listPosts } from "../services/community.js";
 import { requireUserId } from "../session.js";
 
@@ -18,7 +19,7 @@ community.get("/community/posts", async (c) => {
   return c.json({ posts: await listPosts(limit) });
 });
 
-community.post("/community/posts", async (c) => {
+community.post("/community/posts", rateLimit("post", 10), async (c) => {
   const userId = await requireUserId(c);
   const body = communityPostSchema.safeParse(await c.req.json().catch(() => null));
   if (!body.success) return c.json({ error: "Invalid post" }, 400);
@@ -26,7 +27,7 @@ community.post("/community/posts", async (c) => {
   return c.json({ ok: true }, 201);
 });
 
-community.post("/community/posts/:id/replies", async (c) => {
+community.post("/community/posts/:id/replies", rateLimit("reply", 30), async (c) => {
   const userId = await requireUserId(c);
   const postId = c.req.param("id");
   if (!/^[0-9a-f-]{36}$/.test(postId)) return c.json({ error: "Unknown post" }, 404);

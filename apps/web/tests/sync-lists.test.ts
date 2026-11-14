@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { syncDecision } from "@/lib/sync";
+import { listAction, syncDecision } from "@/lib/sync";
 import { LIST_SCHEMAS, isListName, communityPostSchema } from "@/lib/types";
 
 describe("syncDecision (whose data a device holds)", () => {
@@ -7,6 +7,23 @@ describe("syncDecision (whose data a device holds)", () => {
     expect(syncDecision(null, "u1")).toBe("adopt");
     expect(syncDecision("u1", "u1")).toBe("same");
     expect(syncDecision("u2", "u1")).toBe("wipe");
+  });
+});
+
+describe("listAction (what a pull does with one list)", () => {
+  it("never overwrites a change this device hasn't got confirmed yet", () => {
+    expect(listAction("same", ["old"], ["new"], true)).toBe("push");
+    expect(listAction("same", ["old"], ["new"], false)).toBe("take-server");
+  });
+
+  it("uploads guest data only when the account has none", () => {
+    expect(listAction("adopt", [], ["guest"], false)).toBe("push");
+    expect(listAction("adopt", ["account"], ["guest"], false)).toBe("take-server");
+  });
+
+  it("removes what the account doesn't have, and ignores dirt from someone else's device", () => {
+    expect(listAction("same", null, null, true)).toBe("remove");
+    expect(listAction("wipe", ["theirs"], null, true)).toBe("take-server");
   });
 });
 

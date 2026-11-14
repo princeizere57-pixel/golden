@@ -8,6 +8,7 @@ import { JwsError, appStoreStatus, verifyAppleJws } from "../services/billing/ap
 import { decodeRtdn, playStatus as rtdnStatus } from "../services/billing/google-play-rtdn.js";
 import { acknowledgePlaySubscription, getPlaySubscription, judgePlaySubscription, playApiConfigured, playExpiry, playPackageName, playStatus } from "../services/billing/google-play.js";
 import { accessForUser, createOrder, saveSubscription, spotsTaken, type SubscriptionUpdate } from "../services/billing/store.js";
+import { rateLimit } from "../services/rate-limit.js";
 import { USER_ID, handleWhopEvent, prepareWhopCheckout, whopApiConfigured, whopEmbedConfigured, type WhopEvent } from "../services/billing/whop.js";
 
 // Public URLs are unchanged: the web proxies /api/billing/* here with the /api prefix stripped,
@@ -45,7 +46,7 @@ async function checkoutInput(c: Context) {
 }
 
 /** Starts a Whop checkout with Golden's order, account and plan attached (never taken from the browser's word). */
-billing.post("/billing/checkout", async (c) => {
+billing.post("/billing/checkout", rateLimit("checkout", 20), async (c) => {
   const input = await checkoutInput(c);
   if (!input) return c.json({ ok: false, error: "Unknown plan." }, 400);
   const metadata = input.meta(newOrderId());
@@ -64,7 +65,7 @@ billing.post("/billing/checkout", async (c) => {
 });
 
 /** Whop's hosted page for an order already started (when the embedded form is slow). */
-billing.post("/billing/checkout/hosted", async (c) => {
+billing.post("/billing/checkout/hosted", rateLimit("checkout", 20), async (c) => {
   const input = await checkoutInput(c);
   const orderId = String(input?.body.orderId ?? "");
   if (!input || !ORDER_ID.test(orderId)) return c.json({ error: "Please start checkout again." }, 400);
@@ -77,7 +78,7 @@ billing.post("/billing/checkout/hosted", async (c) => {
  * Called after Google's purchase sheet closes (or to restore purchases). Premium only after
  * Google's API confirms the subscription belongs to this account and product.
  */
-billing.post("/billing/play/verify", async (c) => {
+billing.post("/billing/play/verify", rateLimit("play-verify", 30), async (c) => {
   const userId = await requireUserId(c);
   const body = ((await c.req.json().catch(() => null)) ?? {}) as { productId?: unknown; purchaseToken?: unknown };
   const productId = String(body.productId ?? "");
@@ -99,7 +100,16 @@ billing.post("/billing/play/verify", async (c) => {
   // Save before acknowledging: if saving fails, the unacknowledged purchase is retried by
   // "Restore purchases" instead of being acknowledged with no record of it.
   await saveSubscription({ provider: "google_play", externalId: purchaseToken, status: verdict.status, userId, currentPeriodEnd: verdict.expiry, offer });
-  if (verdict.needsAck) await acknowledgePlaySubscription(productId, purchaseToken).catch((e) => console.error("[play] acknowledge failed", e));
+  // Google refunds purchases left unacknowledged for 3 days, so a failed acknowledge must not pass
+  // quietly: the app shows the error and "Restore purchases" retries (access is already saved).
+  if (verdict.needsAck) {
+    try {
+      await acknowledgePlaySubscription(productId, purchaseToken);
+    } catch (e) {
+      console.error("[play] acknowledge failed", e);
+      return c.json({ ok: false, error: "Your plan is saved, but Google Play didn't confirm it yet. Tap Restore purchases to finish." }, 502);
+    }
+  }
   return c.json({ ok: true, entitled: verdict.entitled, offer, trialEndsAt: verdict.status === "trialing" && verdict.expiry ? Date.parse(verdict.expiry) : undefined });
 });
 
@@ -132,6 +142,7 @@ billing.post("/billing/google/rtdn", async (c) => {
   const note = message.subscriptionNotification;
   if (note) {
     let update: SubscriptionUpdate | null = null;
+    let ackProduct: string | undefined;
     if (playApiConfigured()) {
       try {
         const sub = await getPlaySubscription(note.purchaseToken);
@@ -139,6 +150,7 @@ billing.post("/billing/google/rtdn", async (c) => {
         const offer = sub.lineItems?.map((l) => offerForPlayProduct(l.productId)).find(Boolean);
         const owner = sub.externalAccountIdentifiers?.obfuscatedExternalAccountId;
         if (status) update = { provider: "google_play", externalId: note.purchaseToken, status, currentPeriodEnd: playExpiry(sub), ...(offer ? { offer } : {}), ...(owner && USER_ID.test(owner) ? { userId: owner } : {}) };
+        if (sub.acknowledgementState === "ACKNOWLEDGEMENT_STATE_PENDING") ackProduct = sub.lineItems?.[0]?.productId;
       } catch (e) {
         // Ask Pub/Sub to redeliver later rather than guessing from the notification type.
         console.error("[rtdn] lookup failed", e);
@@ -149,6 +161,15 @@ billing.post("/billing/google/rtdn", async (c) => {
       if (status) update = { provider: "google_play", externalId: note.purchaseToken, status };
     }
     if (update) await saveSubscription(update);
+    // Second chance for a purchase the app couldn't acknowledge (Google refunds it after 3 days).
+    if (ackProduct) {
+      try {
+        await acknowledgePlaySubscription(ackProduct, note.purchaseToken);
+      } catch (e) {
+        console.error("[rtdn] acknowledge failed", e);
+        return c.json({ error: "Acknowledge failed, retry" }, 503);
+      }
+    }
   }
   // 2xx once handled so Pub/Sub doesn't redeliver forever.
   return c.json({ received: true });

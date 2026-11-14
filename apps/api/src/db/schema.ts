@@ -247,3 +247,11 @@ export const orders = pgTable(
   },
   (t) => [index("orders_user_idx").on(t.userId)],
 );
+
+// Fixed-window request counters (services/rate-limit.ts). One row per "<route>:<user>"; rows stay
+// small (users × limited routes) so nothing prunes them.
+export const rateLimits = pgTable("rate_limits", {
+  key: text("key").primaryKey(),
+  windowStart: timestamp("window_start", { withTimezone: true }).notNull(),
+  count: integer("count").notNull(),
+});

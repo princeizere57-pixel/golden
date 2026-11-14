@@ -14,9 +14,16 @@ export async function requireUserId(c: Context): Promise<string> {
   return id;
 }
 
-export async function optionalUserId(c: Context): Promise<string | null> {
-  const session = await auth.api.getSession({ headers: c.req.raw.headers });
-  return session?.user.id ?? null;
+// One session read per request, however many checks (rate limit, plan gate, owner) ask.
+const perRequest = new WeakMap<Request, Promise<string | null>>();
+
+export function optionalUserId(c: Context): Promise<string | null> {
+  let id = perRequest.get(c.req.raw);
+  if (!id) {
+    id = auth.api.getSession({ headers: c.req.raw.headers }).then((s) => s?.user.id ?? null);
+    perRequest.set(c.req.raw, id);
+  }
+  return id;
 }
 
 /**
