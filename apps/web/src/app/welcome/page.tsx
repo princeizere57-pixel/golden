@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { FridgeIcon, LifebuoyIcon, StopwatchIcon } from "@/components/icons-3d";
-import { HeadlineTicker } from "@/components/headline-ticker";
 import { Phone } from "@/components/landing/phone";
 import { Brand } from "@/components/site-chrome";
 import { TRIAL_HEADLINE_DAYS } from "@/lib/billing/offers";
@@ -20,9 +19,11 @@ export default function WelcomePage() {
     <main className="relative mx-auto min-h-dvh max-w-lg overflow-x-hidden bg-surface pb-40">
       <section className="pt-10 text-center">
         <Brand className="text-5xl" />
-        <HeadlineTicker className="mt-6" />
+        <h1 className="mt-6 px-6 font-display text-[2.4rem] leading-[1.05]">
+          Never Waste <span className="text-accent">Groceries</span> Again.
+        </h1>
         <p className="mt-5 px-6 text-[17px] text-muted">
-          You pay for food twice: at the shop, and again when it ends up in the bin. Golden helps you cook what you already have, save the dish when it goes wrong, and get dinner on the table hot.
+          Golden turns your fridge into tonight&apos;s dinner before expensive ingredients spoil. It guides you from beginner to chef and times every dish to land hot together.
         </p>
       </section>
 
