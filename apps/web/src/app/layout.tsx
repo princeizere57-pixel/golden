@@ -19,7 +19,7 @@ export const metadata: Metadata = {
   description: "Recipes and techniques adapted to your skill level, a hands-free cook mode, and fixes for when things go wrong.",
 };
 
-// A phone app: device width, and drawn under the notch and home indicator (pages pad with
+// Phone-first: device width, and drawn under the notch and home indicator (pages pad with
 // env(safe-area-inset-*)), the same in the browser and in the Android and iPhone apps.
 export const viewport: Viewport = { width: "device-width", initialScale: 1, viewportFit: "cover", themeColor: "#ffffff" };
 
@@ -32,10 +32,10 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
     <html lang="en">
       <body className={`${body.variable} ${display.variable} antialiased`}>
         <TimerProvider>
-          {/* Golden is a phone app: every screen renders in one centred, phone-width frame. */}
+          {/* Phone-width frame on phones; full width from md, with pages in a centred column. */}
           <div className="app-frame">
             <SiteHeader welcomeAtRoot={welcomeAtRoot} upsell={showUpsell} />
-            <div className="pb-24">{children}</div>
+            <div className="pb-24 md:mx-auto md:max-w-6xl md:pb-12">{children}</div>
             <TabBar welcomeAtRoot={welcomeAtRoot} />
             <TimerTray />
           </div>

@@ -103,7 +103,7 @@ export function SavedGrid() {
   const saved = useSaved();
   if (!saved.length) return <EmptyState icon={<SackIcon size={72} />} title="Nothing saved yet" text="Tap Save on any recipe you want to cook later. It will wait for you here." action={{ href: "/", label: "Find something to cook" }} />;
   return (
-    <ul className="mt-6 grid grid-cols-2 gap-4">
+    <ul className="mt-6 grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
       {saved.map((r) => (
         <li key={r.slug}>
           <a href={r.href} className="group block">

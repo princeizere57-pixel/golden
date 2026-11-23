@@ -37,12 +37,12 @@ export function FixMyMistake({ slug, dish, defaultVolumeMl }: { slug: string; di
         onClick={() => setOpen((o) => !o)}
         aria-expanded={open}
         aria-controls="fix-panel"
-        className="fixed bottom-[max(1rem,env(safe-area-inset-bottom))] right-[max(1rem,calc(50%-224px))] z-40 min-h-16 rounded-full bg-accent px-6 text-lg font-bold text-accent-ink shadow-xl"
+        className="fixed bottom-[max(1rem,env(safe-area-inset-bottom))] right-[max(1rem,calc(50%-224px))] z-40 md:right-6 min-h-16 rounded-full bg-accent px-6 text-lg font-bold text-accent-ink shadow-xl"
       >
         {open ? "Close" : "Fix my mistake"}
       </button>
       {open && (
-        <section id="fix-panel" aria-label="Fix my mistake" className="fixed inset-x-4 bottom-24 z-40 mx-auto max-w-[448px] max-h-[70vh] overflow-y-auto rounded-3xl border border-line bg-surface p-5 shadow-2xl">
+        <section id="fix-panel" aria-label="Fix my mistake" className="fixed inset-x-4 bottom-24 z-40 mx-auto max-w-[448px] md:left-auto md:right-6 md:w-[28rem] max-h-[70vh] overflow-y-auto rounded-3xl border border-line bg-surface p-5 shadow-2xl">
           <fieldset>
             <legend className="font-bold">What went wrong?</legend>
             <div className="mt-2 grid grid-cols-2 gap-2">

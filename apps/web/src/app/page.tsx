@@ -125,7 +125,7 @@ export default async function Discover({ searchParams }: { searchParams: Promise
         <span aria-hidden className="text-2xl text-accent">›</span>
       </Link>
 
-      <nav aria-label="Quick links" className="mt-4 grid grid-cols-2 gap-2.5 px-4">
+      <nav aria-label="Quick links" className="mt-4 grid grid-cols-2 gap-2.5 px-4 md:grid-cols-4">
         {TILES.map((t) => <QuickTile key={t.label} href={`/explore?c=${t.category}`} label={t.label} image={firstImage(t.category)} />)}
       </nav>
 

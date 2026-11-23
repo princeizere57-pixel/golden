@@ -205,8 +205,9 @@ body {
   transform-box: fill-box;
 }
 
-/* Mobile app layout everywhere: one phone-width column (max 480 px), the same in the browser and
-   the Android and iPhone apps; on a computer it sits centred on a soft backdrop, like a phone. */
+/* Phone-first: below 768 px one phone-width column (max 480 px), centred on a soft backdrop when
+   the window is a little wider. From 768 px (tablets, computers) the frame fills the window and
+   pages lay out in more columns (Tailwind md:/lg:). The native apps follow the same widths. */
 html {
   background: #ece8e1;
 }
@@ -222,7 +223,7 @@ html {
   /* Clear the status bar / notch when installed to the home screen (0 elsewhere). */
   padding-top: env(safe-area-inset-top);
 }
-@media (max-width: 480px) {
+@media (max-width: 480px), (min-width: 768px) {
   html {
     background: var(--bg);
   }
@@ -230,8 +231,13 @@ html {
     box-shadow: none;
   }
 }
-/* The body paints the backdrop too, so it matches the frame's surroundings on wide screens. */
-@media (min-width: 481px) {
+@media (min-width: 768px) {
+  .app-frame {
+    max-width: none;
+  }
+}
+/* The body paints the backdrop too, so it matches the frame's surroundings. */
+@media (min-width: 481px) and (max-width: 767px) {
   body {
     background: #ece8e1;
   }

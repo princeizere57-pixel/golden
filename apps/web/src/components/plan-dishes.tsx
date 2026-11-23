@@ -27,7 +27,7 @@ export function DishPicker({ options, max = MAX_DISHES }: { options: DishOption[
 
   return (
     <>
-      <ul className="mt-6 grid grid-cols-2 gap-4">
+      <ul className="mt-6 grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
         {options.map((o) => {
           const on = picked.includes(o.slug);
           const full = max > 1 && !on && picked.length >= max;
@@ -53,7 +53,7 @@ export function DishPicker({ options, max = MAX_DISHES }: { options: DishOption[
         })}
       </ul>
       {picked.length > 0 && (
-        <div className="sticky bottom-24 z-20 mt-6">
+        <div className="sticky bottom-24 z-20 mt-6 md:bottom-6">
           <button
             onClick={() => {
               keepOnly([]);

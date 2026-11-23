@@ -1,7 +1,8 @@
 "use client";
 
-// Header on wide screens, bottom tab bar on phones. Hidden on the full-screen welcome and
-// onboarding flows; the tab bar is also hidden in cook mode.
+// Phones: floating bottom tab bar (the header hides on tab pages, which have their own big title).
+// From md: the header carries the tabs and shows on every page. Both hide on the full-screen
+// welcome, sign-in, onboarding and checkout flows; the tab bar also hides in cook mode.
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -28,16 +29,42 @@ export function Brand({ className = "text-3xl" }: { className?: string }) {
   );
 }
 
-/** Tab pages carry their own big title on phones, so the header only shows there on wide screens. */
 const TAB_PAGES = /^\/(for-you|shopping|saved|plan)?$/;
+
+const isActive = (path: string, href: string) => (href === "/" ? path === "/" || path.startsWith("/explore") : path.startsWith(href));
+
+function ToBuyBadge({ count }: { count: number }) {
+  if (count <= 0) return null;
+  return (
+    <span className="absolute -right-2.5 -top-1.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-basil px-1 text-[10px] font-bold text-white" aria-label={`${count} to buy`}>{count > 99 ? "99+" : count}</span>
+  );
+}
 
 export function SiteHeader({ welcomeAtRoot = false, upsell = false }: { welcomeAtRoot?: boolean; upsell?: boolean }) {
   const path = usePathname();
+  const toBuy = useShopping().filter((i) => !i.done).length;
   if (FULL_SCREEN.test(path) || (welcomeAtRoot && path === "/")) return null;
   return (
-    <header className={`sticky top-0 z-30 border-b border-line bg-bg/90 backdrop-blur ${TAB_PAGES.test(path) ? "hidden" : ""}`}>
-      <nav className="mx-auto flex items-center gap-4 px-4 py-3" aria-label="Main">
+    <header className={`sticky top-0 z-30 border-b border-line bg-bg/90 backdrop-blur ${TAB_PAGES.test(path) ? "hidden md:block" : ""}`}>
+      <nav className="mx-auto flex max-w-6xl items-center gap-4 px-4 py-3 md:px-6" aria-label="Main">
         <Link href="/"><Brand /></Link>
+        <ul className="hidden items-center gap-1 md:flex lg:ml-6">
+          {TABS.map((tab) => {
+            const active = isActive(path, tab.href);
+            return (
+              <li key={tab.href}>
+                <Link href={tab.href} aria-current={active ? "page" : undefined} className={`flex min-h-11 items-center gap-2 rounded-full px-3 text-sm ${active ? "bg-accent-soft font-semibold text-ink" : "font-medium text-muted hover:text-ink"}`}>
+                  <span className="relative">
+                    <tab.Icon size={26} />
+                    <ToBuyBadge count={tab.href === "/shopping" ? toBuy : 0} />
+                  </span>
+                  <span className="hidden lg:inline">{tab.label}</span>
+                  <span className="sr-only lg:hidden">{tab.label}</span>
+                </Link>
+              </li>
+            );
+          })}
+        </ul>
         {upsell && !COOK.test(path) ? <Link href="/checkout" className="ml-auto rounded-full bg-button px-4 py-2.5 text-sm font-semibold text-button-ink">Try free</Link> : <span className="ml-auto" />}
         <Link href="/you" aria-label="Mini You and your progress" className="overflow-hidden rounded-full bg-accent-soft"><MiniYou headOnly size={42} /></Link>
       </nav>
@@ -45,25 +72,22 @@ export function SiteHeader({ welcomeAtRoot = false, upsell = false }: { welcomeA
   );
 }
 
-/** Floating pill tab bar, on every screen size. */
+/** Floating pill tab bar on phones; from md the header carries the tabs. */
 export function TabBar({ welcomeAtRoot = false }: { welcomeAtRoot?: boolean }) {
   const path = usePathname();
   const toBuy = useShopping().filter((i) => !i.done).length;
   if (FULL_SCREEN.test(path) || COOK.test(path) || (welcomeAtRoot && path === "/")) return null;
   return (
-    <nav aria-label="Tabs" className="fixed inset-x-3 bottom-3 z-30 mx-auto max-w-[456px] rounded-[1.75rem] border border-line bg-bg/90 shadow-[0_8px_30px_rgba(0,0,0,0.12)] backdrop-blur-md mb-[env(safe-area-inset-bottom)]">
+    <nav aria-label="Tabs" className="fixed inset-x-3 bottom-3 z-30 mx-auto max-w-[456px] md:hidden rounded-[1.75rem] border border-line bg-bg/90 shadow-[0_8px_30px_rgba(0,0,0,0.12)] backdrop-blur-md mb-[env(safe-area-inset-bottom)]">
       <ul className="grid grid-cols-5">
         {TABS.map((tab) => {
-          const active = tab.href === "/" ? path === "/" || path.startsWith("/explore") : path.startsWith(tab.href);
-          const badge = tab.href === "/shopping" && toBuy > 0 ? toBuy : 0;
+          const active = isActive(path, tab.href);
           return (
             <li key={tab.href}>
               <Link href={tab.href} aria-current={active ? "page" : undefined} className={`flex min-h-16 flex-col items-center justify-center gap-0.5 text-[11px] ${active ? "font-semibold text-ink" : "font-medium text-muted"}`}>
                 <span className={`relative transition-transform duration-200 ${active ? "-translate-y-0.5 scale-110" : "opacity-75 saturate-[.6]"}`}>
                   <tab.Icon size={34} />
-                  {badge > 0 && (
-                    <span className="absolute -right-2.5 -top-1.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-basil px-1 text-[10px] font-bold text-white" aria-label={`${badge} to buy`}>{badge > 99 ? "99+" : badge}</span>
-                  )}
+                  <ToBuyBadge count={tab.href === "/shopping" ? toBuy : 0} />
                 </span>
                 {tab.label}
               </Link>

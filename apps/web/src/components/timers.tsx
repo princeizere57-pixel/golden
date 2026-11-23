@@ -119,7 +119,7 @@ export function TimerTray() {
   const { timers, now, cancel } = useTimers();
   if (!timers.length) return null;
   return (
-    <aside aria-label="Running timers" className="fixed bottom-24 left-[max(1rem,calc(50%-224px))] z-40 flex max-w-[calc(min(100vw,480px)-2rem)] flex-col gap-2">
+    <aside aria-label="Running timers" className="fixed bottom-24 left-[max(1rem,calc(50%-224px))] z-40 flex max-w-[calc(min(100vw,480px)-2rem)] md:bottom-6 md:left-6 md:max-w-sm flex-col gap-2">
       {timers.map((t) => {
         const left = t.endsAt - now;
         return (

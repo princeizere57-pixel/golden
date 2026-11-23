@@ -74,7 +74,7 @@ function Hero({ recipe, minutes }: { recipe: Recipe; minutes: string }) {
   const round = "flex h-11 w-11 items-center justify-center rounded-full bg-bg/90 text-ink shadow-md backdrop-blur";
   return (
     <figure className="relative">
-      <div className="aspect-[4/3] overflow-hidden rounded-b-[2rem] bg-surface">
+      <div className="aspect-[4/3] overflow-hidden rounded-b-[2rem] bg-surface lg:rounded-[2rem]">
         {recipe.image && !failed ? (
           // eslint-disable-next-line @next/next/no-img-element -- our own photos, or the source's own photo loaded from its URL
           <img src={recipe.image} alt={recipe.title} referrerPolicy="no-referrer" onError={() => setFailed(true)} className="h-full w-full object-cover" />
@@ -110,10 +110,12 @@ export function RecipeDetail({ recipe, skill, level, activeMinutes, cookHref, pl
   const badge = recipe.realTime ? "Real-time" : level;
 
   return (
-    <main className="mx-auto max-w-xl pb-40">
+    <main className="mx-auto max-w-xl pb-40 lg:grid lg:max-w-6xl lg:grid-cols-[minmax(0,28rem)_minmax(0,1fr)] lg:items-start lg:gap-x-12 lg:px-6 lg:pt-6">
+      {/* From lg: photo, header and ingredients on the left, the method beside them */}
+      <div>
       <Hero recipe={recipe} minutes={minutes} />
 
-      <div className="px-4">
+      <div className="px-4 lg:px-0">
         {/* Short header: category, one short badge, the title, then what decides it */}
         <div className="mt-5 flex items-center justify-between gap-3">
           <p className="text-xs font-semibold uppercase tracking-wide text-muted">{recipe.category}</p>
@@ -166,9 +168,13 @@ export function RecipeDetail({ recipe, skill, level, activeMinutes, cookHref, pl
           </ul>
           <div className="mt-3 flex"><AddToListButton recipe={scaled} /></div>
         </section>
+      </div>
+      </div>
+
+      <div className="px-4 lg:px-0">
 
         {/* Method at the cook's level */}
-        <section className="mt-9" aria-label="Method">
+        <section className="mt-9 lg:mt-0" aria-label="Method">
           <h2 className="text-xl font-semibold">Method</h2>
           <div className="mt-3">
             {access === "locked-recipe" ? (
@@ -211,7 +217,7 @@ export function RecipeDetail({ recipe, skill, level, activeMinutes, cookHref, pl
       </div>
 
       {/* One sticky primary action, above the tab bar */}
-      <div className="sticky bottom-[calc(5.75rem+env(safe-area-inset-bottom))] z-20 mt-8 px-4">
+      <div className="sticky bottom-[calc(5.75rem+env(safe-area-inset-bottom))] z-20 mt-8 px-4 md:bottom-6 lg:col-span-2 lg:mx-auto lg:w-full lg:max-w-xl">
         <div className="flex gap-2 rounded-full border border-line bg-bg/95 p-1.5 shadow-[0_8px_30px_rgba(0,0,0,0.12)] backdrop-blur">
           {access === "open" ? (
             <>
