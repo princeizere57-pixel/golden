@@ -68,7 +68,7 @@ describe("the 5 free days unlock everything, then the chosen plan", () => {
     expect(accessFor("free", true)).toEqual({ tier: "free", plan: "free", trial: false });
   });
 
-  it("demo and Play cookies carry the trial end and expire on their own", () => {
+  it("Play cookies carry the trial end and expire on their own", () => {
     const ends = NOW + 5 * 86_400_000;
     const value = planCookieValue("experience", ends);
     expect(value).toBe(`experience~${ends}`);

@@ -1,9 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { signOut } from "@/app/actions/auth";
-import { setDemoPlan } from "@/app/actions/viewer";
 import { getUser } from "@/lib/auth";
-import { demoPaymentsAllowed } from "@/lib/billing/demo";
 import { TIER_NAME } from "@/lib/billing/entitlements";
 import { getViewer } from "@/lib/viewer";
 
@@ -14,7 +12,6 @@ const SKILL_LABEL = { beginner: "Beginner", intermediate: "Intermediate", chef: 
 export default async function AccountPage({ searchParams }: { searchParams: Promise<{ trial?: string }> }) {
   const { trial } = await searchParams;
   const [viewer, user] = await Promise.all([getViewer(), getUser()]);
-  const demo = demoPaymentsAllowed();
 
   return (
     <main className="mx-auto px-4 py-12 pb-24">
@@ -33,11 +30,6 @@ export default async function AccountPage({ searchParams }: { searchParams: Prom
         <section className="mt-8">
           <h2 className="font-bold">Manage subscription</h2>
           <p className="mt-1 text-sm text-muted">Bought on the website? Manage or cancel it in your Whop account (the link is in Whop&apos;s receipt email). Bought in the app? Use your Google Play or App Store subscriptions.</p>
-          {demo && (
-            <form action={setDemoPlan.bind(null, "free")} className="mt-4">
-              <button className="min-h-11 rounded-full border border-line px-5 font-semibold">Cancel demo trial</button>
-            </form>
-          )}
         </section>
       )}
       {user && (
