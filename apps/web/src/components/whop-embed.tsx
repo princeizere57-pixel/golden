@@ -64,12 +64,14 @@ function SlowFallback({ offer, orderId, failed = false }: { offer: string; order
 type Props = {
   plan?: string;
   checkoutConfiguration?: string;
+  /** Whop affiliate username from an `?a=` link; Whop credits the sale to them. */
+  affiliateCode?: string;
   metadata: Record<string, string>;
   returnUrl: string;
   offer: string;
 };
 
-export function WhopEmbed({ plan, checkoutConfiguration, metadata, returnUrl, offer }: Props) {
+export function WhopEmbed({ plan, checkoutConfiguration, affiliateCode, metadata, returnUrl, offer }: Props) {
   // Load the SDK in the browser only.
   // Wait for Whop's script before drawing its form: if it can't load, offer the hosted page instead.
   const [state, setState] = useState<"loading" | "ready" | "failed">("loading");
@@ -88,6 +90,7 @@ export function WhopEmbed({ plan, checkoutConfiguration, metadata, returnUrl, of
     <WhopElements elements={warmWhop()}>
       <Checkout
         {...(checkoutConfiguration ? { checkoutConfiguration } : { plan })}
+        affiliateCode={affiliateCode}
         metadata={metadata}
         returnUrl={returnUrl}
         fallback={<SlowFallback offer={offer} orderId={orderId} />}

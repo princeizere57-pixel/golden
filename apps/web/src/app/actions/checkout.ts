@@ -1,5 +1,6 @@
 "use server";
 
+import { AFFILIATE_COOKIE, isAffiliateCode } from "@golden/shared/billing";
 import { cookies } from "next/headers";
 import { apiFetch } from "@/lib/api";
 import { getUser } from "@/lib/auth";
@@ -8,7 +9,7 @@ import { requestShell } from "@/lib/native/shell";
 import { SKILL_COOKIE } from "@/lib/viewer";
 
 export type StartCheckout =
-  | { ok: true; orderId: string; metadata: Record<string, string>; plan?: string; checkoutConfiguration?: string; returnUrl: string }
+  | { ok: true; orderId: string; metadata: Record<string, string>; plan?: string; checkoutConfiguration?: string; affiliateCode?: string; returnUrl: string }
   | { ok: false; error: string };
 
 const BUSY = "Checkout isn't answering right now. Please try again in a minute.";
@@ -17,6 +18,12 @@ const BUSY = "Checkout isn't answering right now. Please try again in a minute."
 async function referredBy(userId: string) {
   const ref = (await cookies()).get(REF_COOKIE)?.value;
   return isValidCode(ref) && ref !== referralCode(userId) ? ref : undefined;
+}
+
+/** The Whop affiliate whose link brought this visitor (`?a=`, last 30 days). */
+async function affiliateCode() {
+  const code = (await cookies()).get(AFFILIATE_COOKIE)?.value;
+  return isAffiliateCode(code) ? code : undefined;
 }
 
 async function post<T>(path: string, body: Record<string, unknown>): Promise<T | null> {
@@ -33,7 +40,7 @@ export async function startCheckout(offerId: string, payLater: boolean, origin: 
   const user = await getUser();
   if (!user) return { ok: false, error: "Please sign in first." };
   if (!(await cookies()).has(SKILL_COOKIE)) return { ok: false, error: "Please answer the quick questions first." };
-  const started = await post<StartCheckout | { error?: string }>("/billing/checkout", { offerId, payLater, origin, referredBy: await referredBy(user.id) });
+  const started = await post<StartCheckout | { error?: string }>("/billing/checkout", { offerId, payLater, origin, referredBy: await referredBy(user.id), affiliateCode: await affiliateCode() });
   return started && "ok" in started ? started : { ok: false, error: started?.error ?? BUSY };
 }
 
@@ -42,6 +49,6 @@ export async function openHostedCheckout(offerId: string, orderId: string, origi
   if (await requestShell()) return { error: "In the app, subscribe through Google Play." };
   const user = await getUser();
   if (!user) return { error: "Please sign in first." };
-  const res = await post<{ url?: string; error?: string }>("/billing/checkout/hosted", { offerId, orderId, origin, referredBy: await referredBy(user.id) });
+  const res = await post<{ url?: string; error?: string }>("/billing/checkout/hosted", { offerId, orderId, origin, referredBy: await referredBy(user.id), affiliateCode: await affiliateCode() });
   return res?.url ? { url: res.url } : { error: res?.error ?? BUSY };
 }

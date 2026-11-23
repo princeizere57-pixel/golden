@@ -1,5 +1,5 @@
 import { timingSafeEqual } from "node:crypto";
-import { ENTITLED, OFFERS, newOrderId, offerById, offerForPlayProduct, type GoldenMetadata } from "@golden/shared/billing";
+import { ENTITLED, OFFERS, isAffiliateCode, newOrderId, offerById, offerForPlayProduct, type GoldenMetadata } from "@golden/shared/billing";
 import { unwrapWebhook } from "@whop/sdk/helpers";
 import { Hono, type Context } from "hono";
 import { env } from "../env.js";
@@ -32,7 +32,7 @@ billing.get("/billing/checkout", async (c) =>
   c.json({ spotsTaken: await spotsTaken(), payLater: whopApiConfigured(), embed: Object.fromEntries(OFFERS.map((o) => [o.id, whopEmbedConfigured(o)])) }),
 );
 
-type CheckoutBody = { offerId?: unknown; orderId?: unknown; origin?: unknown; payLater?: unknown; referredBy?: unknown };
+type CheckoutBody = { offerId?: unknown; orderId?: unknown; origin?: unknown; payLater?: unknown; referredBy?: unknown; affiliateCode?: unknown };
 
 async function checkoutInput(c: Context) {
   const userId = await requireUserId(c);
@@ -42,7 +42,8 @@ async function checkoutInput(c: Context) {
   if (!offer || !ORIGIN.test(origin)) return null;
   const ref = typeof body.referredBy === "string" && REFERRAL.test(body.referredBy) ? body.referredBy : undefined;
   const meta = (orderId: string): GoldenMetadata => ({ order_id: orderId, golden_user_id: userId, offer: offer.id, ...(ref ? { referred_by: ref } : {}) });
-  return { offer, origin, body, meta };
+  const affiliateCode = isAffiliateCode(body.affiliateCode) ? body.affiliateCode : undefined;
+  return { offer, origin, body, meta, affiliateCode };
 }
 
 /** Starts a Whop checkout with Golden's order, account and plan attached (never taken from the browser's word). */
@@ -51,7 +52,7 @@ billing.post("/billing/checkout", rateLimit("checkout", 20), async (c) => {
   if (!input) return c.json({ ok: false, error: "Unknown plan." }, 400);
   const metadata = input.meta(newOrderId());
   const returnUrl = `${input.origin}/checkout/return?order=${metadata.order_id}`;
-  const prepared = await prepareWhopCheckout(input.offer, metadata, returnUrl, { payLater: input.body.payLater === true });
+  const prepared = await prepareWhopCheckout(input.offer, metadata, returnUrl, { payLater: input.body.payLater === true, affiliateCode: input.affiliateCode });
   if (!prepared.ok) return c.json(prepared, 502);
   // Not fatal: payment.succeeded upserts the order if this pending row is missing.
   await createOrder(metadata).catch((e) => console.error("[checkout] pending order not saved", e));
@@ -60,6 +61,7 @@ billing.post("/billing/checkout", rateLimit("checkout", 20), async (c) => {
     orderId: metadata.order_id,
     metadata,
     returnUrl,
+    ...(input.affiliateCode ? { affiliateCode: input.affiliateCode } : {}),
     ...("plan" in prepared ? { plan: prepared.plan } : { checkoutConfiguration: prepared.checkoutConfiguration }),
   });
 });
@@ -69,7 +71,7 @@ billing.post("/billing/checkout/hosted", rateLimit("checkout", 20), async (c) =>
   const input = await checkoutInput(c);
   const orderId = String(input?.body.orderId ?? "");
   if (!input || !ORDER_ID.test(orderId)) return c.json({ error: "Please start checkout again." }, 400);
-  const prepared = await prepareWhopCheckout(input.offer, input.meta(orderId), `${input.origin}/checkout/return?order=${orderId}`, { hosted: true });
+  const prepared = await prepareWhopCheckout(input.offer, input.meta(orderId), `${input.origin}/checkout/return?order=${orderId}`, { hosted: true, affiliateCode: input.affiliateCode });
   const url = prepared.ok && "purchaseUrl" in prepared ? prepared.purchaseUrl : undefined;
   return url ? c.json({ url }) : c.json({ error: "Whop isn't answering right now. Please try again in a minute." }, 502);
 });

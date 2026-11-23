@@ -25,7 +25,7 @@ export type PreparedCheckout = { ok: true; plan: string } | { ok: true; checkout
  * The offer's Whop plan is sold directly with `plan`. Pay-later, hosted pages and offers without a
  * plan id use a checkout configuration (Golden's metadata attached, BNPL methods switched on).
  */
-export async function prepareWhopCheckout(offer: Offer, metadata: GoldenMetadata, returnUrl: string, opts: { payLater?: boolean; hosted?: boolean } = {}): Promise<PreparedCheckout> {
+export async function prepareWhopCheckout(offer: Offer, metadata: GoldenMetadata, returnUrl: string, opts: { payLater?: boolean; hosted?: boolean; affiliateCode?: string } = {}): Promise<PreparedCheckout> {
   const planId = planIdFor(offer);
   if (planId && !opts.payLater && !opts.hosted) return { ok: true, plan: planId };
   if (!whopApiConfigured()) {
@@ -35,6 +35,7 @@ export async function prepareWhopCheckout(offer: Offer, metadata: GoldenMetadata
     const config = await new WhopClient({ token: process.env.WHOP_API_KEY! }).checkoutConfigurations.create({
       account_id: process.env.WHOP_COMPANY_ID!,
       metadata: { ...metadata },
+      ...(opts.affiliateCode ? { affiliate_code: opts.affiliateCode } : {}),
       // Whop only accepts https return addresses (not http://localhost); the embed's own returnUrl covers local runs.
       ...(returnUrl.startsWith("https://") ? { redirect_url: returnUrl } : {}),
       ...(planId

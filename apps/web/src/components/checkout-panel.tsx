@@ -173,7 +173,7 @@ export function CheckoutPanel({ user, level, tier, store: serverStore, offers, d
       <section className="mt-6" aria-label="Payment">
         {session ? (
           <div className="rounded-3xl border border-line p-3">
-            <WhopEmbed plan={session.plan} checkoutConfiguration={session.checkoutConfiguration} metadata={session.metadata} returnUrl={session.returnUrl} offer={chosen} />
+            <WhopEmbed plan={session.plan} checkoutConfiguration={session.checkoutConfiguration} affiliateCode={session.affiliateCode} metadata={session.metadata} returnUrl={session.returnUrl} offer={chosen} />
             <button onClick={() => setSession(null)} className="mt-2 min-h-11 w-full text-sm font-medium">Change plan</button>
           </div>
         ) : offer.embedReady ? (
