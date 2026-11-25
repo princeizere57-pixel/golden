@@ -61,7 +61,6 @@ billing.post("/billing/checkout", rateLimit("checkout", 20), async (c) => {
     orderId: metadata.order_id,
     metadata,
     returnUrl,
-    ...(input.affiliateCode ? { affiliateCode: input.affiliateCode } : {}),
     ...("plan" in prepared ? { plan: prepared.plan } : { checkoutConfiguration: prepared.checkoutConfiguration }),
   });
 });

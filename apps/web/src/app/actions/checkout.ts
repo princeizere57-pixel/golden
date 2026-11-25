@@ -40,8 +40,10 @@ export async function startCheckout(offerId: string, payLater: boolean, origin: 
   const user = await getUser();
   if (!user) return { ok: false, error: "Please sign in first." };
   if (!(await cookies()).has(SKILL_COOKIE)) return { ok: false, error: "Please answer the quick questions first." };
-  const started = await post<StartCheckout | { error?: string }>("/billing/checkout", { offerId, payLater, origin, referredBy: await referredBy(user.id), affiliateCode: await affiliateCode() });
-  return started && "ok" in started ? started : { ok: false, error: started?.error ?? BUSY };
+  const affiliate = await affiliateCode();
+  const started = await post<StartCheckout | { error?: string }>("/billing/checkout", { offerId, payLater, origin, referredBy: await referredBy(user.id), affiliateCode: affiliate });
+  if (!started || !("ok" in started)) return { ok: false, error: started?.error ?? BUSY };
+  return started.ok && affiliate ? { ...started, affiliateCode: affiliate } : started;
 }
 
 /** Whop's hosted checkout page for the order already started, used when the embedded form is slow. */
