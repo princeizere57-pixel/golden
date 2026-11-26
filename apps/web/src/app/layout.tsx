@@ -1,11 +1,11 @@
 import type { Metadata, Viewport } from "next";
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
 import localFont from "next/font/local";
 import { AccountSync } from "@/components/account-sync";
 import { PageViews } from "@/components/page-views";
 import { SiteHeader, TabBar } from "@/components/site-chrome";
 import { TimerProvider, TimerTray } from "@/components/timers";
-import { journeyComplete } from "@/lib/journey";
+import { LANDING_HEADER, journeyComplete } from "@/lib/journey";
 import "./globals.css";
 import { getViewer } from "@/lib/viewer";
 
@@ -24,10 +24,21 @@ export const metadata: Metadata = {
 export const viewport: Viewport = { width: "device-width", initialScale: 1, viewportFit: "cover", themeColor: "#ffffff" };
 
 export default async function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
-  // Before the first-run sequence is done, "/" shows the welcome page, which has no chrome.
+  // Before the first-run sequence is done, "/" shows the landing page, which has no chrome.
   const welcomeAtRoot = !journeyComplete(await cookies());
   // The header's "Try free" is only for people without a plan: never for payers or during the free days.
   const showUpsell = welcomeAtRoot ? false : (await getViewer()).access.plan === "free";
+  // The marketing landing page is full width and has its own navigation.
+  if ((await headers()).get(LANDING_HEADER)) {
+    return (
+      <html lang="en">
+        <body className={`${body.variable} ${display.variable} bg-black antialiased`}>
+          {children}
+          <PageViews />
+        </body>
+      </html>
+    );
+  }
   return (
     <html lang="en">
       <body className={`${body.variable} ${display.variable} antialiased`}>

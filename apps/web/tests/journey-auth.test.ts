@@ -3,7 +3,7 @@ import { isJourneyPath, journeyComplete } from "@/lib/journey";
 
 describe("first-run gate", () => {
   it("always allows the sequence, API and assets", () => {
-    for (const p of ["/welcome", "/signin", "/auth/callback", "/onboarding", "/checkout", "/api/billing/whop/webhook", "/api/auth/get-session", "/_next/static/x.js", "/favicon.ico"]) {
+    for (const p of ["/landing", "/welcome", "/signin", "/auth/callback", "/onboarding", "/checkout", "/api/billing/whop/webhook", "/api/auth/get-session", "/_next/static/x.js", "/favicon.ico"]) {
       expect(isJourneyPath(p), p).toBe(true);
     }
   });
